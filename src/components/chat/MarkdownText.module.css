@@ -157,6 +157,11 @@
   padding: 0;
   font-family: inherit;
   color: var(--text-foreground);
+  /* Override .md :global(*) { white-space: normal } which would otherwise
+     collapse newlines inside <pre><code> blocks. Must be `pre` (not `inherit`)
+     so nested code (e.g. LLM emitting a markdown sample inside a fenced
+     block) preserves every newline. */
+  white-space: pre;
 }
 
 /* Syntax-highlight tokens (highlight.js) — map to design tokens so they

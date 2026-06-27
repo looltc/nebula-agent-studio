@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import rehypeHighlight from 'rehype-highlight';
 import styles from './MarkdownText.module.css';
 
@@ -24,12 +25,16 @@ export interface MarkdownTextProps {
  */
 function MarkdownTextBase({ content, streaming = false }: MarkdownTextProps) {
   // remark-gfm enables tables, strikethrough, task lists, autolinked literals.
-  // During streaming we keep gfm on — partial tables just look slightly off
-  // until complete, which is preferable to a hard re-parse flash.
+  // remark-breaks renders single "\n" as <br> — chat UIs (ChatGPT, GitHub
+  // Issues) treat line breaks as hard breaks, otherwise Markdown collapses
+  // single newlines into spaces and LLM replies lose their line structure.
+  // Both plugins are safe during streaming; partial tables just look slightly
+  // off until the closing row arrives.
+  const remarkPlugins = streaming ? [remarkBreaks] : [remarkGfm, remarkBreaks];
   return (
     <div className={styles.md}>
       <ReactMarkdown
-        remarkPlugins={streaming ? [] : [remarkGfm]}
+        remarkPlugins={remarkPlugins}
         rehypePlugins={[[rehypeHighlight, { detect: true, ignoreMissing: true }]]}
         components={{
           a: ({ node, ...props }) => (

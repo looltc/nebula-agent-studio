@@ -86,7 +86,7 @@
 | MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
 | MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim |
 | StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染；后端 WS/SSE 已接入 LangChain astream() 真 token 流式（绕过 ReAct 循环，首字延迟显著降低） |
-| MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色 |
+| MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色；启用 remark-breaks 把单换行渲染为 <br>；`.codeBlock code` 显式 `white-space: pre` 覆盖 `.md :global(*)` 的 normal，修复嵌套代码块换行被折叠 |
 | ToolCallBlock | ✅ | Loading/完成/失败态 |
 | ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符 |
 | HITLApproval | ✅ | 审批卡片+倒计时 |
