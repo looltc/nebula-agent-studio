@@ -18,11 +18,11 @@
 | Feature | 状态 | 说明 |
 |---|---|---|
 | REST API 封装 | ✅ | api() 函数 + ApiError |
-| WebSocket 服务 | ✅ | 普通聊天 + 流式通道 |
-| SSE 服务 | ✅ | fetch ReadableStream 解析 |
+| WebSocket 服务 | ✅ | 普通聊天 + 流式通道；流式端点接入 LangChain astream() 真 token 流式 |
+| SSE 服务 | ✅ | fetch ReadableStream 解析；后端接入 LangChain astream() 真 token 流式 |
 | ConnectionManager | ✅ | 重连状态机 + 指数退避 + 降级 |
 | 轮询 hook | ✅ | usePolling 可配置间隔 |
-| 后端状态持久化 | ✅ | providers/agents/conversations JSON 文件落盘 + 启动时 _load_state() 恢复 + 时区感知时间戳(timezone.utc) + 会话删除同步落盘 |
+| 后端状态持久化 | ✅ | providers/agents/conversations JSON 文件落盘 + 启动时 _load_state() 恢复 + 时区感知时间戳(timezone.utc) + 会话删除同步落盘 + api_format 字段随 provider/agent 持久化 |
 | 前端偏好持久化 | ✅ | localStorage 保存 currentAgentId / chatMode |
 | 会话按 Agent 过滤 | ✅ | /api/conversations?agent_id=xxx 后端过滤 + 前端最新在上排序 |
 
@@ -85,7 +85,7 @@
 | 聊天头部 | ✅ | 左侧 Agent 名称 + 右侧 分享图标 + 3 点菜单(清空/导出/传输模式) |
 | MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
 | MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim |
-| StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染 |
+| StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染；后端 WS/SSE 已接入 LangChain astream() 真 token 流式（绕过 ReAct 循环，首字延迟显著降低） |
 | MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色 |
 | ToolCallBlock | ✅ | Loading/完成/失败态 |
 | ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符 |
@@ -130,7 +130,7 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| LLM Provider 配置 | ✅ | Provider/Model/Temperature；_resolve_llm_creds 跨 Provider 继承 base_url+api_key(指定 Provider 无凭据时自动扫描其他已配置 Provider)；OpenAIProvider._get_client 在 base_url 已配置但无 api_key 时统一兜底占位符；get_or_create_agent + _build_agent_config 均走 _resolve_llm_creds；_build_agent_config 强制归一化 provider='openai'(LLMRegistry 仅注册 openai，本地服务靠 base_url 路由)；_load_state 走 _build_agent_config 自动修复持久化数据中的旧 provider 值；Base URL/API Key 集中托管，Agent 配置复用 |
+| LLM Provider 配置 | ✅ | 名称/API 格式(openai/anthropic/openai_responses)/Base URL/API Key/模型列表(手动填+动态拉取)；后端统一走 LangChain ChatModels（ChatOpenAI/ChatAnthropic），按 api_format 路由；_resolve_llm_creds 跨 Provider 继承 base_url+api_key；Anthropic 格式无 /v1/models 端点时返回用户手动配置的模型列表；编辑时 API Key 留空保持不变；Base URL/API Key 集中托管，Agent 配置复用 |
 | 工具注册浏览 | ✅ | 工具列表+schema |
 | 成本预算设置 | ✅ | 预算阈值 |
 | 主题切换 | ✅ | 暗色/亮色 |

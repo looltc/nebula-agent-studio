@@ -361,6 +361,36 @@
   color: var(--text-muted);
 }
 
+/* ===== Provider form: native select & textarea ===== */
+.apiFormatSelect,
+.modelsTextarea {
+  width: 100%;
+  background: var(--bg-muted);
+  border: 1px solid var(--accent-input);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-foreground);
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.apiFormatSelect {
+  cursor: pointer;
+}
+
+.modelsTextarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.apiFormatSelect:focus,
+.modelsTextarea:focus {
+  outline: none;
+  border-color: var(--accent-ring);
+}
+
 /* ===== Confirm modal text ===== */
 .confirmText {
   font-size: var(--text-sm);

@@ -38,6 +38,8 @@ export interface LLMSpecRequest {
   temperature: number;
   api_key?: string | null;
   base_url?: string | null;
+  /** API 协议格式：openai / anthropic / openai_responses */
+  api_format?: string;
 }
 
 export interface AgentCreateRequest {
@@ -80,6 +82,7 @@ export interface AgentDetailResponse {
     temperature: number;
     base_url: string | null;
     has_api_key: boolean;
+    api_format?: string;
   };
 }
 
@@ -107,6 +110,10 @@ export interface ProviderSummary {
   name: string;
   base_url: string | null;
   api_key_set: boolean;
+  /** API 协议格式：openai / anthropic / openai_responses */
+  api_format?: string;
+  /** 用户手动配置的模型列表 */
+  models?: string[];
 }
 
 export interface ProviderListResponse {
@@ -117,6 +124,10 @@ export interface ProviderCreateRequest {
   name: string;
   base_url?: string | null;
   api_key?: string | null;
+  /** API 协议格式：openai / anthropic / openai_responses */
+  api_format?: string;
+  /** 用户手动配置的模型列表（Anthropic 格式必填） */
+  models?: string[];
 }
 
 export interface ProviderTestResponse {

@@ -35,6 +35,8 @@ interface ProviderFormState {
   name: string;
   base_url: string;
   api_key: string;
+  api_format: string;
+  models_text: string; // textarea 文本，每行一个模型
 }
 
 interface TestResult {
@@ -70,6 +72,8 @@ export default function SettingsPage() {
     name: '',
     base_url: '',
     api_key: '',
+    api_format: 'openai',
+    models_text: '',
   });
   const [providerSaving, setProviderSaving] = useState(false);
 
@@ -94,7 +98,13 @@ export default function SettingsPage() {
 
   const openCreateProvider = () => {
     setEditingProvider(null);
-    setProviderForm({ name: '', base_url: '', api_key: '' });
+    setProviderForm({
+      name: '',
+      base_url: '',
+      api_key: '',
+      api_format: 'openai',
+      models_text: '',
+    });
     setProviderModalOpen(true);
   };
 
@@ -104,6 +114,8 @@ export default function SettingsPage() {
       name: provider.name,
       base_url: provider.base_url ?? '',
       api_key: '',
+      api_format: provider.api_format ?? 'openai',
+      models_text: (provider.models ?? []).join('\n'),
     });
     setProviderModalOpen(true);
   };
@@ -116,10 +128,16 @@ export default function SettingsPage() {
     }
     setProviderSaving(true);
     try {
+      const models = providerForm.models_text
+        .split('\n')
+        .map((m) => m.trim())
+        .filter(Boolean);
       const body = {
         name,
         base_url: providerForm.base_url.trim() || null,
         api_key: providerForm.api_key.trim() || null,
+        api_format: providerForm.api_format,
+        models,
       };
       const ok = editingProvider
         ? await updateProvider(editingProvider.id, body)
@@ -264,6 +282,12 @@ export default function SettingsPage() {
                         </Badge>
                       </div>
                       <div className={styles.providerMeta}>
+                        <span>
+                          <span className={styles.providerUrlLabel}>API 格式:</span>
+                          <span className={styles.providerUrl}>
+                            {provider.api_format ?? 'openai'}
+                          </span>
+                        </span>
                         <span>
                           <span className={styles.providerUrlLabel}>base_url:</span>
                           <span className={styles.providerUrl}>
@@ -538,6 +562,42 @@ export default function SettingsPage() {
               placeholder="sk-..."
               onChange={(e) =>
                 setProviderForm((prev) => ({ ...prev, api_key: e.target.value }))
+              }
+            />
+          </Field>
+          <Field
+            label="API 格式"
+            helper="决定后端用哪个 LangChain 集成调用模型。"
+          >
+            <select
+              className={styles.apiFormatSelect}
+              value={providerForm.api_format}
+              onChange={(e) =>
+                setProviderForm((prev) => ({
+                  ...prev,
+                  api_format: e.target.value,
+                }))
+              }
+            >
+              <option value="openai">OpenAI Chat Completions (/chat/completions)</option>
+              <option value="anthropic">Anthropic Messages (/v1/messages)</option>
+              <option value="openai_responses">OpenAI Responses (/responses)</option>
+            </select>
+          </Field>
+          <Field
+            label="模型列表"
+            helper="每行一个模型 ID。Anthropic 格式必填（无 /v1/models 端点）；OpenAI 格式可留空，点「加载模型」自动拉取。"
+          >
+            <textarea
+              className={styles.modelsTextarea}
+              value={providerForm.models_text}
+              placeholder={'gpt-4o-mini\ngpt-4o\nclaude-3-5-sonnet-20241022'}
+              rows={4}
+              onChange={(e) =>
+                setProviderForm((prev) => ({
+                  ...prev,
+                  models_text: e.target.value,
+                }))
               }
             />
           </Field>
