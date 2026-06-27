@@ -1,0 +1,44 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  font-weight: var(--font-medium);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.default {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.primary {
+  background: var(--accent-bg);
+  color: var(--accent-primary);
+}
+
+/* Tinted backgrounds derived from status tokens (theme-aware, no hardcoded hex). */
+.success {
+  background: color-mix(in srgb, var(--status-success) 18%, transparent);
+  color: var(--status-success);
+}
+
+.danger {
+  background: color-mix(in srgb, var(--status-destructive) 18%, transparent);
+  color: var(--status-destructive);
+}
+
+.warning {
+  background: color-mix(in srgb, var(--status-warning) 18%, transparent);
+  color: var(--status-warning);
+}
+
+.mono {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}

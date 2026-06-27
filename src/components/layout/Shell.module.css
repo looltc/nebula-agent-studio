@@ -1,0 +1,24 @@
+.shell {
+  display: grid;
+  grid-template-rows: var(--topbar-height) 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: var(--sidenav-width) 1fr;
+  min-height: 0;
+  transition: grid-template-columns var(--duration-normal) var(--ease-default);
+}
+
+.body[data-collapsed='true'] {
+  grid-template-columns: var(--sidenav-collapsed-width) 1fr;
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg-background);
+}

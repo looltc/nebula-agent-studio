@@ -1,0 +1,63 @@
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dot {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* active: success + pulse 2s */
+.active {
+  background: var(--status-success);
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+/* idle: muted, no animation */
+.idle {
+  background: var(--text-muted);
+}
+
+/* error: destructive, no animation */
+.error {
+  background: var(--status-destructive);
+}
+
+/* warning: warning + flash 1s */
+.warning {
+  background: var(--status-warning);
+  animation: flash 1s var(--ease-default) infinite;
+}
+
+/* loading: accent + spin 1s linear */
+.loading {
+  background: transparent;
+  border: 1.5px solid var(--accent-ring);
+  border-top-color: var(--accent-primary);
+  animation: spin 1s linear infinite;
+}
