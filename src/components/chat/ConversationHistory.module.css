@@ -1,4 +1,5 @@
 .panel {
+<<<<<<< HEAD
   border-top: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
@@ -64,6 +65,19 @@
 }
 
 .list {
+=======
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-background);
+  overflow: hidden;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+>>>>>>> feat-implement-frontend-design-GH23Da
   overflow-y: auto;
   padding: var(--space-2);
   display: flex;
@@ -72,7 +86,11 @@
 }
 
 .empty {
+<<<<<<< HEAD
   padding: var(--space-3);
+=======
+  padding: var(--space-6) var(--space-3);
+>>>>>>> feat-implement-frontend-design-GH23Da
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
@@ -80,12 +98,23 @@
 }
 
 .item {
+<<<<<<< HEAD
   display: flex;
   flex-direction: column;
   gap: 2px;
   width: 100%;
   padding: var(--space-2) var(--space-3);
   border: 1px solid transparent;
+=======
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+>>>>>>> feat-implement-frontend-design-GH23Da
   border-radius: var(--radius-md);
   background: transparent;
   text-align: left;
@@ -98,13 +127,18 @@
   background: var(--bg-muted);
 }
 
+<<<<<<< HEAD
 .item:focus-visible {
+=======
+.item:focus-within {
+>>>>>>> feat-implement-frontend-design-GH23Da
   outline: 2px solid var(--accent-ring);
   outline-offset: 1px;
 }
 
 .active {
   background: var(--accent-bg);
+<<<<<<< HEAD
   border-color: color-mix(in srgb, var(--accent-primary) 25%, transparent);
 }
 
@@ -120,11 +154,35 @@
   line-height: var(--line-xs);
   color: var(--text-secondary);
   font-weight: var(--font-medium);
+=======
+  border-left-color: var(--accent-primary);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.title {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-foreground);
+>>>>>>> feat-implement-frontend-design-GH23Da
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+<<<<<<< HEAD
 .count {
   font-size: var(--text-xs);
   line-height: var(--line-xs);
@@ -134,14 +192,135 @@
 }
 
 .time {
+=======
+.meta {
+>>>>>>> feat-implement-frontend-design-GH23Da
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
+<<<<<<< HEAD
 }
 
 .timeIcon {
   flex-shrink: 0;
 }
+=======
+  font-variant-numeric: tabular-nums;
+}
+
+.metaIcon {
+  flex-shrink: 0;
+}
+
+.dot {
+  opacity: 0.6;
+}
+
+.menuBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    opacity var(--duration-fast) var(--ease-default);
+}
+
+.item:hover .menuBtn,
+.menuBtn:focus-visible,
+.menuBtn[aria-expanded='true'] {
+  opacity: 1;
+}
+
+.menuBtn:hover {
+  background: var(--bg-popover);
+  color: var(--text-foreground);
+}
+
+.menuBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: transparent;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: var(--space-2);
+  z-index: 20;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  background: var(--bg-popover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.menuItem:hover {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -2px;
+}
+
+.menuItemDanger {
+  color: var(--status-destructive);
+}
+
+.menuItemDanger:hover {
+  background: color-mix(in srgb, var(--status-destructive) 12%, transparent);
+  color: var(--status-destructive);
+}
+
+.menuIcon {
+  flex-shrink: 0;
+}
+
+.modalBody {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-secondary);
+}
+>>>>>>> feat-implement-frontend-design-GH23Da

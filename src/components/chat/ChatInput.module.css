@@ -7,7 +7,11 @@
 
 .field {
   display: flex;
+<<<<<<< HEAD
   align-items: flex-end;
+=======
+  flex-direction: column;
+>>>>>>> feat-implement-frontend-design-GH23Da
   gap: var(--space-2);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -23,6 +27,16 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-ring) 20%, transparent);
 }
 
+<<<<<<< HEAD
+=======
+.textareaRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  min-height: 48px;
+}
+
+>>>>>>> feat-implement-frontend-design-GH23Da
 .attach {
   display: inline-flex;
   align-items: center;
@@ -57,3 +71,14 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+<<<<<<< HEAD
+=======
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 0 var(--space-1);
+}
+>>>>>>> feat-implement-frontend-design-GH23Da

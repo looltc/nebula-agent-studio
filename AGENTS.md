@@ -42,6 +42,10 @@ nebula-agent-studio/
 - **类型安全**：所有 props、API 响应、store state 必须有 TypeScript 类型，禁止 any
 - **后端契约**：API 端点与字段以 `src/nebula/api/server.py` 为准，前端类型与之对齐
 - **跨平台**：Windows 上路径用正斜杠，命令用 PowerShell 兼容写法
+<<<<<<< HEAD
+=======
+- **界面文案中文优先**：界面文字使用中文，专业词汇（如 LLM/Provider/Temperature/Token/Agent 等）保留英文，禁止生硬机翻
+>>>>>>> feat-implement-frontend-design-GH23Da
 - **保持 AGENTS.md 简洁凝练，不超过 100 行**
 
 ## 技术栈

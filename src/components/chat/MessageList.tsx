@@ -34,6 +34,20 @@ export function MessageList() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
+<<<<<<< HEAD
+=======
+  // Defensive ascending sort by timestamp — the store already sorts loaded
+  // messages, but locally appended messages must also stay ordered.
+  const orderedMessages = useMemo(() => {
+    return [...messages].sort((a, b) => {
+      const ta = Date.parse(a.ts);
+      const tb = Date.parse(b.ts);
+      if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
+      return 0;
+    });
+  }, [messages]);
+
+>>>>>>> feat-implement-frontend-design-GH23Da
   const agentName = useMemo(() => {
     const a = agents.find((x) => x.id === currentAgentId);
     return a?.name ?? currentAgentId ?? undefined;
@@ -52,7 +66,11 @@ export function MessageList() {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
+<<<<<<< HEAD
   }, [messages, streamingText, streaming, streamingTools, autoScroll]);
+=======
+  }, [orderedMessages, streamingText, streaming, streamingTools, autoScroll]);
+>>>>>>> feat-implement-frontend-design-GH23Da
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
@@ -76,7 +94,11 @@ export function MessageList() {
         aria-relevant="additions"
       >
         <div className={styles.list}>
+<<<<<<< HEAD
           {messages.map((m) => (
+=======
+          {orderedMessages.map((m) => (
+>>>>>>> feat-implement-frontend-design-GH23Da
             <MessageBubble key={m.id} message={m} agentName={agentName} />
           ))}
           {streaming && <StreamingMessage />}

@@ -1,6 +1,10 @@
 .shell {
   display: grid;
+<<<<<<< HEAD
   grid-template-rows: var(--topbar-height) 1fr;
+=======
+  grid-template-rows: 1fr;
+>>>>>>> feat-implement-frontend-design-GH23Da
   height: 100vh;
   overflow: hidden;
 }

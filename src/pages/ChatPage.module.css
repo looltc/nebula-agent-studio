@@ -1,13 +1,104 @@
 .page {
   height: 100%;
   display: flex;
+<<<<<<< HEAD
   flex-direction: column;
+=======
+  flex-direction: row;
+>>>>>>> feat-implement-frontend-design-GH23Da
   min-height: 0;
   background: var(--bg-background);
 }
 
+<<<<<<< HEAD
 /* ===== Toolbar ===== */
 .toolbar {
+=======
+/* ===== Sidebar (260px) ===== */
+.sidebar {
+  flex-shrink: 0;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border-default);
+  background: var(--bg-background);
+  overflow: hidden;
+}
+
+.sidebarTop {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+}
+
+/* ===== Main area ===== */
+.main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Welcome screen ===== */
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+}
+
+.brandLogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    var(--accent-bg) 0%,
+    color-mix(in srgb, var(--accent-primary) 20%, transparent) 100%
+  );
+  color: var(--accent-primary);
+  box-shadow: 0 0 0 1px
+    color-mix(in srgb, var(--accent-primary) 18%, transparent) inset;
+  margin-bottom: var(--space-2);
+}
+
+.welcomeTitle {
+  font-size: var(--text-2xl);
+  line-height: var(--line-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  text-align: center;
+}
+
+.welcomeSubtitle {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 420px;
+}
+
+.welcomeInput {
+  width: 100%;
+  max-width: 720px;
+  margin-top: var(--space-4);
+}
+
+/* ===== Chat header ===== */
+.header {
+>>>>>>> feat-implement-frontend-design-GH23Da
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -19,13 +110,18 @@
   min-height: 56px;
 }
 
+<<<<<<< HEAD
 .brand {
+=======
+.headerLeft {
+>>>>>>> feat-implement-frontend-design-GH23Da
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
+<<<<<<< HEAD
 .brandIcon {
   color: var(--accent-primary);
   flex-shrink: 0;
@@ -59,6 +155,87 @@
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
+=======
+.agentName {
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.iconBtn:hover {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* ===== 3-dot dropdown ===== */
+.menuWrap {
+  position: relative;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: transparent;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2);
+  background: var(--bg-popover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.menuLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-2);
+>>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 .modeGroup {
@@ -71,6 +248,10 @@
 }
 
 .modeBtn {
+<<<<<<< HEAD
+=======
+  flex: 1;
+>>>>>>> feat-implement-frontend-design-GH23Da
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -99,6 +280,7 @@
   color: var(--text-primary-fg);
 }
 
+<<<<<<< HEAD
 /* ===== Layout grid: 260px sidebar | 1fr main ===== */
 .layout {
   flex: 1;
@@ -175,6 +357,58 @@
   color: var(--text-muted);
   font-weight: var(--font-medium);
   padding: 0 var(--space-1);
+=======
+.menuDivider {
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--space-1) 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.menuItem:hover:not(:disabled) {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -2px;
+}
+
+.menuItem:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.menuItemDanger {
+  color: var(--status-destructive);
+}
+
+.menuItemDanger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-destructive) 12%, transparent);
+  color: var(--status-destructive);
+}
+
+.menuIcon {
+  flex-shrink: 0;
+>>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 /* ===== Modal body ===== */
@@ -183,3 +417,13 @@
   line-height: var(--line-base);
   color: var(--text-secondary);
 }
+<<<<<<< HEAD
+=======
+
+/* ===== Mobile: hide sidebar on narrow viewports ===== */
+@media (max-width: 720px) {
+  .sidebar {
+    display: none;
+  }
+}
+>>>>>>> feat-implement-frontend-design-GH23Da

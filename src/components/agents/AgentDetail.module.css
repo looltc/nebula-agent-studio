@@ -466,3 +466,83 @@
 .confirmText strong {
   font-weight: var(--font-semibold);
 }
+<<<<<<< HEAD
+=======
+
+/* ===== Persona / goals / constraints ===== */
+.persona {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.simpleList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.simpleListItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-foreground);
+  word-break: break-word;
+}
+
+.simpleBullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6px;
+  height: 6px;
+  margin-top: 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.simpleEmpty {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ===== Loading state ===== */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+}
+
+/* ===== KV full-width (single column for url) ===== */
+.kvFull {
+  grid-column: 1 / -1;
+}
+
+.kvValueMuted {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+>>>>>>> feat-implement-frontend-design-GH23Da

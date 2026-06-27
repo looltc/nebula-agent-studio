@@ -1,7 +1,13 @@
 import type {
   AgentCreateRequest,
   AgentCreateResponse,
+<<<<<<< HEAD
   AgentListResponse,
+=======
+  AgentDetailResponse,
+  AgentListResponse,
+  AgentUpdateRequest,
+>>>>>>> feat-implement-frontend-design-GH23Da
   ApiErrorBody,
   ChatRequest,
   ChatResponse,
@@ -13,6 +19,14 @@ import type {
   GroupChatListResponse,
   HealthResponse,
   MetricsText,
+<<<<<<< HEAD
+=======
+  ProviderCreateRequest,
+  ProviderListResponse,
+  ProviderModelsResponse,
+  ProviderTestResponse,
+  ProviderSummary,
+>>>>>>> feat-implement-frontend-design-GH23Da
   RelationGraphResponse,
   ToolListResponse,
   WorldStateResponse,
@@ -53,11 +67,50 @@ export const apiClient = {
 
   /* Agents */
   listAgents: () => api<AgentListResponse>('/agents'),
+<<<<<<< HEAD
+=======
+  getAgent: (id: string) => api<AgentDetailResponse>(`/agents/${encodeURIComponent(id)}`),
+>>>>>>> feat-implement-frontend-design-GH23Da
   createAgent: (body: AgentCreateRequest) =>
     api<AgentCreateResponse>('/agents', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+<<<<<<< HEAD
+=======
+  updateAgent: (id: string, body: AgentUpdateRequest) =>
+    api<AgentCreateResponse>(`/agents/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteAgent: (id: string) =>
+    api<{ id: string; status: string }>(`/agents/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+
+  /* LLM Providers */
+  listProviders: () => api<ProviderListResponse>('/llm/providers'),
+  createProvider: (body: ProviderCreateRequest) =>
+    api<ProviderSummary>('/llm/providers', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateProvider: (id: string, body: ProviderCreateRequest) =>
+    api<ProviderSummary>(`/llm/providers/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteProvider: (id: string) =>
+    api<{ id: string; status: string }>(`/llm/providers/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+  testProvider: (id: string) =>
+    api<ProviderTestResponse>(`/llm/providers/${encodeURIComponent(id)}/test`, {
+      method: 'POST',
+    }),
+  listProviderModels: (id: string) =>
+    api<ProviderModelsResponse>(`/llm/providers/${encodeURIComponent(id)}/models`),
+>>>>>>> feat-implement-frontend-design-GH23Da
 
   /* Chat (HTTP) */
   chat: (body: ChatRequest) =>

@@ -18,6 +18,10 @@ const MAX_HEIGHT = 200;
 
 /**
  * Auto-growing chat input. Enter sends, Shift+Enter inserts a newline.
+<<<<<<< HEAD
+=======
+ * The action button (Send / Stop) sits in a bottom row, right-aligned.
+>>>>>>> feat-implement-frontend-design-GH23Da
  * While streaming, the send button morphs into a red Stop button.
  */
 export function ChatInput({
@@ -26,7 +30,11 @@ export function ChatInput({
   streaming,
   disabled = false,
   agentId,
+<<<<<<< HEAD
   placeholder = 'Type a message…',
+=======
+  placeholder = '输入消息…  (Enter 发送, Shift+Enter 换行)',
+>>>>>>> feat-implement-frontend-design-GH23Da
 }: ChatInputProps) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -82,6 +90,7 @@ export function ChatInput({
   return (
     <div className={styles.wrap}>
       <div className={styles.field}>
+<<<<<<< HEAD
         <span className={styles.attach} aria-hidden="true" title="Attach (decorative)">
           <Paperclip size={18} />
         </span>
@@ -116,6 +125,48 @@ export function ChatInput({
             Send
           </Button>
         )}
+=======
+        <div className={styles.textareaRow}>
+          <span className={styles.attach} aria-hidden="true" title="附件 (装饰)">
+            <Paperclip size={18} />
+          </span>
+          <textarea
+            ref={textareaRef}
+            className={styles.textarea}
+            placeholder={placeholder}
+            value={value}
+            rows={1}
+            disabled={disabled}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            aria-label="消息输入"
+          />
+        </div>
+        <div className={styles.actions}>
+          {streaming ? (
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<Square size={14} />}
+              onClick={onStop}
+              aria-label="停止生成"
+            >
+              停止
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<SendHorizontal size={14} />}
+              onClick={send}
+              disabled={!canSend}
+              aria-label="发送消息"
+            >
+              发送
+            </Button>
+          )}
+        </div>
+>>>>>>> feat-implement-frontend-design-GH23Da
       </div>
     </div>
   );

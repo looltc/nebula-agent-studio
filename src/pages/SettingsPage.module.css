@@ -35,6 +35,27 @@
   letter-spacing: 0.08em;
 }
 
+<<<<<<< HEAD
+=======
+.sectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1;
+  font-weight: var(--font-semibold);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+>>>>>>> feat-implement-frontend-design-GH23Da
 /* ===== Appearance ===== */
 .themeRow {
   display: flex;
@@ -70,13 +91,28 @@
   color: var(--text-muted);
 }
 
+<<<<<<< HEAD
 /* ===== Sub-block (providers / models) ===== */
 .subBlock {
+=======
+/* ===== Section header row (title + action) ===== */
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* ===== Provider list ===== */
+.providerList {
+>>>>>>> feat-implement-frontend-design-GH23Da
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
+<<<<<<< HEAD
 .subBlock + .subBlock {
   margin-top: var(--space-5);
   padding-top: var(--space-5);
@@ -160,6 +196,117 @@
 .chipRemove:focus-visible {
   outline: 2px solid var(--accent-ring);
   outline-offset: 1px;
+=======
+.providerCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  transition: border-color var(--duration-fast) var(--ease-default),
+    box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.providerCard:hover {
+  border-color: var(--accent-ring);
+  box-shadow: var(--shadow-sm);
+}
+
+.providerHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.providerInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.providerName {
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  word-break: break-all;
+}
+
+.providerMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.providerUrl {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.providerUrlLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: var(--space-1);
+}
+
+/* ===== Model badges ===== */
+.modelBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+}
+
+.modelBadgesLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  align-self: center;
+}
+
+/* ===== Test result ===== */
+.testResult {
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+}
+
+.testResultOk {
+  color: var(--status-success);
+  background: color-mix(in srgb, var(--status-success) 10%, transparent);
+  border-color: color-mix(in srgb, var(--status-success) 30%, transparent);
+}
+
+.testResultError {
+  color: var(--status-destructive);
+  background: color-mix(in srgb, var(--status-destructive) 10%, transparent);
+  border-color: color-mix(in srgb, var(--status-destructive) 30%, transparent);
+}
+
+/* ===== Provider actions ===== */
+.providerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+>>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 /* ===== Empty inline ===== */
@@ -171,6 +318,7 @@
   font-style: italic;
 }
 
+<<<<<<< HEAD
 /* ===== Add row ===== */
 .addRow {
   display: flex;
@@ -183,6 +331,8 @@
   min-width: 0;
 }
 
+=======
+>>>>>>> feat-implement-frontend-design-GH23Da
 /* ===== Tools grid ===== */
 .toolGrid {
   display: grid;
@@ -305,3 +455,31 @@
   justify-content: flex-end;
   margin-top: var(--space-5);
 }
+<<<<<<< HEAD
+=======
+
+/* ===== Provider modal form ===== */
+.providerForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.providerFormHint {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  color: var(--text-muted);
+}
+
+/* ===== Confirm modal text ===== */
+.confirmText {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-foreground);
+}
+
+.confirmText strong {
+  font-weight: var(--font-semibold);
+}
+>>>>>>> feat-implement-frontend-design-GH23Da

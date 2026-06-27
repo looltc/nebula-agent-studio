@@ -76,6 +76,7 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
+<<<<<<< HEAD
 | ChatLayout | ✅ | Agent 侧栏+消息区+输入区 |
 | MessageList | ✅ | 滚动/自动定位 |
 | MessageBubble | ✅ | 用户/Agent/系统 气泡 |
@@ -85,6 +86,19 @@
 | HITLApproval | ✅ | 审批卡片+倒计时 |
 | ConversationHistory | ✅ | 历史侧栏 |
 | ChatMode 切换 | ✅ | WS/SSE/HTTP 三选一 |
+=======
+| ChatPage 布局 | ✅ | 260px 会话侧栏(新聊天+搜索+展开历史) + 欢迎屏/聊天头部 + 消息区 + 输入区 |
+| 欢迎屏 | ✅ | 居中 Sparkles 品牌 logo + 欢迎文案 + 居中输入框，新聊天不自动打招呼 |
+| 聊天头部 | ✅ | 左侧 Agent 名称 + 右侧 分享图标 + 3 点菜单(清空/导出/传输模式) |
+| MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
+| MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签 |
+| StreamingMessage | ✅ | 光标动画+chunk 合并 |
+| ToolCallBlock | ✅ | Loading/完成/失败态 |
+| ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符 |
+| HITLApproval | ✅ | 审批卡片+倒计时 |
+| ConversationHistory | ✅ | 展开式会话列表(不可折叠)+悬停 3 点菜单(重命名/删除/导出)+活跃高亮 |
+| ChatMode 切换 | ✅ | WS/SSE/HTTP 三选一(收入 3 点菜单) |
+>>>>>>> feat-implement-frontend-design-GH23Da
 
 ## Agents Tab (pages/AgentsPage)
 

@@ -12,10 +12,17 @@ import styles from './AgentsPage.module.css';
 type FilterTab = 'all' | 'active' | 'idle' | 'error';
 
 const FILTERS: { key: FilterTab; label: string }[] = [
+<<<<<<< HEAD
   { key: 'all', label: 'All' },
   { key: 'active', label: 'Active' },
   { key: 'idle', label: 'Idle' },
   { key: 'error', label: 'Error' },
+=======
+  { key: 'all', label: '全部' },
+  { key: 'active', label: '运行中' },
+  { key: 'idle', label: '空闲' },
+  { key: 'error', label: '错误' },
+>>>>>>> feat-implement-frontend-design-GH23Da
 ];
 
 export default function AgentsPage() {
@@ -27,12 +34,19 @@ export default function AgentsPage() {
   const loadAgents = useAgentStore((s) => s.loadAgents);
   const loadTools = useAgentStore((s) => s.loadTools);
   const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
+<<<<<<< HEAD
+=======
+  const resetForm = useAgentStore((s) => s.resetForm);
+>>>>>>> feat-implement-frontend-design-GH23Da
 
   const [filterTab, setFilterTab] = useState<FilterTab>('all');
   const [sortKey, setSortKey] = useState<'name'>('name');
   const [query, setQuery] = useState('');
   const [pausedIds, setPausedIds] = useState<string[]>([]);
+<<<<<<< HEAD
   const [removedIds, setRemovedIds] = useState<string[]>([]);
+=======
+>>>>>>> feat-implement-frontend-design-GH23Da
 
   useEffect(() => {
     loadAgents();
@@ -45,6 +59,7 @@ export default function AgentsPage() {
     );
   };
 
+<<<<<<< HEAD
   const handleRemove = (id: string) => {
     setRemovedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
   };
@@ -59,6 +74,16 @@ export default function AgentsPage() {
           enabled: pausedIds.includes(a.id) ? false : a.enabled,
         })),
     [agents, removedIds, pausedIds],
+=======
+  // Apply local pause overrides.
+  const adjustedAgents = useMemo<AgentSummary[]>(
+    () =>
+      agents.map((a) => ({
+        ...a,
+        enabled: pausedIds.includes(a.id) ? false : a.enabled,
+      })),
+    [agents, pausedIds],
+>>>>>>> feat-implement-frontend-design-GH23Da
   );
 
   const displayedAgents = useMemo(() => {
@@ -98,15 +123,30 @@ export default function AgentsPage() {
     [adjustedAgents],
   );
 
+<<<<<<< HEAD
   const newAgentAction = (
     <Button variant="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
       New Agent
+=======
+  const handleNewAgent = () => {
+    resetForm();
+    setCreateOpen(true);
+  };
+
+  const newAgentAction = (
+    <Button variant="primary" icon={<Plus size={16} />} onClick={handleNewAgent}>
+      新建 Agent
+>>>>>>> feat-implement-frontend-design-GH23Da
     </Button>
   );
 
   const filters = (
     <>
+<<<<<<< HEAD
       <div className={styles.pills} role="tablist" aria-label="Filter agents">
+=======
+      <div className={styles.pills} role="tablist" aria-label="筛选 Agent">
+>>>>>>> feat-implement-frontend-design-GH23Da
         {FILTERS.map((f) => (
           <button
             key={f.key}
@@ -124,19 +164,33 @@ export default function AgentsPage() {
       <div className={styles.controls}>
         <TextInput
           icon={<Search size={14} />}
+<<<<<<< HEAD
           placeholder="Search agents"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={styles.search}
           aria-label="Search agents"
+=======
+          placeholder="搜索 Agent"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className={styles.search}
+          aria-label="搜索 Agent"
+>>>>>>> feat-implement-frontend-design-GH23Da
         />
         <Select
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as 'name')}
           className={styles.sort}
+<<<<<<< HEAD
           aria-label="Sort agents"
         >
           <option value="name">Name</option>
+=======
+          aria-label="排序 Agent"
+        >
+          <option value="name">名称</option>
+>>>>>>> feat-implement-frontend-design-GH23Da
         </Select>
       </div>
     </>
@@ -145,6 +199,7 @@ export default function AgentsPage() {
   return (
     <PageContainer>
       {agentId ? (
+<<<<<<< HEAD
         <AgentDetail
           agent={detailAgent}
           onTogglePause={handleTogglePause}
@@ -155,6 +210,14 @@ export default function AgentsPage() {
           <ContentHeader
             title="Agents"
             subtitle="Create, configure, and manage your autonomous agents."
+=======
+        <AgentDetail agent={detailAgent} />
+      ) : (
+        <>
+          <ContentHeader
+            title="Agent 管理"
+            subtitle="创建、配置和管理你的自治 Agent。"
+>>>>>>> feat-implement-frontend-design-GH23Da
             actions={newAgentAction}
             filters={filters}
           />
@@ -163,7 +226,10 @@ export default function AgentsPage() {
             loading={loading}
             tools={tools}
             onTogglePause={handleTogglePause}
+<<<<<<< HEAD
             onRemove={handleRemove}
+=======
+>>>>>>> feat-implement-frontend-design-GH23Da
           />
         </>
       )}

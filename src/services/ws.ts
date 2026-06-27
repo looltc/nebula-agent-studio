@@ -43,9 +43,17 @@ export class WSChatClient {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 
+<<<<<<< HEAD
   send(text: string) {
     if (this.isOpen) {
       this.ws!.send(JSON.stringify({ message: text }));
+=======
+  send(text: string, conversationId?: string | null) {
+    if (this.isOpen) {
+      const payload: Record<string, string> = { message: text };
+      if (conversationId) payload.conversation_id = conversationId;
+      this.ws!.send(JSON.stringify(payload));
+>>>>>>> feat-implement-frontend-design-GH23Da
       return true;
     }
     return false;
@@ -85,9 +93,19 @@ export function streamSSEChat(
   agentId: string,
   message: string,
   handlers: SSEChatHandlers,
+<<<<<<< HEAD
 ): () => void {
   const controller = new AbortController();
   const url = `/api/chat/sse/${encodeURIComponent(agentId)}?message=${encodeURIComponent(message)}`;
+=======
+  conversationId?: string | null,
+): () => void {
+  const controller = new AbortController();
+  let url = `/api/chat/sse/${encodeURIComponent(agentId)}?message=${encodeURIComponent(message)}`;
+  if (conversationId) {
+    url += `&conversation_id=${encodeURIComponent(conversationId)}`;
+  }
+>>>>>>> feat-implement-frontend-design-GH23Da
 
   (async () => {
     try {
