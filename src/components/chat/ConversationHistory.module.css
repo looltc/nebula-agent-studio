@@ -1,71 +1,4 @@
 .panel {
-<<<<<<< HEAD
-  border-top: 1px solid var(--border-default);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  max-height: 45%;
-  background: var(--bg-background);
-}
-
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-3);
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  font-weight: var(--font-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-default),
-    color var(--duration-fast) var(--ease-default);
-}
-
-.toggle:hover {
-  background: var(--bg-muted);
-  color: var(--text-foreground);
-}
-
-.toggle:focus-visible {
-  outline: 2px solid var(--accent-ring);
-  outline-offset: -2px;
-}
-
-.toggleIcon {
-  flex-shrink: 0;
-  color: var(--accent-primary);
-}
-
-.toggleLabel {
-  flex: 1;
-  text-align: left;
-}
-
-.toggleCount {
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  background: var(--bg-muted);
-  border-radius: var(--radius-full);
-  padding: 1px var(--space-2);
-}
-
-.chevron {
-  transition: transform var(--duration-fast) var(--ease-default);
-  color: var(--text-muted);
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
-}
-
-.list {
-=======
   flex: 1;
   min-height: 0;
   display: flex;
@@ -77,7 +10,6 @@
 .list {
   flex: 1;
   min-height: 0;
->>>>>>> feat-implement-frontend-design-GH23Da
   overflow-y: auto;
   padding: var(--space-2);
   display: flex;
@@ -86,11 +18,7 @@
 }
 
 .empty {
-<<<<<<< HEAD
-  padding: var(--space-3);
-=======
   padding: var(--space-6) var(--space-3);
->>>>>>> feat-implement-frontend-design-GH23Da
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
@@ -98,14 +26,6 @@
 }
 
 .item {
-<<<<<<< HEAD
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid transparent;
-=======
   position: relative;
   display: flex;
   align-items: center;
@@ -114,7 +34,6 @@
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid transparent;
   border-left: 2px solid transparent;
->>>>>>> feat-implement-frontend-design-GH23Da
   border-radius: var(--radius-md);
   background: transparent;
   text-align: left;
@@ -127,34 +46,13 @@
   background: var(--bg-muted);
 }
 
-<<<<<<< HEAD
-.item:focus-visible {
-=======
 .item:focus-within {
->>>>>>> feat-implement-frontend-design-GH23Da
   outline: 2px solid var(--accent-ring);
   outline-offset: 1px;
 }
 
 .active {
   background: var(--accent-bg);
-<<<<<<< HEAD
-  border-color: color-mix(in srgb, var(--accent-primary) 25%, transparent);
-}
-
-.itemTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.participants {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-secondary);
-  font-weight: var(--font-medium);
-=======
   border-left-color: var(--accent-primary);
 }
 
@@ -176,38 +74,18 @@
   line-height: var(--line-sm);
   font-weight: var(--font-medium);
   color: var(--text-foreground);
->>>>>>> feat-implement-frontend-design-GH23Da
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-<<<<<<< HEAD
-.count {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
-.time {
-=======
 .meta {
->>>>>>> feat-implement-frontend-design-GH23Da
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
-<<<<<<< HEAD
-}
-
-.timeIcon {
-  flex-shrink: 0;
-}
-=======
   font-variant-numeric: tabular-nums;
 }
 
@@ -323,4 +201,3 @@
   line-height: var(--line-base);
   color: var(--text-secondary);
 }
->>>>>>> feat-implement-frontend-design-GH23Da

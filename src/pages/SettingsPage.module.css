@@ -35,8 +35,6 @@
   letter-spacing: 0.08em;
 }
 
-<<<<<<< HEAD
-=======
 .sectionCount {
   display: inline-flex;
   align-items: center;
@@ -55,7 +53,6 @@
   letter-spacing: 0;
 }
 
->>>>>>> feat-implement-frontend-design-GH23Da
 /* ===== Appearance ===== */
 .themeRow {
   display: flex;
@@ -91,10 +88,6 @@
   color: var(--text-muted);
 }
 
-<<<<<<< HEAD
-/* ===== Sub-block (providers / models) ===== */
-.subBlock {
-=======
 /* ===== Section header row (title + action) ===== */
 .sectionHead {
   display: flex;
@@ -106,97 +99,11 @@
 
 /* ===== Provider list ===== */
 .providerList {
->>>>>>> feat-implement-frontend-design-GH23Da
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-<<<<<<< HEAD
-.subBlock + .subBlock {
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-divider);
-}
-
-.subHead {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.subTitle {
-  font-size: var(--text-sm);
-  line-height: var(--line-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.subCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: var(--radius-full);
-  background: var(--bg-muted);
-  color: var(--text-secondary);
-  font-size: var(--text-xs);
-  line-height: 1;
-  font-weight: var(--font-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ===== Chips ===== */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px 4px 2px 8px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  transition: border-color var(--duration-fast) var(--ease-default),
-    background-color var(--duration-fast) var(--ease-default);
-}
-
-.chip:hover {
-  border-color: var(--accent-ring);
-}
-
-.chipRemove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-default),
-    color var(--duration-fast) var(--ease-default);
-}
-
-.chipRemove:hover {
-  background: color-mix(in srgb, var(--status-destructive) 16%, transparent);
-  color: var(--status-destructive);
-}
-
-.chipRemove:focus-visible {
-  outline: 2px solid var(--accent-ring);
-  outline-offset: 1px;
-=======
 .providerCard {
   display: flex;
   flex-direction: column;
@@ -306,7 +213,6 @@
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 /* ===== Empty inline ===== */
@@ -318,21 +224,6 @@
   font-style: italic;
 }
 
-<<<<<<< HEAD
-/* ===== Add row ===== */
-.addRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.addRow > :first-child {
-  flex: 1;
-  min-width: 0;
-}
-
-=======
->>>>>>> feat-implement-frontend-design-GH23Da
 /* ===== Tools grid ===== */
 .toolGrid {
   display: grid;
@@ -455,8 +346,6 @@
   justify-content: flex-end;
   margin-top: var(--space-5);
 }
-<<<<<<< HEAD
-=======
 
 /* ===== Provider modal form ===== */
 .providerForm {
@@ -482,4 +371,3 @@
 .confirmText strong {
   font-weight: var(--font-semibold);
 }
->>>>>>> feat-implement-frontend-design-GH23Da

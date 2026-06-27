@@ -1,7 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-<<<<<<< HEAD
-import { Trash2, Download, MessageCircleMore } from 'lucide-react';
-=======
 import {
   Plus,
   Search,
@@ -11,29 +8,12 @@ import {
   Download,
   Sparkles,
 } from 'lucide-react';
->>>>>>> feat-implement-frontend-design-GH23Da
 import { useChatStore, type ChatMode } from '@/stores/chatStore';
 import type { MessageInfo } from '@/types/api';
 import { useUIStore } from '@/stores/uiStore';
 import { useChatTransport } from '@/hooks/useChatTransport';
-<<<<<<< HEAD
-import {
-  Button,
-  EmptyState,
-  Modal,
-  StatusDot,
-  type StatusDotStatus,
-} from '@/components/ui';
-import {
-  AgentSidebar,
-  ConversationHistory,
-  MessageList,
-  ChatInput,
-} from '@/components/chat';
-=======
 import { Button, Modal, TextInput } from '@/components/ui';
 import { ConversationHistory, MessageList, ChatInput } from '@/components/chat';
->>>>>>> feat-implement-frontend-design-GH23Da
 import { cx } from '@/lib/cx';
 import styles from './ChatPage.module.css';
 
@@ -43,20 +23,6 @@ const MODES: Array<{ key: ChatMode; label: string }> = [
   { key: 'http', label: 'HTTP' },
 ];
 
-<<<<<<< HEAD
-function connectionToStatus(state: string): StatusDotStatus {
-  switch (state) {
-    case 'connected':
-      return 'active';
-    case 'reconnecting':
-      return 'warning';
-    default:
-      return 'idle';
-  }
-}
-
-=======
->>>>>>> feat-implement-frontend-design-GH23Da
 interface ExportPayload {
   agentId: string | null;
   conversationId: string | null;
@@ -65,13 +31,6 @@ interface ExportPayload {
 }
 
 /**
-<<<<<<< HEAD
- * Full-screen Chat page: 260px agent sidebar + messages column + input bar.
- * Toolbar exposes transport-mode toggle, clear (with confirm) and JSON export.
- */
-export default function ChatPage() {
-  const loadAgents = useChatStore((s) => s.loadAgents);
-=======
  * Chat page: 260px conversation sidebar (新聊天 + 搜索 + 展开会话列表)
  * + main area that shows a centered welcome screen when empty, or a header
  * (agent name + 分享 + 3-dot 菜单) + MessageList + ChatInput otherwise.
@@ -79,7 +38,6 @@ export default function ChatPage() {
 export default function ChatPage() {
   const loadAgents = useChatStore((s) => s.loadAgents);
   const loadConversations = useChatStore((s) => s.loadConversations);
->>>>>>> feat-implement-frontend-design-GH23Da
   const agents = useChatStore((s) => s.agents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
   const messages = useChatStore((s) => s.messages);
@@ -87,12 +45,6 @@ export default function ChatPage() {
   const chatMode = useChatStore((s) => s.chatMode);
   const setChatMode = useChatStore((s) => s.setChatMode);
   const clearChat = useChatStore((s) => s.clearChat);
-<<<<<<< HEAD
-  const connectionState = useUIStore((s) => s.connectionState);
-  const addToast = useUIStore((s) => s.addToast);
-  const { send, stop } = useChatTransport();
-  const [clearOpen, setClearOpen] = useState(false);
-=======
   const startNewChat = useChatStore((s) => s.startNewChat);
   const addToast = useUIStore((s) => s.addToast);
   const { send, stop } = useChatTransport();
@@ -100,28 +52,11 @@ export default function ChatPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
->>>>>>> feat-implement-frontend-design-GH23Da
 
   useEffect(() => {
     void loadAgents();
   }, [loadAgents]);
 
-<<<<<<< HEAD
-  const agentName = useMemo(() => {
-    const a = agents.find((x) => x.id === currentAgentId);
-    return a?.name ?? currentAgentId ?? 'Assistant';
-  }, [agents, currentAgentId]);
-
-  const showWelcome =
-    messages.length === 0 && !streaming && currentAgentId !== null;
-
-  function handleExport() {
-    if (messages.length === 0) {
-      addToast({
-        variant: 'info',
-        title: 'Nothing to export',
-        description: 'There are no messages in this conversation yet.',
-=======
   // Keep the conversation list fresh whenever the active agent changes.
   useEffect(() => {
     if (currentAgentId) void loadConversations();
@@ -146,7 +81,6 @@ export default function ChatPage() {
         variant: 'info',
         title: '无可导出内容',
         description: '当前会话暂无消息。',
->>>>>>> feat-implement-frontend-design-GH23Da
       });
       return;
     }
@@ -169,17 +103,6 @@ export default function ChatPage() {
     URL.revokeObjectURL(url);
     addToast({
       variant: 'success',
-<<<<<<< HEAD
-      title: 'Exported',
-      description: 'Conversation exported as JSON.',
-    });
-  }
-
-  function handleClearConfirm() {
-    clearChat();
-    setClearOpen(false);
-    addToast({ variant: 'info', title: 'Chat cleared' });
-=======
       title: '导出成功',
       description: '会话已导出为 JSON 文件。',
     });
@@ -202,108 +125,10 @@ export default function ChatPage() {
 
   function handleNewChat() {
     startNewChat();
->>>>>>> feat-implement-frontend-design-GH23Da
   }
 
   return (
     <div className={styles.page}>
-<<<<<<< HEAD
-      <header className={styles.toolbar}>
-        <div className={styles.brand}>
-          <MessageCircleMore size={18} className={styles.brandIcon} />
-          <h1 className={styles.title}>Chat</h1>
-          <span
-            className={styles.conn}
-            title={`Connection: ${connectionState}`}
-          >
-            <StatusDot status={connectionToStatus(connectionState)} size={8} />
-            <span className={styles.connText}>{connectionState}</span>
-          </span>
-        </div>
-
-        <div className={styles.actions}>
-          <div
-            className={styles.modeGroup}
-            role="group"
-            aria-label="Chat transport mode"
-          >
-            {MODES.map((m) => (
-              <button
-                key={m.key}
-                type="button"
-                className={cx(
-                  styles.modeBtn,
-                  chatMode === m.key && styles.modeActive,
-                )}
-                onClick={() => setChatMode(m.key)}
-                aria-pressed={chatMode === m.key}
-                title={`${m.label} transport`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Trash2 size={14} />}
-            onClick={() => setClearOpen(true)}
-            disabled={messages.length === 0 && !streaming}
-          >
-            Clear
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Download size={14} />}
-            onClick={handleExport}
-            disabled={messages.length === 0}
-          >
-            Export
-          </Button>
-        </div>
-      </header>
-
-      <div className={styles.layout}>
-        <aside className={styles.sidebar}>
-          <div className={styles.sidebarScroll}>
-            <AgentSidebar />
-          </div>
-          <ConversationHistory />
-        </aside>
-
-        <main className={styles.main}>
-          {currentAgentId === null ? (
-            <div className={styles.placeholder}>
-              <EmptyState
-                icon={<MessageCircleMore size={32} />}
-                title="Select an agent to start chatting"
-                description="Pick an agent from the sidebar, or load agents if the list is empty."
-              />
-            </div>
-          ) : showWelcome ? (
-            <div className={styles.welcomeWrap}>
-              <div className={styles.welcome}>
-                <div className={styles.welcomeText}>
-                  Hi, I'm {agentName}. How can I help?
-                </div>
-              </div>
-              <div className={styles.welcomeMeta}>{agentName}</div>
-            </div>
-          ) : (
-            <MessageList />
-          )}
-
-          <ChatInput
-            onSend={send}
-            onStop={stop}
-            streaming={streaming}
-            agentId={currentAgentId}
-            disabled={currentAgentId === null}
-          />
-        </main>
-      </div>
-=======
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
           <Button
@@ -447,43 +272,26 @@ export default function ChatPage() {
           </>
         )}
       </main>
->>>>>>> feat-implement-frontend-design-GH23Da
 
       <Modal
         open={clearOpen}
         onClose={() => setClearOpen(false)}
-<<<<<<< HEAD
-        title="Clear conversation?"
-=======
         title="清空对话?"
->>>>>>> feat-implement-frontend-design-GH23Da
         danger
         size="sm"
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setClearOpen(false)}>
-<<<<<<< HEAD
-              Cancel
-            </Button>
-            <Button variant="danger" size="sm" onClick={handleClearConfirm}>
-              Clear
-=======
               取消
             </Button>
             <Button variant="danger" size="sm" onClick={handleClearConfirm}>
               清空
->>>>>>> feat-implement-frontend-design-GH23Da
             </Button>
           </>
         }
       >
         <p className={styles.modalBody}>
-<<<<<<< HEAD
-          This removes all messages in the current view. This action cannot be
-          undone.
-=======
           此操作将移除当前视图中的所有消息，且无法撤销。
->>>>>>> feat-implement-frontend-design-GH23Da
         </p>
       </Modal>
     </div>

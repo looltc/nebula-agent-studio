@@ -1,8 +1,5 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
-<<<<<<< HEAD
-import type { AgentSummary, ToolInfo } from '@/types/api';
-=======
 import type {
   AgentCreateRequest,
   AgentDetailResponse,
@@ -11,7 +8,6 @@ import type {
   LLMSpecRequest,
   ToolInfo,
 } from '@/types/api';
->>>>>>> feat-implement-frontend-design-GH23Da
 
 export type ThinkingModel = 'react' | 'plan_execute';
 
@@ -21,44 +17,29 @@ export interface AgentFormState {
   role: string;
   persona: string;
   thinkingModel: ThinkingModel;
-<<<<<<< HEAD
-  provider: string;
-  model: string;
-  temperature: number;
-=======
->>>>>>> feat-implement-frontend-design-GH23Da
   maxIterations: number;
   maxMessages: number;
   systemPrompt: string;
   goals: string[];
   constraints: string[];
-<<<<<<< HEAD
-=======
   tools: string[];
   provider: string;
   model: string;
   temperature: number;
   baseUrl: string;
   apiKey: string;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 export interface AgentState {
   agents: AgentSummary[];
   loading: boolean;
   currentAgent: AgentSummary | null;
-<<<<<<< HEAD
-  tools: ToolInfo[];
-  selectedToolIds: string[];
-  createOpen: boolean;
-=======
   currentDetail: AgentDetailResponse | null;
   detailLoading: boolean;
   tools: ToolInfo[];
   selectedToolIds: string[];
   createOpen: boolean;
   editingId: string | null; // null = create mode, string = edit mode
->>>>>>> feat-implement-frontend-design-GH23Da
   setCreateOpen: (open: boolean) => void;
   form: AgentFormState;
   errors: Record<string, string>;
@@ -66,10 +47,7 @@ export interface AgentState {
   loadAgents: () => Promise<void>;
   loadTools: () => Promise<void>;
   selectAgent: (id: string) => void;
-<<<<<<< HEAD
-=======
   loadAgentDetail: (id: string) => Promise<void>;
->>>>>>> feat-implement-frontend-design-GH23Da
   updateForm: (partial: Partial<AgentFormState>) => void;
   toggleTool: (name: string) => void;
   addGoal: () => void;
@@ -80,16 +58,11 @@ export interface AgentState {
   removeConstraint: (index: number) => void;
   validate: () => boolean;
   createAgent: () => Promise<boolean>;
-<<<<<<< HEAD
-  resetForm: () => void;
-  duplicateAgent: (id: string) => void;
-=======
   updateAgent: (id: string) => Promise<boolean>;
   deleteAgent: (id: string) => Promise<boolean>;
   resetForm: () => void;
   duplicateAgent: (id: string) => void;
   startEdit: (id: string) => Promise<void>;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 function defaultForm(): AgentFormState {
@@ -99,20 +72,11 @@ function defaultForm(): AgentFormState {
     role: 'assistant',
     persona: '',
     thinkingModel: 'react',
-<<<<<<< HEAD
-    provider: 'openai',
-    model: 'gpt-4o-mini',
-    temperature: 0.7,
-    maxIterations: 5,
-=======
     maxIterations: 10,
->>>>>>> feat-implement-frontend-design-GH23Da
     maxMessages: 50,
     systemPrompt: '',
     goals: [],
     constraints: [],
-<<<<<<< HEAD
-=======
     tools: [],
     provider: 'openai',
     model: 'gpt-4o-mini',
@@ -162,7 +126,6 @@ function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
     constraints: form.constraints.filter((c) => c.trim()),
     tools: form.tools,
     llm: buildLLMSpec(form),
->>>>>>> feat-implement-frontend-design-GH23Da
   };
 }
 
@@ -170,18 +133,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   agents: [],
   loading: false,
   currentAgent: null,
-<<<<<<< HEAD
-  tools: [],
-  selectedToolIds: [],
-  createOpen: false,
-=======
   currentDetail: null,
   detailLoading: false,
   tools: [],
   selectedToolIds: [],
   createOpen: false,
   editingId: null,
->>>>>>> feat-implement-frontend-design-GH23Da
   setCreateOpen: (open) => set({ createOpen: open }),
   form: defaultForm(),
   errors: {},
@@ -212,8 +169,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ currentAgent: agent });
   },
 
-<<<<<<< HEAD
-=======
   loadAgentDetail: async (id) => {
     set({ detailLoading: true });
     try {
@@ -226,7 +181,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
->>>>>>> feat-implement-frontend-design-GH23Da
   updateForm: (partial) => {
     set((s) => ({ form: { ...s.form, ...partial } }));
   },
@@ -234,18 +188,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   toggleTool: (name) => {
     set((s) => {
       const has = s.selectedToolIds.includes(name);
-<<<<<<< HEAD
-      return {
-        selectedToolIds: has
-          ? s.selectedToolIds.filter((t) => t !== name)
-          : [...s.selectedToolIds, name],
-      };
-=======
       const next = has
         ? s.selectedToolIds.filter((t) => t !== name)
         : [...s.selectedToolIds, name];
       return { selectedToolIds: next, form: { ...s.form, tools: next } };
->>>>>>> feat-implement-frontend-design-GH23Da
     });
   },
 
@@ -293,33 +239,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   validate: () => {
-<<<<<<< HEAD
-    const { form, agents } = get();
-    const errors: Record<string, string> = {};
-
-    if (!form.id) {
-      errors.id = 'ID is required';
-    } else if (!/^[a-z0-9-]+$/.test(form.id)) {
-      errors.id = 'ID must be lowercase alphanumeric with dashes';
-    } else if (agents.some((a) => a.id === form.id)) {
-      errors.id = 'ID already exists';
-    }
-
-    if (!form.name) errors.name = 'Name is required';
-    if (!form.role) errors.role = 'Role is required';
-
-    if (form.temperature < 0 || form.temperature > 2) {
-      errors.temperature = 'Temperature must be between 0 and 2';
-    }
-    if (form.maxIterations < 1 || form.maxIterations > 50) {
-      errors.maxIterations = 'Max iterations must be between 1 and 50';
-    }
-    if (form.maxMessages < 1 || form.maxMessages > 200) {
-      errors.maxMessages = 'Max messages must be between 1 and 200';
-    }
-    if (form.systemPrompt.length > 4096) {
-      errors.systemPrompt = 'System prompt must be 4096 characters or less';
-=======
     const { form, agents, editingId } = get();
     const errors: Record<string, string> = {};
 
@@ -348,7 +267,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
     if (form.systemPrompt.length > 4096) {
       errors.systemPrompt = 'System Prompt 不能超过 4096 字符';
->>>>>>> feat-implement-frontend-design-GH23Da
     }
 
     set({ errors });
@@ -360,17 +278,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (!valid) return false;
     const { form } = get();
     try {
-<<<<<<< HEAD
-      await apiClient.createAgent({
-        id: form.id,
-        name: form.name,
-        role: form.role,
-        persona: form.persona,
-        thinking_model: form.thinkingModel,
-      });
-=======
       await apiClient.createAgent(buildCreateBody(form));
->>>>>>> feat-implement-frontend-design-GH23Da
       await get().loadAgents();
       set({ createOpen: false });
       get().resetForm();
@@ -383,10 +291,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-<<<<<<< HEAD
-  resetForm: () => {
-    set({ form: defaultForm(), errors: {}, selectedToolIds: [] });
-=======
   updateAgent: async (id) => {
     const { form } = get();
     // For edit mode, skip id validation
@@ -425,7 +329,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   resetForm: () => {
     set({ form: defaultForm(), errors: {}, selectedToolIds: [], editingId: null });
->>>>>>> feat-implement-frontend-design-GH23Da
   },
 
   duplicateAgent: (id) => {
@@ -440,8 +343,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       },
       createOpen: true,
       errors: {},
-<<<<<<< HEAD
-=======
       editingId: null,
     });
   },
@@ -472,7 +373,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       },
       selectedToolIds: detail.tools,
       errors: {},
->>>>>>> feat-implement-frontend-design-GH23Da
     });
   },
 }));

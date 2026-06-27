@@ -1,13 +1,9 @@
 import type {
   AgentCreateRequest,
   AgentCreateResponse,
-<<<<<<< HEAD
-  AgentListResponse,
-=======
   AgentDetailResponse,
   AgentListResponse,
   AgentUpdateRequest,
->>>>>>> feat-implement-frontend-design-GH23Da
   ApiErrorBody,
   ChatRequest,
   ChatResponse,
@@ -19,14 +15,11 @@ import type {
   GroupChatListResponse,
   HealthResponse,
   MetricsText,
-<<<<<<< HEAD
-=======
   ProviderCreateRequest,
   ProviderListResponse,
   ProviderModelsResponse,
   ProviderTestResponse,
   ProviderSummary,
->>>>>>> feat-implement-frontend-design-GH23Da
   RelationGraphResponse,
   ToolListResponse,
   WorldStateResponse,
@@ -67,17 +60,12 @@ export const apiClient = {
 
   /* Agents */
   listAgents: () => api<AgentListResponse>('/agents'),
-<<<<<<< HEAD
-=======
   getAgent: (id: string) => api<AgentDetailResponse>(`/agents/${encodeURIComponent(id)}`),
->>>>>>> feat-implement-frontend-design-GH23Da
   createAgent: (body: AgentCreateRequest) =>
     api<AgentCreateResponse>('/agents', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-<<<<<<< HEAD
-=======
   updateAgent: (id: string, body: AgentUpdateRequest) =>
     api<AgentCreateResponse>(`/agents/${encodeURIComponent(id)}`, {
       method: 'PUT',
@@ -110,7 +98,6 @@ export const apiClient = {
     }),
   listProviderModels: (id: string) =>
     api<ProviderModelsResponse>(`/llm/providers/${encodeURIComponent(id)}/models`),
->>>>>>> feat-implement-frontend-design-GH23Da
 
   /* Chat (HTTP) */
   chat: (body: ChatRequest) =>

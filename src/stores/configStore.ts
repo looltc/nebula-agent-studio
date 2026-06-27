@@ -1,15 +1,11 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
-<<<<<<< HEAD
-import type { ToolInfo } from '@/types/api';
-=======
 import type {
   ProviderSummary,
   ProviderCreateRequest,
   ProviderTestResponse,
   ToolInfo,
 } from '@/types/api';
->>>>>>> feat-implement-frontend-design-GH23Da
 
 export interface Budget {
   dailyCap: number;
@@ -17,11 +13,6 @@ export interface Budget {
   criticalThreshold: number;
 }
 
-<<<<<<< HEAD
-export interface ConfigState {
-  providers: string[];
-  models: string[];
-=======
 export interface ProviderFormState {
   id: string | null; // null = new
   name: string;
@@ -35,17 +26,10 @@ export interface ProviderFormState {
 export interface ConfigState {
   providers: ProviderSummary[];
   providerModels: Record<string, string[]>;
->>>>>>> feat-implement-frontend-design-GH23Da
   tools: ToolInfo[];
   budget: Budget;
   loading: boolean;
 
-<<<<<<< HEAD
-  loadTools: () => Promise<void>;
-  setBudget: (partial: Partial<Budget>) => void;
-  addProvider: (name: string) => void;
-  addModel: (name: string) => void;
-=======
   loadProviders: () => Promise<void>;
   createProvider: (body: ProviderCreateRequest) => Promise<boolean>;
   updateProvider: (id: string, body: ProviderCreateRequest) => Promise<boolean>;
@@ -55,7 +39,6 @@ export interface ConfigState {
 
   loadTools: () => Promise<void>;
   setBudget: (partial: Partial<Budget>) => void;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 function readLS(key: string): string | null {
@@ -95,21 +78,13 @@ function initialBudget(): Budget {
   return { dailyCap: 50, warningThreshold: 0.8, criticalThreshold: 0.9 };
 }
 
-<<<<<<< HEAD
-export const useConfigStore = create<ConfigState>((set) => ({
-  providers: ['openai'],
-  models: ['gpt-4o-mini', 'gpt-4o'],
-=======
 export const useConfigStore = create<ConfigState>((set, get) => ({
   providers: [],
   providerModels: {},
->>>>>>> feat-implement-frontend-design-GH23Da
   tools: [],
   budget: initialBudget(),
   loading: false,
 
-<<<<<<< HEAD
-=======
   loadProviders: async () => {
     try {
       const res = await apiClient.listProviders();
@@ -180,7 +155,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
     }
   },
 
->>>>>>> feat-implement-frontend-design-GH23Da
   loadTools: async () => {
     set({ loading: true });
     try {
@@ -200,25 +174,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       return { budget };
     });
   },
-<<<<<<< HEAD
-
-  addProvider: (name) => {
-    const n = name.trim();
-    if (!n) return;
-    set((s) => ({
-      providers: s.providers.includes(n) ? s.providers : [...s.providers, n],
-    }));
-  },
-
-  addModel: (name) => {
-    const n = name.trim();
-    if (!n) return;
-    set((s) => ({
-      models: s.models.includes(n) ? s.models : [...s.models, n],
-    }));
-  },
-=======
->>>>>>> feat-implement-frontend-design-GH23Da
 }));
 
 export default useConfigStore;

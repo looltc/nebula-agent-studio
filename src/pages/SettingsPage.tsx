@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
   Plus,
-<<<<<<< HEAD
-  X,
-=======
   Trash2,
   Pencil,
   Zap,
   ListChecks,
->>>>>>> feat-implement-frontend-design-GH23Da
   Wrench,
   Cpu,
   DollarSign,
@@ -26,29 +22,11 @@ import {
   Toggle,
   ProgressBar,
   EmptyState,
-<<<<<<< HEAD
-=======
   Modal,
->>>>>>> feat-implement-frontend-design-GH23Da
   useToast,
 } from '@/components/ui';
 import { useConfigStore } from '@/stores/configStore';
 import { useUIStore } from '@/stores/uiStore';
-<<<<<<< HEAD
-import { cx } from '@/lib/cx';
-import styles from './SettingsPage.module.css';
-
-export default function SettingsPage() {
-  const providers = useConfigStore((s) => s.providers);
-  const models = useConfigStore((s) => s.models);
-  const tools = useConfigStore((s) => s.tools);
-  const loading = useConfigStore((s) => s.loading);
-  const budget = useConfigStore((s) => s.budget);
-  const loadTools = useConfigStore((s) => s.loadTools);
-  const setBudget = useConfigStore((s) => s.setBudget);
-  const addProvider = useConfigStore((s) => s.addProvider);
-  const addModel = useConfigStore((s) => s.addModel);
-=======
 import type { ProviderSummary } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './SettingsPage.module.css';
@@ -79,19 +57,12 @@ export default function SettingsPage() {
   const testProvider = useConfigStore((s) => s.testProvider);
   const loadProviderModels = useConfigStore((s) => s.loadProviderModels);
   const setBudget = useConfigStore((s) => s.setBudget);
->>>>>>> feat-implement-frontend-design-GH23Da
 
   const theme = useUIStore((s) => s.theme);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
 
   const toast = useToast();
 
-<<<<<<< HEAD
-  const [newProvider, setNewProvider] = useState('');
-  const [newModel, setNewModel] = useState('');
-  const [hiddenProviders, setHiddenProviders] = useState<string[]>([]);
-  const [hiddenModels, setHiddenModels] = useState<string[]>([]);
-=======
   // Provider modal state
   const [providerModalOpen, setProviderModalOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<ProviderSummary | null>(null);
@@ -110,7 +81,6 @@ export default function SettingsPage() {
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<ProviderSummary | null>(null);
   const [deletingProvider, setDeletingProvider] = useState(false);
->>>>>>> feat-implement-frontend-design-GH23Da
 
   // Local string state for budget inputs (lets users type freely).
   const [dailyCapInput, setDailyCapInput] = useState(String(budget.dailyCap));
@@ -118,40 +88,6 @@ export default function SettingsPage() {
   const [criticalInput, setCriticalInput] = useState(String(budget.criticalThreshold));
 
   useEffect(() => {
-<<<<<<< HEAD
-    loadTools();
-  }, [loadTools]);
-
-  const shownProviders = providers.filter((p) => !hiddenProviders.includes(p));
-  const shownModels = models.filter((m) => !hiddenModels.includes(m));
-
-  const handleAddProvider = () => {
-    const name = newProvider.trim();
-    if (!name) return;
-    addProvider(name);
-    setHiddenProviders((prev) => prev.filter((p) => p !== name));
-    setNewProvider('');
-    toast.success('Provider added', name);
-  };
-
-  const handleRemoveProvider = (name: string) => {
-    setHiddenProviders((prev) => [...prev, name]);
-    toast.info('Provider removed', name);
-  };
-
-  const handleAddModel = () => {
-    const name = newModel.trim();
-    if (!name) return;
-    addModel(name);
-    setHiddenModels((prev) => prev.filter((m) => m !== name));
-    setNewModel('');
-    toast.success('Model added', name);
-  };
-
-  const handleRemoveModel = (name: string) => {
-    setHiddenModels((prev) => [...prev, name]);
-    toast.info('Model removed', name);
-=======
     loadProviders();
     loadTools();
   }, [loadProviders, loadTools]);
@@ -248,7 +184,6 @@ export default function SettingsPage() {
     } finally {
       setDeletingProvider(false);
     }
->>>>>>> feat-implement-frontend-design-GH23Da
   };
 
   const commitBudget = (
@@ -264,11 +199,7 @@ export default function SettingsPage() {
     commitBudget('dailyCap', dailyCapInput);
     commitBudget('warningThreshold', warningInput);
     commitBudget('criticalThreshold', criticalInput);
-<<<<<<< HEAD
-    toast.success('Budget saved', 'Your cost budget has been persisted.');
-=======
     toast.success('预算已保存', '成本预算已持久化');
->>>>>>> feat-implement-frontend-design-GH23Da
   };
 
   const usageExample = budget.dailyCap * 0.24;
@@ -276,145 +207,34 @@ export default function SettingsPage() {
   return (
     <PageContainer>
       <ContentHeader
-<<<<<<< HEAD
-        title="Settings"
-        subtitle="Configure providers, tools, budget, and appearance."
-=======
         title="设置"
         subtitle="配置 LLM 供应商、工具、成本预算与外观主题。"
->>>>>>> feat-implement-frontend-design-GH23Da
       />
 
       <div className={styles.sections}>
         {/* ===== Appearance ===== */}
         <Card className={styles.section}>
-<<<<<<< HEAD
-          <SectionTitle icon={<Sun size={14} />}>Appearance</SectionTitle>
-=======
           <SectionTitle icon={<Sun size={14} />}>外观</SectionTitle>
->>>>>>> feat-implement-frontend-design-GH23Da
           <div className={styles.themeRow}>
             <div className={styles.themeMeta}>
               <span className={styles.themeLabel}>
                 {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-<<<<<<< HEAD
-                <span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
-              </span>
-              <p className={styles.themeHint}>
-                Switch between dark and light themes. Your choice is remembered.
-=======
                 <span>{theme === 'dark' ? '深色模式' : '浅色模式'}</span>
               </span>
               <p className={styles.themeHint}>
                 在深色与浅色主题之间切换，你的选择会被记住。
->>>>>>> feat-implement-frontend-design-GH23Da
               </p>
             </div>
             <Toggle
               checked={theme === 'dark'}
               onChange={toggleTheme}
-<<<<<<< HEAD
-              aria-label="Toggle dark mode"
-=======
               aria-label="切换深色模式"
->>>>>>> feat-implement-frontend-design-GH23Da
             />
           </div>
         </Card>
 
         {/* ===== LLM Provider ===== */}
         <Card className={styles.section}>
-<<<<<<< HEAD
-          <SectionTitle icon={<Cpu size={14} />}>LLM Provider</SectionTitle>
-
-          <div className={styles.subBlock}>
-            <div className={styles.subHead}>
-              <span className={styles.subTitle}>Providers</span>
-              <span className={styles.subCount}>{shownProviders.length}</span>
-            </div>
-            {shownProviders.length > 0 ? (
-              <div className={styles.chips}>
-                {shownProviders.map((p) => (
-                  <span key={p} className={styles.chip}>
-                    <Badge variant="mono">{p}</Badge>
-                    <button
-                      type="button"
-                      className={styles.chipRemove}
-                      onClick={() => handleRemoveProvider(p)}
-                      aria-label={`Remove provider ${p}`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className={styles.emptyInline}>No providers configured.</p>
-            )}
-            <div className={styles.addRow}>
-              <TextInput
-                value={newProvider}
-                placeholder="provider name"
-                onChange={(e) => setNewProvider(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddProvider();
-                }}
-              />
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Plus size={14} />}
-                onClick={handleAddProvider}
-              >
-                Add
-              </Button>
-            </div>
-          </div>
-
-          <div className={styles.subBlock}>
-            <div className={styles.subHead}>
-              <span className={styles.subTitle}>Models</span>
-              <span className={styles.subCount}>{shownModels.length}</span>
-            </div>
-            {shownModels.length > 0 ? (
-              <div className={styles.chips}>
-                {shownModels.map((m) => (
-                  <span key={m} className={styles.chip}>
-                    <Badge variant="mono">{m}</Badge>
-                    <button
-                      type="button"
-                      className={styles.chipRemove}
-                      onClick={() => handleRemoveModel(m)}
-                      aria-label={`Remove model ${m}`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className={styles.emptyInline}>No models configured.</p>
-            )}
-            <div className={styles.addRow}>
-              <TextInput
-                value={newModel}
-                placeholder="model name"
-                onChange={(e) => setNewModel(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddModel();
-                }}
-              />
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Plus size={14} />}
-                onClick={handleAddModel}
-              >
-                Add
-              </Button>
-            </div>
-          </div>
-=======
           <div className={styles.sectionHead}>
             <SectionTitle icon={<Cpu size={14} />}>LLM 供应商</SectionTitle>
             <Button
@@ -537,25 +357,16 @@ export default function SettingsPage() {
               }
             />
           )}
->>>>>>> feat-implement-frontend-design-GH23Da
         </Card>
 
         {/* ===== Tools ===== */}
         <Card className={styles.section}>
           <SectionTitle icon={<Wrench size={14} />}>
-<<<<<<< HEAD
-            Tools
-            <span className={styles.subCount}>{tools.length}</span>
-          </SectionTitle>
-          {loading && tools.length === 0 ? (
-            <p className={styles.emptyInline}>Loading tools…</p>
-=======
             工具
             <span className={styles.sectionCount}>{tools.length}</span>
           </SectionTitle>
           {loading && tools.length === 0 ? (
             <p className={styles.emptyInline}>正在加载工具…</p>
->>>>>>> feat-implement-frontend-design-GH23Da
           ) : tools.length > 0 ? (
             <div className={styles.toolGrid}>
               {tools.map((t) => (
@@ -569,20 +380,12 @@ export default function SettingsPage() {
                         <span className={styles.toolName}>{t.name}</span>
                       </div>
                       <Badge variant={t.dangerous ? 'danger' : 'success'}>
-<<<<<<< HEAD
-                        {t.dangerous ? 'DANGER' : 'SAFE'}
-=======
                         {t.dangerous ? '危险' : '安全'}
->>>>>>> feat-implement-frontend-design-GH23Da
                       </Badge>
                     </div>
                     {t.description && <p className={styles.toolDesc}>{t.description}</p>}
                     {t.timeout_s !== null && t.timeout_s !== undefined && (
-<<<<<<< HEAD
-                      <div className={styles.toolMeta}>timeout: {t.timeout_s}s</div>
-=======
                       <div className={styles.toolMeta}>超时: {t.timeout_s}s</div>
->>>>>>> feat-implement-frontend-design-GH23Da
                     )}
                   </Card>
                 </div>
@@ -591,28 +394,17 @@ export default function SettingsPage() {
           ) : (
             <EmptyState
               icon={<Wrench size={24} />}
-<<<<<<< HEAD
-              title="No tools registered"
-              description="Tools will appear here once the backend exposes them at /api/tools."
-=======
               title="尚无注册工具"
               description="后端在 /api/tools 暴露工具后将在此显示。"
->>>>>>> feat-implement-frontend-design-GH23Da
             />
           )}
         </Card>
 
         {/* ===== Cost Budget ===== */}
         <Card className={styles.section}>
-<<<<<<< HEAD
-          <SectionTitle icon={<DollarSign size={14} />}>Cost Budget</SectionTitle>
-          <div className={styles.budgetGrid}>
-            <Field label="Daily Cap ($)" helper="Hard limit per day.">
-=======
           <SectionTitle icon={<DollarSign size={14} />}>成本预算</SectionTitle>
           <div className={styles.budgetGrid}>
             <Field label="每日上限 ($)" helper="每日硬性上限。">
->>>>>>> feat-implement-frontend-design-GH23Da
               <TextInput
                 type="number"
                 min={0}
@@ -624,11 +416,7 @@ export default function SettingsPage() {
                 }}
               />
             </Field>
-<<<<<<< HEAD
-            <Field label="Warning Threshold" helper="0 – 1 (e.g. 0.8 = 80%).">
-=======
             <Field label="预警阈值" helper="0 – 1（例如 0.8 = 80%）。">
->>>>>>> feat-implement-frontend-design-GH23Da
               <TextInput
                 type="number"
                 min={0}
@@ -641,11 +429,7 @@ export default function SettingsPage() {
                 }}
               />
             </Field>
-<<<<<<< HEAD
-            <Field label="Critical Threshold" helper="0 – 1 (e.g. 0.9 = 90%).">
-=======
             <Field label="临界阈值" helper="0 – 1（例如 0.9 = 90%）。">
->>>>>>> feat-implement-frontend-design-GH23Da
               <TextInput
                 type="number"
                 min={0}
@@ -662,11 +446,7 @@ export default function SettingsPage() {
 
           <div className={styles.usage}>
             <div className={styles.usageHead}>
-<<<<<<< HEAD
-              <span className={styles.usageLabel}>Current usage (example)</span>
-=======
               <span className={styles.usageLabel}>当前用量（示例）</span>
->>>>>>> feat-implement-frontend-design-GH23Da
               <span className={styles.usageValue}>
                 ${usageExample.toFixed(2)} / ${budget.dailyCap.toFixed(2)}
               </span>
@@ -687,17 +467,11 @@ export default function SettingsPage() {
 
           <div className={styles.budgetFooter}>
             <Button variant="primary" icon={<Check size={16} />} onClick={saveBudget}>
-<<<<<<< HEAD
-              Save Budget
-=======
               保存预算
->>>>>>> feat-implement-frontend-design-GH23Da
             </Button>
           </div>
         </Card>
       </div>
-<<<<<<< HEAD
-=======
 
       {/* ===== Provider create/edit modal ===== */}
       <Modal
@@ -797,7 +571,6 @@ export default function SettingsPage() {
           确定要删除 <strong>{deleteTarget?.name}</strong> 吗？此操作无法撤销。
         </p>
       </Modal>
->>>>>>> feat-implement-frontend-design-GH23Da
     </PageContainer>
   );
 }

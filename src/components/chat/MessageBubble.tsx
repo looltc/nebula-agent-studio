@@ -57,11 +57,7 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
     message.role === 'assistant'
       ? agentName ?? message.source
       : message.role === 'user'
-<<<<<<< HEAD
-        ? 'You'
-=======
         ? '你'
->>>>>>> feat-implement-frontend-design-GH23Da
         : message.source;
   const segments = parseContent(message.content);
 

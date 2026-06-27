@@ -5,11 +5,6 @@ import {
   GitBranch,
   Activity,
   Settings,
-<<<<<<< HEAD
-} from 'lucide-react';
-import { useUIStore } from '@/stores/uiStore';
-import { useChatStore } from '@/stores/chatStore';
-=======
   Sparkles,
   Sun,
   Moon,
@@ -21,20 +16,10 @@ import { useChatStore } from '@/stores/chatStore';
 import { StatusDot } from '@/components/ui';
 import type { StatusDotStatus } from '@/components/ui';
 import type { ConnectionState } from '@/services/ws';
->>>>>>> feat-implement-frontend-design-GH23Da
 import { cx } from '@/lib/cx';
 import styles from './SideNav.module.css';
 
 const NAV_ITEMS = [
-<<<<<<< HEAD
-  { key: 'chat', label: 'Chat', icon: MessageCircleMore, path: '/chat' },
-  { key: 'agents', label: 'Agents', icon: Bot, path: '/agents' },
-  { key: 'orchestration', label: 'Orchestration', icon: GitBranch, path: '/orchestration' },
-  { key: 'observe', label: 'Observe', icon: Activity, path: '/observe' },
-  { key: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
-];
-
-=======
   { key: 'chat', label: '聊天', icon: MessageCircleMore, path: '/chat' },
   { key: 'agents', label: 'Agents', icon: Bot, path: '/agents' },
   { key: 'orchestration', label: '编排', icon: GitBranch, path: '/orchestration' },
@@ -75,21 +60,11 @@ function relativeTime(iso: string): string {
   return `${years}y`;
 }
 
->>>>>>> feat-implement-frontend-design-GH23Da
 export default function SideNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
-<<<<<<< HEAD
-
-  const agents = useChatStore((s) => s.agents);
-  const currentAgentId = useChatStore((s) => s.currentAgentId);
-  const selectAgent = useChatStore((s) => s.selectAgent);
-  const unread = useChatStore((s) => s.unread);
-
-  const onChat = location.pathname.startsWith('/chat');
-=======
   const toggleTheme = useUIStore((s) => s.toggleTheme);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const theme = useUIStore((s) => s.theme);
@@ -102,7 +77,6 @@ export default function SideNav() {
   const onChat = location.pathname.startsWith('/chat');
   const connStatus = CONN_STATUS[connState];
   const connLabel = CONN_LABEL[connState];
->>>>>>> feat-implement-frontend-design-GH23Da
 
   const go = (path: string, key: string) => {
     setActiveTab(key);
@@ -111,8 +85,6 @@ export default function SideNav() {
 
   return (
     <nav className={styles.sidenav} data-collapsed={collapsed}>
-<<<<<<< HEAD
-=======
       {/* ===== Top section: brand ===== */}
       <button
         className={styles.brand}
@@ -125,7 +97,6 @@ export default function SideNav() {
       </button>
 
       {/* ===== Middle section: nav + conversation history ===== */}
->>>>>>> feat-implement-frontend-design-GH23Da
       <ul className={styles.navList}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -147,28 +118,6 @@ export default function SideNav() {
 
       {onChat && !collapsed && (
         <div className={styles.contextSection}>
-<<<<<<< HEAD
-          <div className={styles.sectionLabel}>Agents</div>
-          <div className={styles.agentList}>
-            {agents.length === 0 && (
-              <div className={styles.emptyHint}>No agents yet</div>
-            )}
-            {agents.map((a) => {
-              const count = unread[a.id] ?? 0;
-              const selected = a.id === currentAgentId;
-              return (
-                <button
-                  key={a.id}
-                  className={cx(styles.agentItem, selected && styles.agentSelected)}
-                  onClick={() => selectAgent(a.id)}
-                >
-                  <span className={styles.agentAvatar}>{a.name.charAt(0).toUpperCase()}</span>
-                  <span className={styles.agentInfo}>
-                    <span className={styles.agentName}>{a.name}</span>
-                    <span className={styles.agentRole}>{a.role || 'assistant'}</span>
-                  </span>
-                  {count > 0 && <span className={styles.unread}>{count}</span>}
-=======
           <div className={styles.sectionLabel}>会话历史</div>
           <div className={styles.convList}>
             {conversations.length === 0 && (
@@ -186,7 +135,6 @@ export default function SideNav() {
                 >
                   <span className={styles.convTitle}>{c.title ?? c.id}</span>
                   {rel && <span className={styles.convTime}>{rel}</span>}
->>>>>>> feat-implement-frontend-design-GH23Da
                 </button>
               );
             })}
@@ -194,17 +142,6 @@ export default function SideNav() {
         </div>
       )}
 
-<<<<<<< HEAD
-      <div className={styles.spacer} />
-
-      {!collapsed && (
-        <div className={styles.stats}>
-          <span className={styles.statsText}>
-            {agents.length} Agents
-          </span>
-        </div>
-      )}
-=======
       {!(onChat && !collapsed) && <div className={styles.spacer} />}
 
       {/* ===== Bottom section: account + actions ===== */}
@@ -239,7 +176,6 @@ export default function SideNav() {
           <PanelLeft size={18} />
         </button>
       </div>
->>>>>>> feat-implement-frontend-design-GH23Da
     </nav>
   );
 }

@@ -48,10 +48,7 @@ export interface ChatState {
   selectAgent: (agentId: string) => void;
   loadConversations: () => Promise<void>;
   loadMessages: (convId: string) => Promise<void>;
-<<<<<<< HEAD
-=======
   setCurrentConversationId: (id: string | null) => void;
->>>>>>> feat-implement-frontend-design-GH23Da
   sendMessage: (text: string) => Promise<void>;
   appendLocalUserMessage: (text: string) => void;
   appendAssistantMessage: (content: string) => void;
@@ -63,11 +60,8 @@ export interface ChatState {
   onStreamDone: (messageId?: string) => void;
   onStreamError: (error: string) => void;
   clearChat: () => void;
-<<<<<<< HEAD
-=======
   startNewChat: () => void;
   deleteConversation: (convId: string) => Promise<void>;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 function genId(): string {
@@ -112,26 +106,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const res = await apiClient.listAgents();
       set({ agents: res.agents });
-<<<<<<< HEAD
-      const { currentAgentId } = get();
-      if (!currentAgentId && res.agents.length > 0) {
-        const id = res.agents[0].id;
-        set({ currentAgentId: id });
-        await get().loadConversations();
-      }
-=======
->>>>>>> feat-implement-frontend-design-GH23Da
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
     }
   },
 
   selectAgent: (agentId) => {
-<<<<<<< HEAD
-=======
     const { currentAgentId } = get();
     if (currentAgentId === agentId) return;
->>>>>>> feat-implement-frontend-design-GH23Da
     set({
       currentAgentId: agentId,
       messages: [],
@@ -165,9 +147,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
   loadMessages: async (convId) => {
     try {
       const res = await apiClient.getConversationMessages(convId, 100);
-<<<<<<< HEAD
-      set({ messages: res.messages, currentConversationId: convId });
-=======
       // Sort by timestamp ascending to fix jumbled order
       const sorted = [...res.messages].sort((a, b) => {
         const ta = Date.parse(a.ts);
@@ -176,53 +155,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         return 0;
       });
       set({ messages: sorted, currentConversationId: convId });
->>>>>>> feat-implement-frontend-design-GH23Da
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
     }
   },
 
-<<<<<<< HEAD
-  sendMessage: async (text) => {
-    const { chatMode, currentAgentId, currentConversationId } = get();
-    if (!currentAgentId) {
-      set({ error: 'No agent selected' });
-      return;
-    }
-    get().appendLocalUserMessage(text);
-    set({ loading: true, streaming: true, error: null });
-
-    if (chatMode === 'http') {
-      try {
-        const res = await apiClient.chat({
-          agent_id: currentAgentId,
-          message: text,
-          conversation_id: currentConversationId,
-        });
-        get().appendAssistantMessage(res.reply);
-        set({
-          currentConversationId: res.conversation_id,
-          streaming: false,
-          streamingText: '',
-          streamingThinking: [],
-          streamingTools: [],
-          loading: false,
-        });
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        set({
-          error: msg,
-          streaming: false,
-          streamingText: '',
-          streamingThinking: [],
-          streamingTools: [],
-          loading: false,
-        });
-      }
-    } else {
-      // ws / sse: the hook dispatches the actual send and feeds onStream* helpers.
-      get().startStreaming();
-=======
   setCurrentConversationId: (id) => {
     if (id) set({ currentConversationId: id });
   },
@@ -263,7 +200,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
         streamingTools: [],
         loading: false,
       });
->>>>>>> feat-implement-frontend-design-GH23Da
     }
   },
 
@@ -348,11 +284,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       streamingTools: [],
       loading: false,
     }));
-<<<<<<< HEAD
-=======
     // Refresh conversation list so title updates
     void get().loadConversations();
->>>>>>> feat-implement-frontend-design-GH23Da
   },
 
   onStreamError: (error) => {
@@ -375,8 +308,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       currentConversationId: null,
     });
   },
-<<<<<<< HEAD
-=======
 
   startNewChat: () => {
     set({
@@ -399,7 +330,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       messages: s.currentConversationId === convId ? [] : s.messages,
     }));
   },
->>>>>>> feat-implement-frontend-design-GH23Da
 }));
 
 export default useChatStore;

@@ -127,8 +127,6 @@
   outline: 2px solid var(--accent-ring);
   outline-offset: 2px;
 }
-<<<<<<< HEAD
-=======
 
 /* ===== Temperature slider ===== */
 .sliderRow {
@@ -248,4 +246,3 @@
   line-height: var(--line-xs);
   color: var(--text-muted);
 }
->>>>>>> feat-implement-frontend-design-GH23Da

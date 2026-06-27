@@ -12,7 +12,4 @@ export type { MessageBubbleProps } from './MessageBubble';
 export type { ToolCallBlockProps } from './ToolCallBlock';
 export type { ChatInputProps } from './ChatInput';
 export type { HITLApprovalProps } from './HITLApproval';
-<<<<<<< HEAD
-=======
 export type { ConversationHistoryProps } from './ConversationHistory';
->>>>>>> feat-implement-frontend-design-GH23Da

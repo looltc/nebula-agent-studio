@@ -35,12 +35,9 @@ export function useChatTransport() {
       const st = getStore();
       if (data.type === 'message') {
         st.appendAssistantMessage(data.content);
-<<<<<<< HEAD
-=======
         if (data.conversation_id) {
           st.setCurrentConversationId(data.conversation_id);
         }
->>>>>>> feat-implement-frontend-design-GH23Da
         st.markRead(data.source);
       } else {
         // StreamEvent
@@ -59,12 +56,9 @@ export function useChatTransport() {
             break;
           case 'stream_done':
             st.onStreamDone(data.payload.message_id ?? data.message_id);
-<<<<<<< HEAD
-=======
             if (data.conversation_id) {
               st.setCurrentConversationId(data.conversation_id);
             }
->>>>>>> feat-implement-frontend-design-GH23Da
             break;
           case 'stream_error':
             st.onStreamError(data.payload.error ?? 'Unknown stream error');
@@ -158,11 +152,7 @@ export function useChatTransport() {
       if (mode === 'ws') {
         const client = clientRef.current;
         if (client && client.isOpen) {
-<<<<<<< HEAD
-          client.send(text);
-=======
           client.send(text, st.currentConversationId);
->>>>>>> feat-implement-frontend-design-GH23Da
         } else {
           // fallback to http if ws not ready
           st.onStreamError('WebSocket not connected, falling back to HTTP');
@@ -174,10 +164,7 @@ export function useChatTransport() {
                 conversation_id: st.currentConversationId,
               }),
             );
-<<<<<<< HEAD
-=======
             st.setCurrentConversationId(res.conversation_id);
->>>>>>> feat-implement-frontend-design-GH23Da
             st.onStreamDone(res.conversation_id);
             st.markRead(id);
           } catch (e) {
@@ -186,26 +173,6 @@ export function useChatTransport() {
         }
       } else if (mode === 'sse') {
         sseCancelRef.current?.();
-<<<<<<< HEAD
-        sseCancelRef.current = streamSSEChat(id, text, {
-          onEvent: (evt) => {
-            const s = getStore();
-            if (evt.type === 'start') {
-              // nothing, streaming already started
-            } else if (evt.type === 'chunk') {
-              s.onStreamChunk(evt.text);
-            } else if (evt.type === 'end') {
-              s.onStreamDone();
-              s.markRead(id);
-            } else if (evt.type === 'error') {
-              s.onStreamError(evt.error);
-            }
-          },
-          onError: (err) => {
-            getStore().onStreamError(err.message);
-          },
-        });
-=======
         sseCancelRef.current = streamSSEChat(
           id,
           text,
@@ -234,7 +201,6 @@ export function useChatTransport() {
           },
           st.currentConversationId,
         );
->>>>>>> feat-implement-frontend-design-GH23Da
       }
     },
     [getStore],

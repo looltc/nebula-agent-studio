@@ -1,19 +1,11 @@
 .page {
   height: 100%;
   display: flex;
-<<<<<<< HEAD
-  flex-direction: column;
-=======
   flex-direction: row;
->>>>>>> feat-implement-frontend-design-GH23Da
   min-height: 0;
   background: var(--bg-background);
 }
 
-<<<<<<< HEAD
-/* ===== Toolbar ===== */
-.toolbar {
-=======
 /* ===== Sidebar (260px) ===== */
 .sidebar {
   flex-shrink: 0;
@@ -98,7 +90,6 @@
 
 /* ===== Chat header ===== */
 .header {
->>>>>>> feat-implement-frontend-design-GH23Da
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -110,52 +101,13 @@
   min-height: 56px;
 }
 
-<<<<<<< HEAD
-.brand {
-=======
 .headerLeft {
->>>>>>> feat-implement-frontend-design-GH23Da
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
-<<<<<<< HEAD
-.brandIcon {
-  color: var(--accent-primary);
-  flex-shrink: 0;
-}
-
-.title {
-  font-size: var(--text-lg);
-  line-height: var(--line-lg);
-  font-weight: var(--font-semibold);
-  color: var(--text-foreground);
-}
-
-.conn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px var(--space-2);
-  background: var(--bg-muted);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-}
-
-.connText {
-  text-transform: capitalize;
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-=======
 .agentName {
   font-size: var(--text-base);
   line-height: var(--line-base);
@@ -235,7 +187,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-2);
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 .modeGroup {
@@ -248,10 +199,7 @@
 }
 
 .modeBtn {
-<<<<<<< HEAD
-=======
   flex: 1;
->>>>>>> feat-implement-frontend-design-GH23Da
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -280,84 +228,6 @@
   color: var(--text-primary-fg);
 }
 
-<<<<<<< HEAD
-/* ===== Layout grid: 260px sidebar | 1fr main ===== */
-.layout {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  grid-template-rows: minmax(0, 1fr);
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border-right: 1px solid var(--border-default);
-  background: var(--bg-background);
-  overflow: hidden;
-}
-
-.sidebarScroll {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.main {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-}
-
-.placeholder {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-}
-
-/* ===== Welcome bubble ===== */
-.welcomeWrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: var(--space-1);
-  padding: var(--space-8) var(--space-4);
-  max-width: 880px;
-  margin: 0 auto;
-  width: 100%;
-  animation: fadeIn var(--duration-slow) var(--ease-out);
-}
-
-.welcome {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
-  padding: var(--space-4) var(--space-5);
-  box-shadow: var(--shadow-sm);
-}
-
-.welcomeText {
-  font-size: var(--text-base);
-  line-height: var(--line-lg);
-  color: var(--text-foreground);
-  font-weight: var(--font-medium);
-}
-
-.welcomeMeta {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-  font-weight: var(--font-medium);
-  padding: 0 var(--space-1);
-=======
 .menuDivider {
   height: 1px;
   background: var(--border-default);
@@ -408,7 +278,6 @@
 
 .menuIcon {
   flex-shrink: 0;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 /* ===== Modal body ===== */
@@ -417,8 +286,6 @@
   line-height: var(--line-base);
   color: var(--text-secondary);
 }
-<<<<<<< HEAD
-=======
 
 /* ===== Mobile: hide sidebar on narrow viewports ===== */
 @media (max-width: 720px) {
@@ -426,4 +293,3 @@
     display: none;
   }
 }
->>>>>>> feat-implement-frontend-design-GH23Da

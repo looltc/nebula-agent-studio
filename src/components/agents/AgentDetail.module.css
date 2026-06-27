@@ -466,8 +466,6 @@
 .confirmText strong {
   font-weight: var(--font-semibold);
 }
-<<<<<<< HEAD
-=======
 
 /* ===== Persona / goals / constraints ===== */
 .persona {
@@ -545,4 +543,3 @@
   font-family: var(--font-mono);
   word-break: break-all;
 }
->>>>>>> feat-implement-frontend-design-GH23Da

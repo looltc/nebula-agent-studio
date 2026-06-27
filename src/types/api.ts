@@ -32,8 +32,6 @@ export interface AgentListResponse {
   agents: AgentSummary[];
 }
 
-<<<<<<< HEAD
-=======
 export interface LLMSpecRequest {
   provider: string;
   model: string;
@@ -42,15 +40,12 @@ export interface LLMSpecRequest {
   base_url?: string | null;
 }
 
->>>>>>> feat-implement-frontend-design-GH23Da
 export interface AgentCreateRequest {
   id: string;
   name: string;
   role: string;
   persona: string;
   thinking_model: string;
-<<<<<<< HEAD
-=======
   max_iterations: number;
   max_messages: number;
   system_prompt: string;
@@ -58,7 +53,6 @@ export interface AgentCreateRequest {
   constraints: string[];
   tools: string[];
   llm: LLMSpecRequest | null;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 export interface AgentCreateResponse {
@@ -67,8 +61,6 @@ export interface AgentCreateResponse {
   status: string;
 }
 
-<<<<<<< HEAD
-=======
 export interface AgentDetailResponse {
   id: string;
   name: string;
@@ -134,7 +126,6 @@ export interface ProviderModelsResponse {
   error?: string;
 }
 
->>>>>>> feat-implement-frontend-design-GH23Da
 /* ---------- Chat ---------- */
 export interface ChatRequest {
   agent_id: string;
@@ -155,10 +146,7 @@ export interface ConversationSummary {
   participants: string[];
   message_count: number;
   started_at: string;
-<<<<<<< HEAD
-=======
   title?: string;
->>>>>>> feat-implement-frontend-design-GH23Da
 }
 
 export interface ConversationListResponse {
