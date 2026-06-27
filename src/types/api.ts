@@ -84,6 +84,10 @@ export interface AgentDetailResponse {
 }
 
 export interface AgentUpdateRequest {
+  // id is required by the backend's AgentCreateRequest schema; the PUT
+  // endpoint reuses it and overwrites req.id with the path param, so we
+  // always echo the current agent id back to satisfy Pydantic validation.
+  id: string;
   name: string;
   role: string;
   persona: string;
@@ -183,15 +187,14 @@ export interface EventListResponse {
 
 /* ---------- Relations ---------- */
 export interface Relation {
-  source: string;
-  target: string;
-  type: 'trust' | 'authority' | 'collaboration' | 'rivalry';
+  from: string;
+  to: string;
+  kind: 'trust' | 'authority' | 'collaboration' | 'rivalry';
   weight: number;
 }
 
 export interface RelationGraphResponse {
-  nodes: Array<{ id: string; label?: string }>;
-  edges: Relation[];
+  relations: Relation[];
 }
 
 /* ---------- Tools ---------- */

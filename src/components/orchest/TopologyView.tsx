@@ -47,22 +47,22 @@ function circularLayout(count: number, radius: number): Array<{ x: number; y: nu
 }
 
 function buildEdge(rel: Relation): Edge {
-  const id = `e-${rel.source}-${rel.target}-${rel.type}`;
-  const weight = Math.max(1, Math.min(6, rel.weight));
-  switch (rel.type) {
+  const id = `e-${rel.from}-${rel.to}-${rel.kind}`;
+  const weight = Math.max(1, Math.min(6, rel.weight ?? 1));
+  switch (rel.kind) {
     case 'trust':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         style: { stroke: 'var(--status-success)', strokeWidth: weight },
         animated: false,
       };
     case 'authority':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         animated: true,
         style: { stroke: 'var(--accent-primary)', strokeWidth: 2 },
         markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--accent-primary)', width: 16, height: 16 },
@@ -70,17 +70,25 @@ function buildEdge(rel: Relation): Edge {
     case 'collaboration':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         style: { stroke: 'var(--accent-ring)', strokeWidth: 2, strokeDasharray: '5 4' },
         animated: false,
       };
     case 'rivalry':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         style: { stroke: 'var(--status-destructive)', strokeWidth: 2, strokeDasharray: '4 3' },
+        animated: false,
+      };
+    default:
+      return {
+        id,
+        source: rel.from,
+        target: rel.to,
+        style: { stroke: 'var(--text-muted)', strokeWidth: 1 },
         animated: false,
       };
   }
@@ -140,7 +148,7 @@ export default function TopologyView({
 
   const edges = useMemo<Edge[]>(() => {
     if (!relations) return [];
-    return relations.edges.map(buildEdge);
+    return (relations.relations ?? []).map(buildEdge);
   }, [relations]);
 
   if (nodes.length === 0) {

@@ -32,28 +32,23 @@
   gap: var(--space-1);
   width: 100%;
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-  border: 1px solid transparent;
-  border-left: 2px solid transparent;
+  border: none;
   border-radius: var(--radius-md);
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default);
+  transition: background-color var(--duration-fast) var(--ease-default);
 }
 
 .item:hover {
   background: var(--bg-muted);
 }
 
-.item:focus-within {
-  outline: 2px solid var(--accent-ring);
-  outline-offset: 1px;
-}
+/* No focus outline on the conversation row — keep the UI clean. */
 
+/* Selected conversation: keep only the background fill — no border, no side bar. */
 .active {
   background: var(--accent-bg);
-  border-left-color: var(--accent-primary);
 }
 
 .body {

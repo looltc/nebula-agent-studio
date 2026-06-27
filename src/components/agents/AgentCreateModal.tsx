@@ -35,7 +35,6 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
   const createOpen = useAgentStore((s) => s.createOpen);
   const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
   const editingId = useAgentStore((s) => s.editingId);
-  const currentDetail = useAgentStore((s) => s.currentDetail);
   const form = useAgentStore((s) => s.form);
   const errors = useAgentStore((s) => s.errors);
   const updateForm = useAgentStore((s) => s.updateForm);
@@ -114,7 +113,7 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
 
   const promptOver = form.systemPrompt.length > SYSTEM_PROMPT_MAX;
   const availableModels = form.provider ? providerModels[form.provider] ?? [] : [];
-  const hasExistingApiKey = Boolean(isEditMode && currentDetail?.llm.has_api_key);
+  const selectedProvider = providers.find((p) => p.id === form.provider);
 
   return (
     <Modal
@@ -229,7 +228,9 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
                 error={Boolean(errors.provider)}
                 onChange={(e) => updateForm({ provider: e.target.value })}
               >
-                {providers.length === 0 && <option value="">尚无供应商</option>}
+                <option value="">
+                  {providers.length === 0 ? '尚无供应商，请先在设置中配置' : '请选择 Provider'}
+                </option>
                 {providers.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -251,7 +252,7 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
                 <TextInput
                   value={form.model}
                   error={Boolean(errors.model)}
-                  placeholder="gpt-4o-mini"
+                  placeholder="请输入或选择 Model"
                   list="agent-model-options"
                   onChange={(e) => updateForm({ model: e.target.value })}
                 />
@@ -282,33 +283,14 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
             </div>
           </Field>
 
-          <div className={styles.grid2}>
-            <Field
-              label="Base URL"
-              helper="可选，例如 https://api.openai.com/v1"
-            >
-              <TextInput
-                value={form.baseUrl}
-                placeholder="https://api.openai.com/v1"
-                onChange={(e) => updateForm({ baseUrl: e.target.value })}
-              />
-            </Field>
-            <Field
-              label="API Key"
-              helper={
-                hasExistingApiKey
-                  ? '留空则使用环境变量'
-                  : '可选，留空则使用环境变量'
-              }
-            >
-              <TextInput
-                type="password"
-                value={form.apiKey}
-                placeholder="sk-..."
-                onChange={(e) => updateForm({ apiKey: e.target.value })}
-              />
-            </Field>
-          </div>
+          {selectedProvider && (
+            <div className={styles.providerHint}>
+              Base URL 与 API Key 由供应商配置统一管理（
+              <strong>{selectedProvider.name}</strong>
+              {selectedProvider.api_key_set ? '，已配置密钥' : '，未配置密钥'}
+              ）。如需修改请前往「设置」页面。
+            </div>
+          )}
         </section>
 
         {/* ===== 工具 (Tools) ===== */}

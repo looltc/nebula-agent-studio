@@ -36,15 +36,15 @@ function circularLayout(count: number, radius: number): Array<{ x: number; y: nu
 }
 
 function buildEdge(rel: Relation): Edge {
-  const id = `r-${rel.source}-${rel.target}-${rel.type}`;
-  const weight = Math.max(1, Math.min(6, rel.weight));
-  const label = `${rel.type} · ${rel.weight}`;
-  switch (rel.type) {
+  const id = `r-${rel.from}-${rel.to}-${rel.kind}`;
+  const weight = Math.max(1, Math.min(6, rel.weight ?? 1));
+  const label = `${rel.kind} · ${rel.weight ?? 1}`;
+  switch (rel.kind) {
     case 'trust':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         label,
         labelStyle: { fill: 'var(--status-success)', fontSize: 11, fontWeight: 600 },
         labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.9 },
@@ -56,8 +56,8 @@ function buildEdge(rel: Relation): Edge {
     case 'authority':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         label,
         labelStyle: { fill: 'var(--accent-primary)', fontSize: 11, fontWeight: 600 },
         labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.9 },
@@ -70,8 +70,8 @@ function buildEdge(rel: Relation): Edge {
     case 'collaboration':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         label,
         labelStyle: { fill: 'var(--accent-ring)', fontSize: 11, fontWeight: 600 },
         labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.9 },
@@ -83,14 +83,27 @@ function buildEdge(rel: Relation): Edge {
     case 'rivalry':
       return {
         id,
-        source: rel.source,
-        target: rel.target,
+        source: rel.from,
+        target: rel.to,
         label,
         labelStyle: { fill: 'var(--status-destructive)', fontSize: 11, fontWeight: 600 },
         labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.9 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 4,
         style: { stroke: 'var(--status-destructive)', strokeWidth: 2, strokeDasharray: '4 3' },
+        animated: false,
+      };
+    default:
+      return {
+        id,
+        source: rel.from,
+        target: rel.to,
+        label,
+        labelStyle: { fill: 'var(--text-muted)', fontSize: 11, fontWeight: 600 },
+        labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.9 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 4,
+        style: { stroke: 'var(--text-muted)', strokeWidth: 1 },
         animated: false,
       };
   }
@@ -109,17 +122,21 @@ export default function RelationGraphView({
 
   const nodes = useMemo<Node[]>(() => {
     if (!relations) return [];
-    const list = relations.nodes;
-    const positions = circularLayout(list.length, RADIUS);
-    return list.map((n, i) => {
+    // Backend returns only relations; derive node ids from edges.
+    const ids = Array.from(
+      new Set(
+        (relations.relations ?? []).flatMap((r) => [r.from, r.to]),
+      ),
+    );
+    const positions = circularLayout(ids.length, RADIUS);
+    return ids.map((id, i) => {
       const pos = positions[i] ?? { x: 0, y: 0 };
       return {
-        id: n.id,
+        id,
         type: 'agent',
         position: pos,
         data: {
-          agentId: n.id,
-          label: n.label,
+          agentId: id,
           supervisor: false,
         },
       };
@@ -128,7 +145,7 @@ export default function RelationGraphView({
 
   const edges = useMemo<Edge[]>(() => {
     if (!relations) return [];
-    return relations.edges.map(buildEdge);
+    return (relations.relations ?? []).map(buildEdge);
   }, [relations]);
 
   const highlightedEdges = useMemo<Edge[]>(() => {

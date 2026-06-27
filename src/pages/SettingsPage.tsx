@@ -499,7 +499,11 @@ export default function SettingsPage() {
         }
       >
         <div className={styles.providerForm}>
-          <Field label="名称" required helper="供应商显示名称，例如 openai。">
+          <Field
+            label="供应商名称"
+            required
+            helper="同时作为 Agent 配置中的 Provider 标识，例如 openai、deepseek。"
+          >
             <TextInput
               value={providerForm.name}
               placeholder="openai"

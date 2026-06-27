@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { MessageInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
+import { MarkdownText } from './MarkdownText';
 import styles from './MessageBubble.module.css';
 
 export interface MessageBubbleProps {
@@ -8,42 +9,15 @@ export interface MessageBubbleProps {
   agentName?: string;
 }
 
-interface ContentSegment {
-  type: 'text' | 'code';
-  lang?: string;
-  content: string;
-}
-
-/**
- * Splits message content into text runs and fenced code blocks.
- * Recognises ```lang\n...\n``` fences.
- */
-function parseContent(content: string): ContentSegment[] {
-  const segments: ContentSegment[] = [];
-  const regex = /```(\w*)\n?([\s\S]*?)```/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match.index > lastIndex) {
-      segments.push({ type: 'text', content: content.slice(lastIndex, match.index) });
-    }
-    const body = match[2] ?? '';
-    segments.push({
-      type: 'code',
-      lang: match[1] || undefined,
-      content: body.replace(/\n$/, ''),
-    });
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < content.length) {
-    segments.push({ type: 'text', content: content.slice(lastIndex) });
-  }
-  return segments.length ? segments : [{ type: 'text', content }];
-}
-
 function formatTime(ts: string): string {
   try {
-    return new Date(ts).toLocaleTimeString();
+    // Backend stores UTC; normalise to ISO with explicit timezone if missing,
+    // then render in Beijing time (Asia/Shanghai).
+    const normalised = ts && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(ts) ? `${ts}Z` : ts;
+    return new Date(normalised).toLocaleTimeString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      hour12: false,
+    });
   } catch {
     return '';
   }
@@ -59,7 +33,6 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
       : message.role === 'user'
         ? '你'
         : message.source;
-  const segments = parseContent(message.content);
 
   return (
     <div className={cx(styles.row, isUser ? styles.rowUser : styles.rowAgent)}>
@@ -70,17 +43,14 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
           isError && styles.error,
         )}
       >
-        {segments.map((seg, i) =>
-          seg.type === 'code' ? (
-            <pre key={i} className={styles.code} data-lang={seg.lang || ''}>
-              {seg.lang && <code className={styles.codeLang}>{seg.lang}</code>}
-              <code className={styles.codeBody}>{seg.content}</code>
-            </pre>
-          ) : (
-            <div key={i} className={styles.text}>
-              {seg.content}
-            </div>
-          ),
+        {isUser ? (
+          // User messages stay as plain pre-wrapped text — users don't type
+          // Markdown and we want newlines/indentation preserved verbatim.
+          <div className={styles.text}>{message.content}</div>
+        ) : (
+          // Assistant messages are rendered as GitHub-flavoured Markdown with
+          // syntax-highlighted code blocks.
+          <MarkdownText content={message.content} />
         )}
       </div>
       <div className={styles.meta}>

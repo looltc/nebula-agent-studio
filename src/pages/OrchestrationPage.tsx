@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Network, GitBranch } from 'lucide-react';
-import { ContentHeader, PageContainer } from '@/components/layout';
+import { ReactFlowProvider } from '@xyflow/react';
+import { ContentHeader, PageContainer, ErrorBoundary } from '@/components/layout';
 import { Button, Tabs, type TabItem } from '@/components/ui';
 import {
   TopologyView,
@@ -75,31 +76,35 @@ export default function OrchestrationPage() {
         actions={newGroupAction}
       />
 
-      <div className={styles.grid}>
-        <div className={styles.column}>
-          <Tabs
-            tabs={TABS}
-            active={tab}
-            onChange={(k) => setTab(k as LeftTab)}
-            variant="pill"
-            className={styles.tabs}
-          />
-          {tab === 'topology' ? (
-            <TopologyView world={world} relations={relations} />
-          ) : (
-            <RelationGraphView relations={relations} />
-          )}
-          <OrchestrationDetail world={world} />
-        </div>
+      <ErrorBoundary>
+        <div className={styles.grid}>
+          <div className={styles.column}>
+            <Tabs
+              tabs={TABS}
+              active={tab}
+              onChange={(k) => setTab(k as LeftTab)}
+              variant="pill"
+              className={styles.tabs}
+            />
+            <ReactFlowProvider>
+              {tab === 'topology' ? (
+                <TopologyView world={world} relations={relations} />
+              ) : (
+                <RelationGraphView relations={relations} />
+              )}
+            </ReactFlowProvider>
+            <OrchestrationDetail world={world} />
+          </div>
 
-        <div className={styles.column}>
-          <WorldPanel />
-          <GroupChatManager
-            createOpen={createOpen}
-            onCreateOpenChange={setCreateOpen}
-          />
+          <div className={styles.column}>
+            <WorldPanel />
+            <GroupChatManager
+              createOpen={createOpen}
+              onCreateOpenChange={setCreateOpen}
+            />
+          </div>
         </div>
-      </div>
+      </ErrorBoundary>
     </PageContainer>
   );
 }

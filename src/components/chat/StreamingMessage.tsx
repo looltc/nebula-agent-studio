@@ -1,11 +1,12 @@
 import { useChatStore } from '@/stores/chatStore';
 import { Spinner } from '@/components/ui';
 import { ToolCallBlock } from './ToolCallBlock';
+import { MarkdownText } from './MarkdownText';
 import styles from './StreamingMessage.module.css';
 
 /**
- * In-progress assistant message: streaming text with a blinking cursor,
- * collapsible thinking steps, and tool-call cards.
+ * In-progress assistant message: streaming text rendered as Markdown with a
+ * blinking cursor, collapsible thinking steps, and tool-call cards.
  */
 export function StreamingMessage() {
   const streamingText = useChatStore((s) => s.streamingText);
@@ -25,7 +26,7 @@ export function StreamingMessage() {
           </div>
         ) : (
           <div className={styles.text}>
-            {streamingText}
+            <MarkdownText content={streamingText} streaming />
             <span className={styles.cursor} aria-hidden="true">▋</span>
           </div>
         )}

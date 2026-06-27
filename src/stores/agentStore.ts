@@ -26,8 +26,6 @@ export interface AgentFormState {
   provider: string;
   model: string;
   temperature: number;
-  baseUrl: string;
-  apiKey: string;
 }
 
 export interface AgentState {
@@ -78,21 +76,24 @@ function defaultForm(): AgentFormState {
     goals: [],
     constraints: [],
     tools: [],
-    provider: 'openai',
-    model: 'gpt-4o-mini',
+    // Provider/Model must be explicitly chosen — no defaults, so the user is
+    // forced to pick from configured providers instead of silently inheriting
+    // an empty "openai" entry.
+    provider: '',
+    model: '',
     temperature: 0.7,
-    baseUrl: '',
-    apiKey: '',
   };
 }
 
 function buildLLMSpec(form: AgentFormState): LLMSpecRequest | null {
+  // base_url and api_key are intentionally omitted: the backend resolves them
+  // from the provider config configured on the Settings page.
   return {
     provider: form.provider,
     model: form.model,
     temperature: form.temperature,
-    base_url: form.baseUrl || null,
-    api_key: form.apiKey || null,
+    base_url: null,
+    api_key: null,
   };
 }
 
@@ -115,6 +116,10 @@ function buildCreateBody(form: AgentFormState): AgentCreateRequest {
 
 function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
   return {
+    // Echo the id so the backend's AgentCreateRequest schema (which requires
+    // id) passes Pydantic validation; the PUT handler overwrites it with the
+    // path-param id anyway, so sending it is harmless and keeps PUT idempotent.
+    id: form.id,
     name: form.name,
     role: form.role,
     persona: form.persona,
@@ -242,7 +247,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     const { form, agents, editingId } = get();
     const errors: Record<string, string> = {};
 
-    // id only required for create mode
+    // id only required for create mode; in edit mode the ID is fixed and
+    // should never be re-validated (it would always collide with itself).
     if (!editingId) {
       if (!form.id) {
         errors.id = 'ID 不能为空';
@@ -255,6 +261,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     if (!form.name) errors.name = '名称不能为空';
     if (!form.role) errors.role = '角色不能为空';
+    if (!form.provider) errors.provider = '请选择 Provider';
+    if (!form.model) errors.model = '请选择或输入 Model';
 
     if (form.temperature < 0 || form.temperature > 2) {
       errors.temperature = 'Temperature 必须在 0 到 2 之间';
@@ -293,11 +301,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   updateAgent: async (id) => {
     const { form } = get();
-    // For edit mode, skip id validation
+    // Set editingId BEFORE validate so the id-uniqueness check is skipped
+    // (in edit mode the ID is fixed and would always collide with itself).
+    // If validation fails we restore the prior state so the modal stays open.
+    const prevEditingId = get().editingId;
     set({ editingId: id });
     const valid = get().validate();
     if (!valid) {
-      set({ editingId: null });
+      set({ editingId: prevEditingId });
       return false;
     }
     try {
@@ -310,7 +321,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     } catch (e) {
       set((s) => ({
         errors: { ...s.errors, form: e instanceof Error ? e.message : String(e) },
-        editingId: null,
+        editingId: prevEditingId,
       }));
       return false;
     }
@@ -368,8 +379,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         provider: detail.llm.provider,
         model: detail.llm.model,
         temperature: detail.llm.temperature,
-        baseUrl: detail.llm.base_url ?? '',
-        apiKey: '',
       },
       selectedToolIds: detail.tools,
       errors: {},

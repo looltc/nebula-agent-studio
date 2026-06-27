@@ -22,6 +22,9 @@
 | SSE 服务 | ✅ | fetch ReadableStream 解析 |
 | ConnectionManager | ✅ | 重连状态机 + 指数退避 + 降级 |
 | 轮询 hook | ✅ | usePolling 可配置间隔 |
+| 后端状态持久化 | ✅ | providers/agents/conversations JSON 文件落盘 + 启动时 _load_state() 恢复 + 时区感知时间戳(timezone.utc) + 会话删除同步落盘 |
+| 前端偏好持久化 | ✅ | localStorage 保存 currentAgentId / chatMode |
+| 会话按 Agent 过滤 | ✅ | /api/conversations?agent_id=xxx 后端过滤 + 前端最新在上排序 |
 
 ## 状态管理 (Zustand)
 
@@ -67,8 +70,9 @@
 | Feature | 状态 | 说明 |
 |---|---|---|
 | Shell | ✅ | grid 56px+240px+1fr |
-| TopBar | ✅ | Logo/面包屑/连接状态/主题切换 |
-| SideNav | ✅ | 5 Tab + 上下文列表 + 折叠 |
+| SideNav | ✅ | brand 改为「Nebula Studio」+ 展开态折叠按钮置于 logo 右侧 + 折叠态隐藏按钮、悬浮 logo 时浮现展开按钮 + Chat tab 手风琴展开 Agent 列表 + 底部账户悬浮展开菜单(主题/设置) |
+| Favicon | ✅ | SVG Sparkles logo，浏览器 tab 图标 |
+| ErrorBoundary | ✅ | 运行时错误兜底 + 重试按钮 + 中文提示 |
 | ContentArea | ✅ | 统一头部+滚动 |
 | StatusBar | ✅ | 底部状态条 |
 
@@ -76,16 +80,17 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| ChatPage 布局 | ✅ | 260px 会话侧栏(新聊天+搜索+展开历史) + 欢迎屏/聊天头部 + 消息区 + 输入区 |
+| ChatPage 布局 | ✅ | 260px 侧栏(新聊天 + 会话历史，Agent 列表移至左侧 SideNav 手风琴) + 欢迎屏/聊天头部 + 消息区 + 输入区 |
 | 欢迎屏 | ✅ | 居中 Sparkles 品牌 logo + 欢迎文案 + 居中输入框，新聊天不自动打招呼 |
 | 聊天头部 | ✅ | 左侧 Agent 名称 + 右侧 分享图标 + 3 点菜单(清空/导出/传输模式) |
 | MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
-| MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签 |
-| StreamingMessage | ✅ | 光标动画+chunk 合并 |
+| MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim |
+| StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染 |
+| MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色 |
 | ToolCallBlock | ✅ | Loading/完成/失败态 |
 | ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符 |
 | HITLApproval | ✅ | 审批卡片+倒计时 |
-| ConversationHistory | ✅ | 展开式会话列表(不可折叠)+悬停 3 点菜单(重命名/删除/导出)+活跃高亮 |
+| ConversationHistory | ✅ | 按 Agent 归属过滤 + 按时间倒序(最新在上) + 悬停 3 点菜单(重命名/删除/导出)+选中态仅背景高亮(无蓝边/无侧边条/无 focus 轮廓)；删除走后端 DELETE 端点持久化 |
 | ChatMode 切换 | ✅ | WS/SSE/HTTP 三选一(收入 3 点菜单) |
 
 ## Agents Tab (pages/AgentsPage)
@@ -94,7 +99,7 @@
 |---|---|---|
 | AgentList | ✅ | 卡片网格+筛选+排序 |
 | AgentCard | ✅ | 头像/状态/工具/统计 |
-| AgentCreate | ✅ | 完整表单 Modal+验证 |
+| AgentCreate | ✅ | 完整表单 Modal+验证；编辑模式跳过 ID 唯一性检查；Provider/Model 无默认值强制选择；Base URL/API Key 由供应商配置统一管理；PUT 更新时 body 回传 id 满足后端 Pydantic 必填校验 |
 | AgentDetail | ✅ | 双栏配置+运行时状态 |
 | ToolAuthorization | ✅ | 工具列表+dangerous 标记 |
 | ThinkingModelConfig | ✅ | ReAct/Plan-Execute |
@@ -103,11 +108,12 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| TopologyView | ✅ | React Flow 拓扑图 |
+| TopologyView | ✅ | React Flow 拓扑图；Relation 字段对齐后端(from/to/kind) |
 | WorldPanel | ✅ | Stats+Agent 状态+WorldLoop 控制 |
 | GroupChatManager | ✅ | 列表+详情+创建 Modal |
-| RelationGraphView | ✅ | 关系图可视化 |
+| RelationGraphView | ✅ | 关系图可视化；从 relations 派生 nodes |
 | OrchestrationDetail | ✅ | GraphSpec 可读视图 |
+| 编排错误兜底 | ✅ | ErrorBoundary 包裹 + ReactFlowProvider + buildEdge 默认分支 |
 
 ## Observe Tab (components/observe)
 
@@ -124,7 +130,7 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| LLM Provider 配置 | ✅ | Provider/Model/Temperature |
+| LLM Provider 配置 | ✅ | Provider/Model/Temperature；_resolve_llm_creds 跨 Provider 继承 base_url+api_key(指定 Provider 无凭据时自动扫描其他已配置 Provider)；OpenAIProvider._get_client 在 base_url 已配置但无 api_key 时统一兜底占位符；get_or_create_agent + _build_agent_config 均走 _resolve_llm_creds；_build_agent_config 强制归一化 provider='openai'(LLMRegistry 仅注册 openai，本地服务靠 base_url 路由)；_load_state 走 _build_agent_config 自动修复持久化数据中的旧 provider 值；Base URL/API Key 集中托管，Agent 配置复用 |
 | 工具注册浏览 | ✅ | 工具列表+schema |
 | 成本预算设置 | ✅ | 预算阈值 |
 | 主题切换 | ✅ | 暗色/亮色 |

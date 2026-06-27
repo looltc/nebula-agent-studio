@@ -36,7 +36,6 @@ interface ExportPayload {
  * (agent name + 分享 + 3-dot 菜单) + MessageList + ChatInput otherwise.
  */
 export default function ChatPage() {
-  const loadAgents = useChatStore((s) => s.loadAgents);
   const loadConversations = useChatStore((s) => s.loadConversations);
   const agents = useChatStore((s) => s.agents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
@@ -53,10 +52,6 @@ export default function ChatPage() {
   const [clearOpen, setClearOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    void loadAgents();
-  }, [loadAgents]);
-
   // Keep the conversation list fresh whenever the active agent changes.
   useEffect(() => {
     if (currentAgentId) void loadConversations();
@@ -71,7 +66,7 @@ export default function ChatPage() {
 
   const welcomeSubtitle =
     currentAgentId === null
-      ? '请先在左侧导航选择一个 Agent'
+      ? '请在左侧边栏「聊天」展开的 Agent 列表中选择一个 Agent'
       : '输入消息开始与 Agent 交流';
 
   function handleExport() {
@@ -140,6 +135,13 @@ export default function ChatPage() {
           >
             新聊天
           </Button>
+        </div>
+
+        {/* 会话历史（按 Agent 归属过滤，最新在上） */}
+        <div className={styles.convSection}>
+          <div className={styles.convSectionHead}>
+            <span className={styles.convSectionLabel}>会话历史</span>
+          </div>
           <TextInput
             icon={<Search size={16} />}
             placeholder="搜索会话..."
@@ -147,8 +149,8 @@ export default function ChatPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="搜索会话"
           />
+          <ConversationHistory query={searchQuery} />
         </div>
-        <ConversationHistory query={searchQuery} />
       </aside>
 
       <main className={styles.main}>

@@ -104,10 +104,20 @@ export const apiClient = {
     api<ChatResponse>('/chat', { method: 'POST', body: JSON.stringify(body) }),
 
   /* Conversations */
-  listConversations: () => api<ConversationListResponse>('/conversations'),
+  listConversations: (agentId?: string) =>
+    api<ConversationListResponse>(
+      agentId
+        ? `/conversations?agent_id=${encodeURIComponent(agentId)}`
+        : '/conversations',
+    ),
   getConversationMessages: (convId: string, limit = 50) =>
     api<ConversationMessagesResponse>(
       `/conversations/${encodeURIComponent(convId)}/messages?limit=${limit}`,
+    ),
+  deleteConversation: (convId: string) =>
+    api<{ id: string; status: string }>(
+      `/conversations/${encodeURIComponent(convId)}`,
+      { method: 'DELETE' },
     ),
 
   /* Events */

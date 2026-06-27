@@ -1,0 +1,257 @@
+/* Markdown rendering inside a chat bubble.
+   Spacing is intentionally tighter than a typical docs page so messages stay
+   compact. Uses design tokens for colours/spacing/radii. */
+
+.md {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-foreground);
+  word-break: break-word;
+}
+
+/* Reset the pre-wrap from .bubble so Markdown controls its own whitespace. */
+.md :global(*) {
+  white-space: normal;
+}
+
+.md > *:first-child {
+  margin-top: 0;
+}
+
+.md > *:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== Headings ===== */
+.md h1,
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-weight: var(--font-semibold);
+  line-height: var(--line-sm);
+  color: var(--text-foreground);
+}
+
+.md h1 {
+  font-size: var(--text-xl);
+}
+
+.md h2 {
+  font-size: var(--text-lg);
+}
+
+.md h3 {
+  font-size: var(--text-base);
+}
+
+.md h4,
+.md h5,
+.md h6 {
+  font-size: var(--text-sm);
+}
+
+/* ===== Paragraphs ===== */
+.md p {
+  margin: 0 0 var(--space-2);
+}
+
+/* ===== Lists ===== */
+.md ul,
+.md ol {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+}
+
+.md ul {
+  list-style: disc;
+}
+
+.md ol {
+  list-style: decimal;
+}
+
+.md li {
+  margin: 2px 0;
+}
+
+.md li > p {
+  margin: 0;
+}
+
+/* Task list (GFM) — hide the default disc so the checkbox shows. */
+.md li:has(input[type='checkbox']) {
+  list-style: none;
+  margin-left: calc(var(--space-3) * -1);
+}
+
+.md li input[type='checkbox'] {
+  margin-right: var(--space-2);
+  accent-color: var(--accent-primary);
+}
+
+/* ===== Inline emphasis ===== */
+.md strong {
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+}
+
+.md em {
+  font-style: italic;
+}
+
+.md del {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* ===== Links ===== */
+.md a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.md a:hover {
+  border-bottom-color: var(--accent-primary);
+}
+
+.md a:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Inline code ===== */
+.inlineCode {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 1px 5px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-foreground);
+  white-space: nowrap;
+}
+
+/* ===== Fenced code blocks ===== */
+.codeBlock {
+  margin: var(--space-2) 0;
+  padding: var(--space-3);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.codeBlock code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  color: var(--text-foreground);
+}
+
+/* Syntax-highlight tokens (highlight.js) — map to design tokens so they
+   adapt to light/dark themes. These are conservative defaults that read well
+   on both backgrounds. */
+.codeBlock :global(.hljs-keyword),
+.codeBlock :global(.hljs-selector-tag),
+.codeBlock :global(.hljs-built_in) {
+  color: var(--accent-primary);
+}
+
+.codeBlock :global(.hljs-string),
+.codeBlock :global(.hljs-attr) {
+  color: var(--status-success);
+}
+
+.codeBlock :global(.hljs-number),
+.codeBlock :global(.hljs-literal) {
+  color: #f59e0b;
+}
+
+.codeBlock :global(.hljs-comment),
+.codeBlock :global(.hljs-quote) {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.codeBlock :global(.hljs-title),
+.codeBlock :global(.hljs-section),
+.codeBlock :global(.hljs-function .hljs-title) {
+  color: #a78bfa;
+}
+
+.codeBlock :global(.hljs-type),
+.codeBlock :global(.hljs-class .hljs-title) {
+  color: #22d3ee;
+}
+
+.codeBlock :global(.hljs-variable),
+.codeBlock :global(.hljs-template-variable) {
+  color: var(--status-destructive);
+}
+
+/* ===== Blockquotes ===== */
+.md blockquote {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-left: 3px solid var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+  color: var(--text-secondary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.md blockquote p {
+  margin: 0;
+}
+
+/* ===== Horizontal rule ===== */
+.md hr {
+  margin: var(--space-3) 0;
+  border: none;
+  border-top: 1px solid var(--border-default);
+}
+
+/* ===== Tables (GFM) ===== */
+.md table {
+  margin: var(--space-2) 0;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--text-xs);
+  display: block;
+  overflow-x: auto;
+}
+
+.md th,
+.md td {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-default);
+  text-align: left;
+  vertical-align: top;
+}
+
+.md th {
+  background: var(--bg-muted);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+}
+
+.md tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--bg-muted) 50%, transparent);
+}
+
+/* ===== Images ===== */
+.md img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}

@@ -8,6 +8,33 @@ import type {
 
 export type ChatMode = 'ws' | 'sse' | 'http';
 
+function readLS(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeLS(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    /* noop */
+  }
+}
+
+const LS_AGENT_ID = 'chat.currentAgentId';
+const LS_CHAT_MODE = 'chat.chatMode';
+
+function initialChatMode(): ChatMode {
+  const stored = readLS(LS_CHAT_MODE);
+  if (stored === 'ws' || stored === 'sse' || stored === 'http') return stored;
+  return 'ws';
+}
+
 export interface StreamingThinkingStep {
   step: string;
   content: string;
@@ -79,15 +106,29 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+/**
+ * Strip leading newlines/whitespace from an LLM reply. Local models often
+ * emit a few leading "\n" before the actual content; trimming them keeps the
+ * chat UI tidy and the first line aligned with the bubble top.
+ */
+function trimLeadingNewlines(s: string): string {
+  // Trim leading \r, \n, \t and spaces — but only at the very start; internal
+  // whitespace (including leading blank lines inside code blocks) is preserved.
+  return s.replace(/^[\r\n\t ]+/, '');
+}
+
 export const useChatStore = create<ChatState>((set, get) => ({
   agents: [],
-  currentAgentId: null,
+  currentAgentId: readLS(LS_AGENT_ID),
   conversations: [],
   currentConversationId: null,
   messages: [],
 
-  chatMode: 'ws',
-  setChatMode: (mode) => set({ chatMode: mode }),
+  chatMode: initialChatMode(),
+  setChatMode: (mode) => {
+    writeLS(LS_CHAT_MODE, mode);
+    set({ chatMode: mode });
+  },
 
   streaming: false,
   streamingText: '',
@@ -114,6 +155,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   selectAgent: (agentId) => {
     const { currentAgentId } = get();
     if (currentAgentId === agentId) return;
+    writeLS(LS_AGENT_ID, agentId);
     set({
       currentAgentId: agentId,
       messages: [],
@@ -131,13 +173,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const { currentAgentId } = get();
     if (!currentAgentId) return;
     try {
-      const res = await apiClient.listConversations();
-      const filtered = res.conversations.filter(
-        (c) =>
-          c.participants.includes(currentAgentId) ||
-          c.participants.includes('human'),
-      );
-      set({ conversations: filtered });
+      const res = await apiClient.listConversations(currentAgentId);
+      // Newest first: sort by started_at descending.
+      const sorted = [...res.conversations].sort((a, b) => {
+        const ta = Date.parse(a.started_at);
+        const tb = Date.parse(b.started_at);
+        if (Number.isNaN(ta) && Number.isNaN(tb)) return 0;
+        if (Number.isNaN(ta)) return 1;
+        if (Number.isNaN(tb)) return -1;
+        return tb - ta;
+      });
+      set({ conversations: sorted });
       get().markRead(currentAgentId);
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
@@ -147,13 +193,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
   loadMessages: async (convId) => {
     try {
       const res = await apiClient.getConversationMessages(convId, 100);
-      // Sort by timestamp ascending to fix jumbled order
-      const sorted = [...res.messages].sort((a, b) => {
-        const ta = Date.parse(a.ts);
-        const tb = Date.parse(b.ts);
-        if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
-        return 0;
-      });
+      // Sort by timestamp ascending to fix jumbled order; also strip leading
+      // newlines from assistant messages so loaded history stays tidy.
+      const sorted = [...res.messages]
+        .map((m) =>
+          m.role === 'assistant' ? { ...m, content: trimLeadingNewlines(m.content) } : m,
+        )
+        .sort((a, b) => {
+          const ta = Date.parse(a.ts);
+          const tb = Date.parse(b.ts);
+          if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
+          return 0;
+        });
       set({ messages: sorted, currentConversationId: convId });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
@@ -179,7 +230,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         message: text,
         conversation_id: currentConversationId,
       });
-      get().appendAssistantMessage(res.reply);
+      get().appendAssistantMessage(trimLeadingNewlines(res.reply));
       set({
         currentConversationId: res.conversation_id,
         streaming: false,
@@ -273,7 +324,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       id: messageId ?? genId(),
       source: currentAgentId ?? 'assistant',
       role: 'assistant',
-      content: streamingText,
+      content: trimLeadingNewlines(streamingText),
       ts: nowIso(),
     };
     set((s) => ({
@@ -322,7 +373,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   deleteConversation: async (convId) => {
-    // Backend has no delete endpoint; remove locally
+    // Call the backend so the conversation is removed from disk and won't
+    // reappear on refresh; then update local state optimistically on success.
+    try {
+      await apiClient.deleteConversation(convId);
+    } catch (e) {
+      // Surface the error so the UI can warn the user the delete failed.
+      set({ error: e instanceof Error ? e.message : String(e) });
+      return;
+    }
     set((s) => ({
       conversations: s.conversations.filter((c) => c.id !== convId),
       currentConversationId:
