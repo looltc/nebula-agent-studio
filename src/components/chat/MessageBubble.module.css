@@ -6,6 +6,9 @@
   animation: fadeIn var(--duration-normal) var(--ease-out);
 }
 
+/* 瀑布流布局：agent 气泡左对齐、user 气泡右对齐。
+   agent 气泡 100% 等宽容器（适合长 Markdown 输出），user 气泡 75% 限宽
+   （多行回执时仍能一眼区分两侧身份）。 */
 .rowUser {
   align-items: flex-end;
 }
@@ -14,25 +17,32 @@
   align-items: flex-start;
 }
 
+/* 气泡字号 text-base；user 75% / agent 100% 由各自的 .user/.assistant 类控制 */
 .bubble {
-  max-width: 75%;
+  max-width: 100%;
   padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: var(--line-base);
   word-break: break-word;
   box-shadow: var(--shadow-sm);
 }
 
+/* user 气泡限宽 75%，保持多行时的视觉区分度。
+   底色取 #edf3fe 近似的淡蓝（亮色模式下 accent-primary 8% + bg-card 92%
+   ≈ #e9f0ff），暗色模式下自动落到深蓝灰，文字色随之反转。 */
 .user {
-  background: var(--accent-primary);
-  color: var(--text-primary-fg);
+  max-width: 75%;
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-card));
+  color: var(--text-foreground);
+  border: none;
   border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
 }
 
+/* Agent 气泡无边框，宽度 100% 等宽容器 */
 .assistant {
   background: var(--bg-card);
   color: var(--text-foreground);
-  border: 1px solid var(--border-default);
+  border: none;
   border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
 }
 

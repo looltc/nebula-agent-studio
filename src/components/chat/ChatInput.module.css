@@ -1,26 +1,75 @@
-.wrap {
+/* 输入框容器 —— 与 MessageList .list 同宽（880px 居中），无水平 padding，
+   这样 .field 边界与 agent 气泡左右对齐。底部 padding 留出悬浮间距。 */
+.inner {
+  max-width: 880px;
+  margin: 0 auto;
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--border-default);
-  background: var(--bg-background);
+  padding: 0 0 var(--space-3);
+  position: relative;
 }
 
+/* 默认即呈现淡蓝悬浮态（淡边框 + shadow-md）；focus 时边框完全透明，
+   由外圈呼吸雾感光晕承担 —— 无实线条、朦胧扩散。 */
 .field {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   background: var(--bg-card);
-  border: 1px solid var(--border-default);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent);
   border-radius: var(--radius-lg);
   padding: var(--space-2) var(--space-3);
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--duration-fast) var(--ease-default),
-    box-shadow var(--duration-fast) var(--ease-default);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  transition: border-color var(--duration-normal) var(--ease-default),
+    box-shadow var(--duration-normal) var(--ease-default);
+}
+
+.field:hover {
+  border-color: color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  box-shadow: var(--shadow-md);
 }
 
 .field:focus-within {
-  border-color: var(--accent-ring);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-ring) 20%, transparent);
+  /* 边框透明 —— 完全交给外圈雾感光晕，避免任何线条感 */
+  border-color: transparent;
+  box-shadow: var(--shadow-md),
+    0 0 0 1px transparent;
+}
+
+/* focus 时的呼吸雾感光晕 —— 用多层柔和外发光（box-shadow）叠加，
+   蓝紫双色 opacity 同步呼吸，朦胧扩散而非锐利描边。 */
+.field:focus-within::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  /* 多层柔和外发光：近层蓝色 + 远层紫色，无锐边 */
+  box-shadow:
+    0 0 12px 2px color-mix(in srgb, var(--accent-primary) 22%, transparent),
+    0 0 24px 6px color-mix(in srgb, var(--accent-primary) 12%, transparent),
+    0 0 36px 12px color-mix(in srgb, #a855f7 10%, transparent);
+  animation: breathHaze 6.67s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes breathHaze {
+  0%, 100% {
+    /* 静息：光晕收拢、偏淡 */
+    opacity: 0.4;
+    box-shadow:
+      0 0 8px 1px color-mix(in srgb, var(--accent-primary) 18%, transparent),
+      0 0 16px 4px color-mix(in srgb, var(--accent-primary) 8%, transparent),
+      0 0 24px 8px color-mix(in srgb, #a855f7 6%, transparent);
+  }
+  50% {
+    /* 吸气顶峰：光晕扩散、增亮 */
+    opacity: 0.85;
+    box-shadow:
+      0 0 16px 3px color-mix(in srgb, var(--accent-primary) 32%, transparent),
+      0 0 32px 8px color-mix(in srgb, var(--accent-primary) 18%, transparent),
+      0 0 48px 16px color-mix(in srgb, #a855f7 16%, transparent);
+  }
 }
 
 .textareaRow {
@@ -50,7 +99,7 @@
   resize: none;
   padding: 13px 0;
   font-family: inherit;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: var(--line-base);
   color: var(--text-foreground);
   overflow-y: auto;

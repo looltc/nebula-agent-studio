@@ -204,7 +204,12 @@ function AgentCardItem({
     <Card className={styles.card} onClick={() => onOpen(agent.id)}>
       <div className={styles.head}>
         <div className={styles.identity} onClick={stop}>
-          <Avatar name={agent.name} size="md" online={isActive} />
+          <Avatar
+            name={agent.name}
+            size="md"
+            online={isActive}
+            src={agent.avatar ? `/avatars/${agent.avatar}` : null}
+          />
           <div className={styles.identityText}>
             <span className={styles.name}>{agent.name}</span>
             <span className={styles.idLabel}>{agent.id}</span>

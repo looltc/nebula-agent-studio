@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+<g>
+
+
+<!-- head -->
+<circle cx="512" cy="540" r="280" fill="#ffffff"/>
+<!-- ears -->
+<ellipse cx="430" cy="220" rx="50" ry="140" fill="#ffffff" stroke="#e5e7eb" stroke-width="6"/><ellipse cx="594" cy="220" rx="50" ry="140" fill="#ffffff" stroke="#e5e7eb" stroke-width="6"/><ellipse cx="430" cy="220" rx="22" ry="100" fill="#fce7f3"/><ellipse cx="594" cy="220" rx="22" ry="100" fill="#fce7f3"/>
+<!-- eyes -->
+<ellipse cx="400" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<ellipse cx="624" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<!-- eye shine -->
+<circle cx="388" cy="478" r="16" fill="#ffffff"/>
+<circle cx="612" cy="478" r="16" fill="#ffffff"/>
+<!-- nose -->
+<ellipse cx="512" cy="610" rx="28" ry="20" fill="#1a1a1a"/>
+<!-- mouth: smile -->
+<path d="M 460 660 Q 512 710 564 660" stroke="#1a1a1a" stroke-width="14" fill="none" stroke-linecap="round"/>
+<!-- cheeks -->
+<circle cx="350" cy="620" r="32" fill="#ff9eb5" opacity="0.5"/>
+<circle cx="674" cy="620" r="32" fill="#ff9eb5" opacity="0.5"/>
+
+
+</g>
+</svg>

@@ -231,7 +231,12 @@ export default function SideNav() {
                             aria-pressed={isActive}
                             title={a.name}
                           >
-                            <Avatar name={a.name} size="sm" online={a.enabled} />
+                            <Avatar
+                              name={a.name}
+                              size="sm"
+                              online={a.enabled}
+                              src={a.avatar ? `/avatars/${a.avatar}` : null}
+                            />
                             <span className={styles.agentPickerName}>{a.name}</span>
                           </button>
                         );

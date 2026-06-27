@@ -20,6 +20,19 @@ const ROLE_OPTIONS = [
   'manager',
 ];
 
+// Built-in animal avatars (24 flat-style SVGs in public/avatars/).
+// Generated programmatically; see /public/avatars/manifest.json for the
+// animal-to-filename mapping. Listed here so the picker is static and
+// tree-shakeable (no fetch needed at runtime).
+const AVATAR_FILES = [
+  'rat.svg', 'ox.svg', 'tiger.svg', 'rabbit.svg',
+  'dragon.svg', 'snake.svg', 'horse.svg', 'goat.svg',
+  'monkey.svg', 'rooster.svg', 'dog.svg', 'pig.svg',
+  'cat.svg', 'panda.svg', 'fox.svg', 'penguin.svg',
+  'koala.svg', 'owl.svg', 'frog.svg', 'hedgehog.svg',
+  'llama.svg', 'redpanda.svg', 'shiba.svg', 'hamster.svg',
+];
+
 type MemoryType = 'buffer' | 'summary';
 
 export interface AgentCreateModalProps {
@@ -161,6 +174,41 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
               />
             </Field>
           </div>
+          {/* Avatar picker — 24 flat-style animal avatars. Empty = UI fallback
+              to first-letter avatar at runtime. */}
+          <Field label="头像" helper="从内置动物头像中选择；不选则使用首字母。">
+            <div className={styles.avatarGrid}>
+              <button
+                type="button"
+                className={cx(
+                  styles.avatarOption,
+                  !form.avatar && styles.avatarOptionActive,
+                )}
+                onClick={() => updateForm({ avatar: '' })}
+                aria-label="不使用头像"
+                title="不使用头像"
+              >
+                <span className={styles.avatarNone}>
+                  {form.name ? form.name.charAt(0).toUpperCase() : 'A'}
+                </span>
+              </button>
+              {AVATAR_FILES.map((file) => (
+                <button
+                  key={file}
+                  type="button"
+                  className={cx(
+                    styles.avatarOption,
+                    form.avatar === file && styles.avatarOptionActive,
+                  )}
+                  onClick={() => updateForm({ avatar: file })}
+                  aria-label={file}
+                  title={file.replace(/\.\w+$/, '')}
+                >
+                  <img src={`/avatars/${file}`} alt={file} className={styles.avatarImg} />
+                </button>
+              ))}
+            </div>
+          </Field>
           <Field label="角色" required error={errors.role}>
             <Select
               value={form.role}

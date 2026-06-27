@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+<g>
+
+
+<!-- head -->
+<circle cx="512" cy="540" r="280" fill="#a16207"/>
+<!-- ears -->
+<path d="M 280 280 Q 200 200 320 240 Q 380 280 360 340 Z" fill="#fef3c7" stroke="#a16207" stroke-width="8"/><path d="M 744 280 Q 824 200 704 240 Q 644 280 664 340 Z" fill="#fef3c7" stroke="#a16207" stroke-width="8"/>
+<!-- eyes -->
+<ellipse cx="400" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<ellipse cx="624" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<!-- eye shine -->
+<circle cx="388" cy="478" r="16" fill="#ffffff"/>
+<circle cx="612" cy="478" r="16" fill="#ffffff"/>
+<!-- nose -->
+<ellipse cx="512" cy="610" rx="28" ry="20" fill="#1a1a1a"/>
+<!-- mouth: smile -->
+<path d="M 460 660 Q 512 710 564 660" stroke="#1a1a1a" stroke-width="14" fill="none" stroke-linecap="round"/>
+<!-- cheeks -->
+<circle cx="350" cy="620" r="32" fill="#ff9eb5" opacity="0.5"/>
+<circle cx="674" cy="620" r="32" fill="#ff9eb5" opacity="0.5"/>
+<path d="M 400 700 Q 512 760 624 700" stroke="#1a1a1a" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+</g>
+</svg>

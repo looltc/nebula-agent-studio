@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#60a5fa"/>
-      <stop offset="100%" stop-color="#a78bfa"/>
-    </linearGradient>
-  </defs>
-  <rect width="32" height="32" rx="8" fill="#0f172a"/>
-  <path d="M16 5l2.2 5.8L24 13l-5.8 2.2L16 21l-2.2-5.8L8 13l5.8-2.2L16 5z" fill="url(#g)"/>
-  <path d="M24 19l1.1 2.9L28 23l-2.9 1.1L24 27l-1.1-2.9L20 23l2.9-1.1L24 19z" fill="url(#g)" opacity="0.7"/>
+  <!-- 透明背景：浏览器 tab 自动适配系统主题色 -->
+  <!-- 双星线条品牌 logo，纯蓝色线条（无填充），与 SideNav Sparkles 调性一致 -->
+  <g fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 主星：4 角对称星形 -->
+    <path d="M16 4 L18.4 13.6 L28 16 L18.4 18.4 L16 28 L13.6 18.4 L4 16 L13.6 13.6 Z"/>
+    <!-- 副星：右上小星，呼应品牌「双星」感 -->
+    <path d="M24 17 L25 20 L28 21 L25 22 L24 25 L23 22 L20 21 L23 20 Z" opacity="0.6"/>
+  </g>
 </svg>

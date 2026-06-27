@@ -157,7 +157,12 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
       <Card className={styles.headerCard}>
         <div className={styles.headerTop}>
           <div className={styles.headerIdentity}>
-            <Avatar name={agent.name} size="lg" online={isActive} />
+            <Avatar
+              name={agent.name}
+              size="lg"
+              online={isActive}
+              src={agent.avatar ? `/avatars/${agent.avatar}` : null}
+            />
             <div className={styles.headerText}>
               <div className={styles.headerNameRow}>
                 <h1 className={styles.headerName}>{agent.name}</h1>

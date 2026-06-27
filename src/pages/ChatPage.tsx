@@ -62,6 +62,13 @@ export default function ChatPage() {
     return a?.name ?? currentAgentId ?? '助手';
   }, [agents, currentAgentId]);
 
+  // Currently selected agent object (for avatar + name card)
+  const currentAgent = useMemo(
+    () => agents.find((x) => x.id === currentAgentId) ?? null,
+    [agents, currentAgentId],
+  );
+  const agentAvatar = currentAgent?.avatar ?? '';
+
   const showWelcome = messages.length === 0 && !streaming;
 
   const welcomeSubtitle =
@@ -126,6 +133,37 @@ export default function ChatPage() {
     <div className={styles.page}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
+          {/* Agent name card — sits above 新聊天 button. Falls back to a
+              "未选择 Agent" placeholder when currentAgentId is null. */}
+          <div
+            className={cx(
+              styles.agentCard,
+              !currentAgent && styles.agentCardEmpty,
+            )}
+            title={currentAgent ? `${agentName} (${currentAgent.id})` : '未选择 Agent'}
+          >
+            <div className={styles.agentAvatar}>
+              {agentAvatar ? (
+                <img
+                  src={`/avatars/${agentAvatar}`}
+                  alt={agentName}
+                  className={styles.agentAvatarImg}
+                />
+              ) : currentAgent ? (
+                <span className={styles.agentAvatarFallback}>
+                  {agentName.charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <Sparkles size={20} className={styles.agentAvatarIcon} />
+              )}
+            </div>
+            <div className={styles.agentInfo}>
+              <div className={styles.agentCardName}>{agentName}</div>
+              <div className={styles.agentCardRole}>
+                {currentAgent ? currentAgent.role : '未选择'}
+              </div>
+            </div>
+          </div>
           <Button
             variant="primary"
             size="sm"
@@ -157,9 +195,19 @@ export default function ChatPage() {
         {showWelcome ? (
           <div className={styles.welcome}>
             <div className={styles.brandLogo} aria-hidden="true">
-              <Sparkles size={48} />
+              {agentAvatar ? (
+                <img
+                  src={`/avatars/${agentAvatar}`}
+                  alt={agentName}
+                  className={styles.brandAvatarImg}
+                />
+              ) : (
+                <Sparkles size={48} />
+              )}
             </div>
-            <h1 className={styles.welcomeTitle}>开始你的对话</h1>
+            <h1 className={styles.welcomeTitle}>
+              {currentAgent ? agentName : '开始你的对话'}
+            </h1>
             <p className={styles.welcomeSubtitle}>{welcomeSubtitle}</p>
             <div className={styles.welcomeInput}>
               <ChatInput
@@ -173,94 +221,90 @@ export default function ChatPage() {
           </div>
         ) : (
           <>
-            <header className={styles.header}>
-              <div className={styles.headerLeft}>
-                <span className={styles.agentName} title={agentName}>
-                  {agentName}
-                </span>
-              </div>
-              <div className={styles.headerRight}>
+            {/* Floating toolbar (top-right) — replaces the old header.
+                Position: absolute over the message list, pointer-events kept
+                on buttons only so the area below still receives scroll. */}
+            <div className={styles.floatingToolbar}>
+              <button
+                type="button"
+                className={styles.iconBtn}
+                onClick={handleShare}
+                aria-label="分享"
+                title="分享"
+              >
+                <Share2 size={18} />
+              </button>
+              <div className={styles.menuWrap}>
                 <button
                   type="button"
                   className={styles.iconBtn}
-                  onClick={handleShare}
-                  aria-label="分享"
-                  title="分享"
+                  onClick={() => setMenuOpen((o) => !o)}
+                  aria-label="更多操作"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  title="更多操作"
                 >
-                  <Share2 size={18} />
+                  <MoreVertical size={18} />
                 </button>
-                <div className={styles.menuWrap}>
-                  <button
-                    type="button"
-                    className={styles.iconBtn}
-                    onClick={() => setMenuOpen((o) => !o)}
-                    aria-label="更多操作"
-                    aria-haspopup="menu"
-                    aria-expanded={menuOpen}
-                    title="更多操作"
-                  >
-                    <MoreVertical size={18} />
-                  </button>
-                  {menuOpen && (
-                    <>
+                {menuOpen && (
+                  <>
+                    <div
+                      className={styles.backdrop}
+                      onClick={() => setMenuOpen(false)}
+                      aria-hidden="true"
+                    />
+                    <div className={styles.menu} role="menu">
+                      <div className={styles.menuLabel}>传输模式</div>
                       <div
-                        className={styles.backdrop}
-                        onClick={() => setMenuOpen(false)}
-                        aria-hidden="true"
-                      />
-                      <div className={styles.menu} role="menu">
-                        <div className={styles.menuLabel}>传输模式</div>
-                        <div
-                          className={styles.modeGroup}
-                          role="group"
-                          aria-label="传输模式"
-                        >
-                          {MODES.map((m) => (
-                            <button
-                              key={m.key}
-                              type="button"
-                              className={cx(
-                                styles.modeBtn,
-                                chatMode === m.key && styles.modeActive,
-                              )}
-                              onClick={() => setChatMode(m.key)}
-                              aria-pressed={chatMode === m.key}
-                              title={`${m.label} 传输`}
-                            >
-                              {m.label}
-                            </button>
-                          ))}
-                        </div>
-                        <div className={styles.menuDivider} />
-                        <button
-                          type="button"
-                          className={styles.menuItem}
-                          role="menuitem"
-                          onClick={handleExport}
-                          disabled={messages.length === 0}
-                        >
-                          <Download size={14} className={styles.menuIcon} />
-                          导出 JSON
-                        </button>
-                        <button
-                          type="button"
-                          className={cx(
-                            styles.menuItem,
-                            styles.menuItemDanger,
-                          )}
-                          role="menuitem"
-                          onClick={handleClearClick}
-                          disabled={messages.length === 0 && !streaming}
-                        >
-                          <Trash2 size={14} className={styles.menuIcon} />
-                          清空对话
-                        </button>
+                        className={styles.modeGroup}
+                        role="group"
+                        aria-label="传输模式"
+                      >
+                        {MODES.map((m) => (
+                          <button
+                            key={m.key}
+                            type="button"
+                            className={cx(
+                              styles.modeBtn,
+                              chatMode === m.key && styles.modeActive,
+                            )}
+                            onClick={() => setChatMode(m.key)}
+                            aria-pressed={chatMode === m.key}
+                            title={`${m.label} 传输`}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
                       </div>
-                    </>
-                  )}
-                </div>
+                      <div className={styles.menuDivider} />
+                      <button
+                        type="button"
+                        className={styles.menuItem}
+                        role="menuitem"
+                        onClick={handleExport}
+                        disabled={messages.length === 0}
+                      >
+                        <Download size={14} className={styles.menuIcon} />
+                        导出 JSON
+                      </button>
+                      <button
+                        type="button"
+                        className={cx(
+                          styles.menuItem,
+                          styles.menuItemDanger,
+                        )}
+                        role="menuitem"
+                        onClick={handleClearClick}
+                        disabled={messages.length === 0 && !streaming}
+                      >
+                        <Trash2 size={14} className={styles.menuIcon} />
+                        清空对话
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            </header>
+            </div>
 
             <MessageList />
 

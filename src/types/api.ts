@@ -26,6 +26,8 @@ export interface AgentSummary {
   name: string;
   role: string;
   enabled: boolean;
+  /** 头像文件名（位于 /avatars/ 目录下，如 "cat.jpg"）；未配置时由 UI fallback 到首字母 */
+  avatar?: string | null;
 }
 
 export interface AgentListResponse {
@@ -55,6 +57,8 @@ export interface AgentCreateRequest {
   constraints: string[];
   tools: string[];
   llm: LLMSpecRequest | null;
+  /** 头像文件名（如 "cat.jpg"），可空 */
+  avatar?: string | null;
 }
 
 export interface AgentCreateResponse {
@@ -84,6 +88,8 @@ export interface AgentDetailResponse {
     has_api_key: boolean;
     api_format?: string;
   };
+  /** 头像文件名（位于 /avatars/ 目录下，如 "cat.jpg"），可空 */
+  avatar?: string | null;
 }
 
 export interface AgentUpdateRequest {
@@ -102,6 +108,8 @@ export interface AgentUpdateRequest {
   constraints: string[];
   tools: string[];
   llm: LLMSpecRequest | null;
+  /** 头像文件名（如 "cat.jpg"），可空 */
+  avatar?: string | null;
 }
 
 /* ---------- LLM Providers ---------- */

@@ -3,7 +3,7 @@
    compact. Uses design tokens for colours/spacing/radii. */
 
 .md {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: var(--line-base);
   color: var(--text-foreground);
   word-break: break-word;

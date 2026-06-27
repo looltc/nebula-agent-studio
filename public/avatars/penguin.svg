@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+<g>
+
+
+<!-- body -->
+<ellipse cx="512" cy="540" rx="240" ry="280" fill="#1f2937"/>
+<!-- white belly -->
+<ellipse cx="512" cy="580" rx="160" ry="200" fill="#ffffff"/>
+<!-- eyes -->
+<ellipse cx="440" cy="460" rx="30" ry="40" fill="#ffffff"/>
+<ellipse cx="584" cy="460" rx="30" ry="40" fill="#ffffff"/>
+<circle cx="440" cy="465" r="16" fill="#1a1a1a"/>
+<circle cx="584" cy="465" r="16" fill="#1a1a1a"/>
+<!-- beak -->
+<path d="M 470 520 L 512 560 L 554 520 Z" fill="#f59e0b"/>
+<!-- feet -->
+<ellipse cx="440" cy="780" rx="50" ry="20" fill="#f59e0b"/>
+<ellipse cx="584" cy="780" rx="50" ry="20" fill="#f59e0b"/>
+<!-- cheeks -->
+<circle cx="380" cy="540" r="28" fill="#fb923c" opacity="0.5"/>
+<circle cx="644" cy="540" r="28" fill="#fb923c" opacity="0.5"/>
+
+</g>
+</svg>

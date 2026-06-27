@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+<g>
+
+
+<!-- body -->
+<ellipse cx="512" cy="560" rx="280" ry="240" fill="#a16207"/>
+<!-- spikes (triangles around top) -->
+<path d="M 280 460 L 240 360 L 320 440 Z" fill="#451a03"/>
+<path d="M 350 420 L 320 320 L 390 400 Z" fill="#451a03"/>
+<path d="M 430 390 L 410 290 L 470 370 Z" fill="#451a03"/>
+<path d="M 512 380 L 492 280 L 532 360 Z" fill="#451a03"/>
+<path d="M 594 390 L 614 290 L 554 370 Z" fill="#451a03"/>
+<path d="M 674 420 L 704 320 L 634 400 Z" fill="#451a03"/>
+<path d="M 744 460 L 784 360 L 704 440 Z" fill="#451a03"/>
+<!-- face (lighter) -->
+<ellipse cx="512" cy="620" rx="180" ry="120" fill="#d97706"/>
+<!-- eyes -->
+<ellipse cx="440" cy="580" rx="32" ry="40" fill="#1a1a1a"/>
+<ellipse cx="584" cy="580" rx="32" ry="40" fill="#1a1a1a"/>
+<circle cx="430" cy="570" r="12" fill="#ffffff"/>
+<circle cx="574" cy="570" r="12" fill="#ffffff"/>
+<!-- nose -->
+<circle cx="512" cy="680" r="20" fill="#1a1a1a"/>
+<!-- mouth -->
+<path d="M 470 720 Q 512 750 554 720" stroke="#1a1a1a" stroke-width="10" fill="none" stroke-linecap="round"/>
+
+</g>
+</svg>

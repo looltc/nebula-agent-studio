@@ -71,7 +71,7 @@
 |---|---|---|
 | Shell | ✅ | grid 56px+240px+1fr |
 | SideNav | ✅ | brand 改为「Nebula Studio」+ 展开态折叠按钮置于 logo 右侧 + 折叠态隐藏按钮、悬浮 logo 时浮现展开按钮 + Chat tab 手风琴展开 Agent 列表 + 底部账户悬浮展开菜单(主题/设置) |
-| Favicon | ✅ | SVG Sparkles logo，浏览器 tab 图标 |
+| Favicon | ✅ | 蓝色线条双星品牌 logo（透明背景 SVG），浏览器 tab 自动适配系统主题色 |
 | ErrorBoundary | ✅ | 运行时错误兜底 + 重试按钮 + 中文提示 |
 | ContentArea | ✅ | 统一头部+滚动 |
 | StatusBar | ✅ | 底部状态条 |
@@ -80,15 +80,15 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| ChatPage 布局 | ✅ | 260px 侧栏(新聊天 + 会话历史，Agent 列表移至左侧 SideNav 手风琴) + 欢迎屏/聊天头部 + 消息区 + 输入区 |
-| 欢迎屏 | ✅ | 居中 Sparkles 品牌 logo + 欢迎文案 + 居中输入框，新聊天不自动打招呼 |
-| 聊天头部 | ✅ | 左侧 Agent 名称 + 右侧 分享图标 + 3 点菜单(清空/导出/传输模式) |
+| ChatPage 布局 | ✅ | 260px 侧栏(Agent 名片卡 + 新聊天 + 会话历史，Agent 列表移至左侧 SideNav 手风琴) + 欢迎屏/消息区 + 输入区 |
+| 欢迎屏 | ✅ | 居中品牌 logo（已选 Agent 时显示其头像，否则 Sparkles）+ Agent 名称标题 + 居中输入框，新聊天不自动打招呼 |
+| 聊天头部 | ✅ | 已移除（原 header 拆分为：左侧 Agent 名片卡置顶侧栏；分享/3 点菜单改为浮动右上角，半透明背景 + backdrop-blur） |
 | MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
-| MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim |
+| MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim；字号 text-base；Agent 气泡无边框；同一瀑布流布局（容器 880px，agent 气泡左对齐、user 气泡右对齐，两者各占容器全宽） |
 | StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染；后端 WS/SSE 已接入 LangChain astream() 真 token 流式（绕过 ReAct 循环，首字延迟显著降低） |
 | MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色；启用 remark-breaks 把单换行渲染为 <br>；`.codeBlock code` 显式 `white-space: pre` 覆盖 `.md :global(*)` 的 normal，修复嵌套代码块换行被折叠 |
 | ToolCallBlock | ✅ | Loading/完成/失败态 |
-| ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符 |
+| ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符；带边框 + focus 时呼吸感双色流光动画（蓝紫双色 3.2s ease-in-out 脉冲）；max-width 880px 与消息列表对齐 |
 | HITLApproval | ✅ | 审批卡片+倒计时 |
 | ConversationHistory | ✅ | 按 Agent 归属过滤 + 按时间倒序(最新在上) + 悬停 3 点菜单(重命名/删除/导出)+选中态仅背景高亮(无蓝边/无侧边条/无 focus 轮廓)；删除走后端 DELETE 端点持久化 |
 | ChatMode 切换 | ✅ | WS/SSE/HTTP 三选一(收入 3 点菜单) |
@@ -99,7 +99,7 @@
 |---|---|---|
 | AgentList | ✅ | 卡片网格+筛选+排序 |
 | AgentCard | ✅ | 头像/状态/工具/统计 |
-| AgentCreate | ✅ | 完整表单 Modal+验证；编辑模式跳过 ID 唯一性检查；Provider/Model 无默认值强制选择；Base URL/API Key 由供应商配置统一管理；PUT 更新时 body 回传 id 满足后端 Pydantic 必填校验 |
+| AgentCreate | ✅ | 完整表单 Modal+验证；编辑模式跳过 ID 唯一性检查；Provider/Model 无默认值强制选择；Base URL/API Key 由供应商配置统一管理；PUT 更新时 body 回传 id 满足后端 Pydantic 必填校验；新增头像选择器（24 张内置动物扁平画风 SVG 透明背景，12 生肖+12 可爱动物，未选时 fallback 首字母） |
 | AgentDetail | ✅ | 双栏配置+运行时状态 |
 | ToolAuthorization | ✅ | 工具列表+dangerous 标记 |
 | ThinkingModelConfig | ✅ | ReAct/Plan-Execute |

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+<g>
+
+
+<circle cx="512" cy="540" r="280" fill="#fca5a5"/>
+<!-- comb -->
+<path d="M 420 240 L 440 180 L 480 240 L 512 180 L 544 240 L 576 180 L 604 240 Z" fill="#dc2626"/>
+<!-- wattle -->
+<path d="M 480 700 Q 512 760 544 700" fill="#dc2626"/>
+<!-- eyes -->
+<ellipse cx="400" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<ellipse cx="624" cy="500" rx="42" ry="55" fill="#1a1a1a"/>
+<circle cx="388" cy="478" r="16" fill="#ffffff"/>
+<circle cx="612" cy="478" r="16" fill="#ffffff"/>
+<!-- beak -->
+<path d="M 480 600 L 512 660 L 544 600 Z" fill="#f59e0b"/>
+<!-- cheeks -->
+<circle cx="350" cy="620" r="32" fill="#fb7185" opacity="0.6"/>
+<circle cx="674" cy="620" r="32" fill="#fb7185" opacity="0.6"/>
+
+</g>
+</svg>

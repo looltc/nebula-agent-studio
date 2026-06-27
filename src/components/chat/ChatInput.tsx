@@ -81,7 +81,7 @@ export function ChatInput({
   const canSend = value.trim().length > 0 && !streaming && !disabled;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.inner}>
       <div className={styles.field}>
         <div className={styles.textareaRow}>
           <span className={styles.attach} aria-hidden="true" title="附件 (装饰)">

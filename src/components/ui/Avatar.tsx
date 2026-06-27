@@ -7,6 +7,9 @@ export interface AvatarProps {
   size?: 'sm' | 'md' | 'lg';
   /** Show an "online" status dot in the bottom-right corner. */
   online?: boolean;
+  /** Optional image source (e.g. "/avatars/cat.svg"). When provided the image
+   *  fills the circular frame and the initials fallback is hidden. */
+  src?: string | null;
   className?: string;
 }
 
@@ -36,17 +39,18 @@ function initialsOf(name: string): string {
   return parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0);
 }
 
-/** Circular gradient avatar with uppercase initials and optional online dot. */
+/** Circular avatar with optional image, fallback to uppercase initials. */
 export function Avatar({
   name,
   size = 'md',
   online = false,
+  src,
   className,
 }: AvatarProps) {
   const px = SIZE_PX[size];
   return (
     <span
-      className={cx(styles.avatar, className)}
+      className={cx(styles.avatar, src && styles.hasImage, className)}
       style={{
         width: px,
         height: px,
@@ -56,7 +60,16 @@ export function Avatar({
       aria-label={name}
       title={name}
     >
-      <span className={styles.initials}>{initialsOf(name).toUpperCase()}</span>
+      {src ? (
+        <img
+          src={src}
+          alt={name}
+          className={styles.image}
+          draggable={false}
+        />
+      ) : (
+        <span className={styles.initials}>{initialsOf(name).toUpperCase()}</span>
+      )}
       {online && (
         <span className={styles.online}>
           <StatusDot status="active" size={DOT_SIZE_PX[size]} />

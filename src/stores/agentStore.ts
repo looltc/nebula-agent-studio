@@ -26,6 +26,8 @@ export interface AgentFormState {
   provider: string;
   model: string;
   temperature: number;
+  /** 头像文件名（如 "cat.jpg"）；空字符串表示未选择 */
+  avatar: string;
 }
 
 export interface AgentState {
@@ -82,6 +84,8 @@ function defaultForm(): AgentFormState {
     provider: '',
     model: '',
     temperature: 0.7,
+    // Avatar: empty = not chosen, UI will fallback to first-letter avatar.
+    avatar: '',
   };
 }
 
@@ -111,6 +115,7 @@ function buildCreateBody(form: AgentFormState): AgentCreateRequest {
     constraints: form.constraints.filter((c) => c.trim()),
     tools: form.tools,
     llm: buildLLMSpec(form),
+    avatar: form.avatar || null,
   };
 }
 
@@ -131,6 +136,7 @@ function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
     constraints: form.constraints.filter((c) => c.trim()),
     tools: form.tools,
     llm: buildLLMSpec(form),
+    avatar: form.avatar || null,
   };
 }
 
@@ -379,6 +385,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         provider: detail.llm.provider,
         model: detail.llm.model,
         temperature: detail.llm.temperature,
+        avatar: detail.avatar ?? '',
       },
       selectedToolIds: detail.tools,
       errors: {},

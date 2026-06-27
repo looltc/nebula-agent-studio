@@ -1,0 +1,98 @@
+{
+  "rat": {
+    "file": "rat.svg",
+    "name": "鼠"
+  },
+  "ox": {
+    "file": "ox.svg",
+    "name": "牛"
+  },
+  "tiger": {
+    "file": "tiger.svg",
+    "name": "虎"
+  },
+  "rabbit": {
+    "file": "rabbit.svg",
+    "name": "兔"
+  },
+  "dragon": {
+    "file": "dragon.svg",
+    "name": "龙"
+  },
+  "snake": {
+    "file": "snake.svg",
+    "name": "蛇"
+  },
+  "horse": {
+    "file": "horse.svg",
+    "name": "马"
+  },
+  "goat": {
+    "file": "goat.svg",
+    "name": "羊"
+  },
+  "monkey": {
+    "file": "monkey.svg",
+    "name": "猴"
+  },
+  "rooster": {
+    "file": "rooster.svg",
+    "name": "鸡"
+  },
+  "dog": {
+    "file": "dog.svg",
+    "name": "狗"
+  },
+  "pig": {
+    "file": "pig.svg",
+    "name": "猪"
+  },
+  "cat": {
+    "file": "cat.svg",
+    "name": "猫"
+  },
+  "panda": {
+    "file": "panda.svg",
+    "name": "熊猫"
+  },
+  "fox": {
+    "file": "fox.svg",
+    "name": "狐狸"
+  },
+  "penguin": {
+    "file": "penguin.svg",
+    "name": "企鹅"
+  },
+  "koala": {
+    "file": "koala.svg",
+    "name": "考拉"
+  },
+  "owl": {
+    "file": "owl.svg",
+    "name": "猫头鹰"
+  },
+  "frog": {
+    "file": "frog.svg",
+    "name": "青蛙"
+  },
+  "hedgehog": {
+    "file": "hedgehog.svg",
+    "name": "刺猬"
+  },
+  "llama": {
+    "file": "llama.svg",
+    "name": "羊驼"
+  },
+  "redpanda": {
+    "file": "redpanda.svg",
+    "name": "小熊猫"
+  },
+  "shiba": {
+    "file": "shiba.svg",
+    "name": "柴犬"
+  },
+  "hamster": {
+    "file": "hamster.svg",
+    "name": "仓鼠"
+  }
+}

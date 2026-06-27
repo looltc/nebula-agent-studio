@@ -27,6 +27,88 @@
   border-bottom: 1px solid var(--border-default);
 }
 
+/* ===== Agent name card (above 新聊天 button) ===== */
+.agentCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  min-width: 0;
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.agentCardEmpty {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.7;
+}
+
+.agentAvatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-bg);
+  color: var(--accent-primary);
+}
+
+.agentAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.agentAvatarFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-primary);
+  color: var(--text-primary-fg);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+}
+
+.agentAvatarIcon {
+  color: var(--accent-primary);
+}
+
+.agentInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agentCardName {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentCardRole {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ===== 会话历史 section ===== */
 .convSection {
   flex: 1;
@@ -62,6 +144,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  position: relative; /* anchors .floatingToolbar */
 }
 
 /* ===== Welcome screen ===== */
@@ -92,6 +175,14 @@
   box-shadow: 0 0 0 1px
     color-mix(in srgb, var(--accent-primary) 18%, transparent) inset;
   margin-bottom: var(--space-2);
+  overflow: hidden; /* clips the round agent avatar to the rounded square */
+}
+
+.brandAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .welcomeTitle {
@@ -116,41 +207,26 @@
   margin-top: var(--space-4);
 }
 
-/* ===== Chat header ===== */
-.header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-default);
-  background: var(--bg-background);
-  min-height: 56px;
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.agentName {
-  font-size: var(--text-base);
-  line-height: var(--line-base);
-  font-weight: var(--font-semibold);
-  color: var(--text-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.headerRight {
+/* ===== Floating toolbar (top-right, replaces header) ===== */
+.floatingToolbar {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 20;
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  flex-shrink: 0;
+  /* Semi-transparent backdrop so messages scrolling under it stay readable.
+     pointer-events: none on the wrapper would block the buttons; instead we
+     let each .iconBtn receive events and rely on .iconBtn transparent bg. */
+}
+
+.floatingToolbar .iconBtn {
+  background: color-mix(in srgb, var(--bg-background) 70%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
 .iconBtn {
