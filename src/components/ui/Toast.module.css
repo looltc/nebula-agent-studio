@@ -1,0 +1,119 @@
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 360px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  animation: slideInRight var(--duration-slow) var(--ease-out);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+}
+
+.description {
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.closeBtn:hover {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.closeBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* Variant left-border + icon color */
+.success {
+  border-left-color: var(--status-success);
+}
+.success .icon {
+  color: var(--status-success);
+}
+
+.error {
+  border-left-color: var(--status-destructive);
+}
+.error .icon {
+  color: var(--status-destructive);
+}
+
+.warning {
+  border-left-color: var(--status-warning);
+}
+.warning .icon {
+  color: var(--status-warning);
+}
+
+.info {
+  border-left-color: var(--accent-primary);
+}
+.info .icon {
+  color: var(--accent-primary);
+}

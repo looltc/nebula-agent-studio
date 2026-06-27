@@ -1,0 +1,178 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ===== Warning banner ===== */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-medium);
+  border: 1px solid transparent;
+}
+
+.bannerWarn {
+  background: color-mix(in srgb, var(--status-warning) 14%, var(--bg-card));
+  color: var(--status-warning);
+  border-color: color-mix(in srgb, var(--status-warning) 40%, transparent);
+}
+
+.bannerDanger {
+  background: color-mix(in srgb, var(--status-destructive) 14%, var(--bg-card));
+  color: var(--status-destructive);
+  border-color: color-mix(in srgb, var(--status-destructive) 40%, transparent);
+}
+
+/* ===== Overview card ===== */
+.overviewCard,
+.agentsCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.overviewHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.overviewTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+}
+
+.overviewCap {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.overviewRow {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.overviewUsed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 120px;
+}
+
+.overviewUsedLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--font-medium);
+}
+
+.overviewUsedValue {
+  font-size: var(--text-2xl);
+  line-height: var(--line-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.overviewBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 220px;
+  justify-content: center;
+}
+
+.overviewPctRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.overviewRemain {
+  color: var(--text-secondary);
+}
+
+/* ===== Agents card ===== */
+.agentsTitle {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.agentList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.agentRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.agentHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.agentId {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-foreground);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentUsage {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.agentPct {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 640px) {
+  .overviewRow {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+}

@@ -1,0 +1,135 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    filter var(--duration-fast) var(--ease-default),
+    opacity var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== Sizes ===== */
+.sm {
+  height: 32px;
+  padding: 8px 12px;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+}
+
+.md {
+  height: 36px;
+  padding: 8px 16px;
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+}
+
+.lg {
+  height: 44px;
+  padding: 12px 20px;
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+}
+
+/* ===== Variants ===== */
+.primary {
+  background: var(--accent-primary);
+  color: var(--text-primary-fg);
+}
+.primary:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+.primary:active:not(:disabled) {
+  filter: brightness(0.8);
+}
+
+.secondary {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+.secondary:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+.secondary:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-foreground);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--bg-muted);
+}
+.ghost:active:not(:disabled) {
+  background: var(--accent-bg);
+}
+
+.danger {
+  background: var(--status-destructive);
+  color: var(--text-primary-fg);
+}
+.danger:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+.danger:active:not(:disabled) {
+  filter: brightness(0.8);
+}
+
+.outline {
+  background: transparent;
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+.outline:hover:not(:disabled) {
+  background: var(--accent-bg);
+}
+.outline:active:not(:disabled) {
+  background: var(--accent-bg);
+  filter: brightness(0.95);
+}
+
+/* ===== Modifiers ===== */
+.fullWidth {
+  width: 100%;
+}
+
+.loading {
+  cursor: progress;
+}
+
+.spinner {
+  margin-right: var(--space-1);
+}
+
+.label {
+  display: inline-block;
+}
+
+.labelLoading {
+  opacity: 0.5;
+}
+
+.icon,
+.iconRight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,35 @@
+.statsRow {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.statsRow > * {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.tabs {
+  border-bottom: 1px solid var(--border-divider);
+  margin-bottom: var(--space-1);
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.replayLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .replayLayout {
+    grid-template-columns: 1fr;
+  }
+}

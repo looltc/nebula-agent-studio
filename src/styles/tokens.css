@@ -1,0 +1,164 @@
+/* Design Tokens — Doubao Design System aligned, light/dark dual mode */
+
+:root {
+  /* ===== Light mode (default in code) ===== */
+
+  /* Backgrounds */
+  --bg-background: #ffffff;
+  --bg-card: #ffffff;
+  --bg-popover: #f9f9fa;
+  --bg-muted: #eff1f4;
+
+  /* Text */
+  --text-foreground: #0e1115;
+  --text-muted: #7f8d9f;
+  --text-secondary: #333942;
+  --text-primary-fg: #ffffff;
+  --text-accent-fg: #00266b;
+
+  /* Accent */
+  --accent-primary: #0065fd;
+  --accent-ring: #557fff;
+  --accent-input: #e7eaef;
+  --accent-bg: #e5e9ff;
+
+  /* Status */
+  --status-destructive: #ef4444;
+  --status-success: #22c55e;
+  --status-warning: #f59e0b;
+  --status-info: #0065fd;
+
+  /* Borders */
+  --border-default: #e7eaef;
+  --border-divider: #e7eaef;
+
+  /* Charts */
+  --chart-1: #557fff;
+  --chart-2: #0065fd;
+  --chart-3: #0057da;
+  --chart-4: #0043ad;
+  --chart-5: #002e7d;
+
+  /* Sidebar */
+  --sidebar-bg: #eff1f4;
+  --sidebar-fg: #0e1115;
+  --sidebar-primary: #0065fd;
+  --sidebar-accent: #d4daff;
+  --sidebar-accent-fg: #0e1115;
+  --sidebar-border: #e7eaef;
+
+  /* Typography */
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC',
+    'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
+  --line-xs: 16px;
+  --line-sm: 20px;
+  --line-base: 24px;
+  --line-lg: 28px;
+  --line-xl: 28px;
+  --line-2xl: 32px;
+  --line-3xl: 36px;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing (4px base) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* Radius */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Icons */
+  --icon-xs: 14px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 32px;
+
+  /* Animation durations */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* Easing */
+  --ease-default: ease;
+  --ease-in: ease-in;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
+
+  /* Layout */
+  --topbar-height: 56px;
+  --sidenav-width: 240px;
+  --sidenav-collapsed-width: 64px;
+  --statusbar-height: 28px;
+}
+
+[data-theme='dark'] {
+  --bg-background: #0e1115;
+  --bg-card: #0e1115;
+  --bg-popover: #22252a;
+  --bg-muted: #1a1d23;
+
+  --text-foreground: #eff1f4;
+  --text-muted: #7f8d9f;
+  --text-secondary: #c9cdd4;
+  --text-accent-fg: #8ab4ff;
+
+  --accent-primary: #0065fd;
+  --accent-ring: #557fff;
+  --accent-input: #2b3038;
+  --accent-bg: #1a2340;
+
+  --status-destructive: #ef4444;
+  --status-success: #22c55e;
+  --status-warning: #f59e0b;
+  --status-info: #0065fd;
+
+  --border-default: #2b3038;
+  --border-divider: #2b3038;
+
+  --sidebar-bg: #1a1d23;
+  --sidebar-fg: #eff1f4;
+  --sidebar-primary: #0065fd;
+  --sidebar-accent: #1a2340;
+  --sidebar-accent-fg: #eff1f4;
+  --sidebar-border: #2b3038;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}

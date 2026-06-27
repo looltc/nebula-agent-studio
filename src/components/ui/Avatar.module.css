@@ -1,0 +1,35 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-ring) 100%
+  );
+  color: var(--text-primary-fg);
+  text-transform: uppercase;
+  font-weight: var(--font-semibold);
+  line-height: 1;
+  overflow: visible;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.initials {
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.online {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  border-radius: var(--radius-full);
+  /* White ring so the dot reads against any background. */
+  box-shadow: 0 0 0 2px var(--bg-card);
+}
