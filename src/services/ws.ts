@@ -43,9 +43,11 @@ export class WSChatClient {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 
-  send(text: string) {
+  send(text: string, conversationId?: string | null) {
     if (this.isOpen) {
-      this.ws!.send(JSON.stringify({ message: text }));
+      const payload: Record<string, string> = { message: text };
+      if (conversationId) payload.conversation_id = conversationId;
+      this.ws!.send(JSON.stringify(payload));
       return true;
     }
     return false;
@@ -85,9 +87,13 @@ export function streamSSEChat(
   agentId: string,
   message: string,
   handlers: SSEChatHandlers,
+  conversationId?: string | null,
 ): () => void {
   const controller = new AbortController();
-  const url = `/api/chat/sse/${encodeURIComponent(agentId)}?message=${encodeURIComponent(message)}`;
+  let url = `/api/chat/sse/${encodeURIComponent(agentId)}?message=${encodeURIComponent(message)}`;
+  if (conversationId) {
+    url += `&conversation_id=${encodeURIComponent(conversationId)}`;
+  }
 
   (async () => {
     try {

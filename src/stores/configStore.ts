@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
-import type { ToolInfo } from '@/types/api';
+import type {
+  ProviderSummary,
+  ProviderCreateRequest,
+  ProviderTestResponse,
+  ToolInfo,
+} from '@/types/api';
 
 export interface Budget {
   dailyCap: number;
@@ -8,17 +13,32 @@ export interface Budget {
   criticalThreshold: number;
 }
 
-export interface ConfigState {
-  providers: string[];
+export interface ProviderFormState {
+  id: string | null; // null = new
+  name: string;
+  base_url: string;
+  api_key: string;
   models: string[];
+  testing: boolean;
+  testResult: ProviderTestResponse | null;
+}
+
+export interface ConfigState {
+  providers: ProviderSummary[];
+  providerModels: Record<string, string[]>;
   tools: ToolInfo[];
   budget: Budget;
   loading: boolean;
 
+  loadProviders: () => Promise<void>;
+  createProvider: (body: ProviderCreateRequest) => Promise<boolean>;
+  updateProvider: (id: string, body: ProviderCreateRequest) => Promise<boolean>;
+  deleteProvider: (id: string) => Promise<boolean>;
+  testProvider: (id: string) => Promise<ProviderTestResponse>;
+  loadProviderModels: (id: string) => Promise<string[]>;
+
   loadTools: () => Promise<void>;
   setBudget: (partial: Partial<Budget>) => void;
-  addProvider: (name: string) => void;
-  addModel: (name: string) => void;
 }
 
 function readLS(key: string): string | null {
@@ -58,12 +78,82 @@ function initialBudget(): Budget {
   return { dailyCap: 50, warningThreshold: 0.8, criticalThreshold: 0.9 };
 }
 
-export const useConfigStore = create<ConfigState>((set) => ({
-  providers: ['openai'],
-  models: ['gpt-4o-mini', 'gpt-4o'],
+export const useConfigStore = create<ConfigState>((set, get) => ({
+  providers: [],
+  providerModels: {},
   tools: [],
   budget: initialBudget(),
   loading: false,
+
+  loadProviders: async () => {
+    try {
+      const res = await apiClient.listProviders();
+      set({ providers: res.providers });
+    } catch (e) {
+      console.error('Failed to load providers:', e);
+    }
+  },
+
+  createProvider: async (body) => {
+    try {
+      await apiClient.createProvider(body);
+      await get().loadProviders();
+      return true;
+    } catch (e) {
+      console.error('Failed to create provider:', e);
+      return false;
+    }
+  },
+
+  updateProvider: async (id, body) => {
+    try {
+      await apiClient.updateProvider(id, body);
+      await get().loadProviders();
+      return true;
+    } catch (e) {
+      console.error('Failed to update provider:', e);
+      return false;
+    }
+  },
+
+  deleteProvider: async (id) => {
+    try {
+      await apiClient.deleteProvider(id);
+      await get().loadProviders();
+      return true;
+    } catch (e) {
+      console.error('Failed to delete provider:', e);
+      return false;
+    }
+  },
+
+  testProvider: async (id) => {
+    try {
+      const res = await apiClient.testProvider(id);
+      if (res.status === 'ok' && res.models) {
+        set((s) => ({
+          providerModels: { ...s.providerModels, [id]: res.models ?? [] },
+        }));
+      }
+      return res;
+    } catch (e) {
+      console.error('Failed to test provider:', e);
+      return { status: 'error' as const, error: e instanceof Error ? e.message : String(e) };
+    }
+  },
+
+  loadProviderModels: async (id) => {
+    try {
+      const res = await apiClient.listProviderModels(id);
+      set((s) => ({
+        providerModels: { ...s.providerModels, [id]: res.models },
+      }));
+      return res.models;
+    } catch (e) {
+      console.error('Failed to load provider models:', e);
+      return [];
+    }
+  },
 
   loadTools: async () => {
     set({ loading: true });
@@ -83,22 +173,6 @@ export const useConfigStore = create<ConfigState>((set) => ({
       writeLS('budget', JSON.stringify(budget));
       return { budget };
     });
-  },
-
-  addProvider: (name) => {
-    const n = name.trim();
-    if (!n) return;
-    set((s) => ({
-      providers: s.providers.includes(n) ? s.providers : [...s.providers, n],
-    }));
-  },
-
-  addModel: (name) => {
-    const n = name.trim();
-    if (!n) return;
-    set((s) => ({
-      models: s.models.includes(n) ? s.models : [...s.models, n],
-    }));
   },
 }));
 

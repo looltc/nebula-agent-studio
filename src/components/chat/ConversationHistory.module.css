@@ -1,69 +1,15 @@
 .panel {
-  border-top: 1px solid var(--border-default);
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  max-height: 45%;
   background: var(--bg-background);
-}
-
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-3);
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  font-weight: var(--font-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-default),
-    color var(--duration-fast) var(--ease-default);
-}
-
-.toggle:hover {
-  background: var(--bg-muted);
-  color: var(--text-foreground);
-}
-
-.toggle:focus-visible {
-  outline: 2px solid var(--accent-ring);
-  outline-offset: -2px;
-}
-
-.toggleIcon {
-  flex-shrink: 0;
-  color: var(--accent-primary);
-}
-
-.toggleLabel {
-  flex: 1;
-  text-align: left;
-}
-
-.toggleCount {
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  background: var(--bg-muted);
-  border-radius: var(--radius-full);
-  padding: 1px var(--space-2);
-}
-
-.chevron {
-  transition: transform var(--duration-fast) var(--ease-default);
-  color: var(--text-muted);
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
+  overflow: hidden;
 }
 
 .list {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: var(--space-2);
   display: flex;
@@ -72,7 +18,7 @@
 }
 
 .empty {
-  padding: var(--space-3);
+  padding: var(--space-6) var(--space-3);
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
@@ -80,12 +26,14 @@
 }
 
 .item {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: var(--space-1);
   width: 100%;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid transparent;
+  border-left: 2px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
   text-align: left;
@@ -98,50 +46,158 @@
   background: var(--bg-muted);
 }
 
-.item:focus-visible {
+.item:focus-within {
   outline: 2px solid var(--accent-ring);
   outline-offset: 1px;
 }
 
 .active {
   background: var(--accent-bg);
-  border-color: color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  border-left-color: var(--accent-primary);
 }
 
-.itemTop {
+.body {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 
-.participants {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-secondary);
+.title {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
   font-weight: var(--font-medium);
+  color: var(--text-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.count {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
-.time {
+.meta {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.timeIcon {
+.metaIcon {
   flex-shrink: 0;
+}
+
+.dot {
+  opacity: 0.6;
+}
+
+.menuBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    opacity var(--duration-fast) var(--ease-default);
+}
+
+.item:hover .menuBtn,
+.menuBtn:focus-visible,
+.menuBtn[aria-expanded='true'] {
+  opacity: 1;
+}
+
+.menuBtn:hover {
+  background: var(--bg-popover);
+  color: var(--text-foreground);
+}
+
+.menuBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: transparent;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: var(--space-2);
+  z-index: 20;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  background: var(--bg-popover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.menuItem:hover {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -2px;
+}
+
+.menuItemDanger {
+  color: var(--status-destructive);
+}
+
+.menuItemDanger:hover {
+  background: color-mix(in srgb, var(--status-destructive) 12%, transparent);
+  color: var(--status-destructive);
+}
+
+.menuIcon {
+  flex-shrink: 0;
+}
+
+.modalBody {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-secondary);
 }

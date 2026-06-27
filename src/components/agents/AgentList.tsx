@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MoreVertical, Edit, Copy, Pause, Play, Trash2 } from 'lucide-react';
+import { MoreVertical, Edit, Copy, Pause, Play, Trash2, Plus } from 'lucide-react';
 import {
   Card,
   Badge,
@@ -23,40 +23,56 @@ export interface AgentListProps {
   tools: ToolInfo[];
   /** Toggle local pause/resume. Parent owns the override state. */
   onTogglePause: (id: string) => void;
-  /** Remove an agent from the local list (no backend delete API). */
-  onRemove: (id: string) => void;
   className?: string;
 }
 
 /**
  * Responsive card grid of agents. Handles loading (skeletons), empty state,
- * per-card navigation and an operation menu (Edit / Duplicate / Pause / Delete).
+ * per-card navigation and an operation menu (编辑 / 复制 / 暂停 / 删除).
  */
 export function AgentList({
   agents,
   loading,
   tools,
   onTogglePause,
-  onRemove,
   className,
 }: AgentListProps) {
   const navigate = useNavigate();
+  const startEdit = useAgentStore((s) => s.startEdit);
   const duplicateAgent = useAgentStore((s) => s.duplicateAgent);
+  const deleteAgent = useAgentStore((s) => s.deleteAgent);
+  const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
+  const resetForm = useAgentStore((s) => s.resetForm);
   const toast = useToast();
   const [deleteTarget, setDeleteTarget] = useState<AgentSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const open = (id: string) => navigate(`/agents/${id}`);
 
-  const handleDuplicate = (agent: AgentSummary) => {
-    duplicateAgent(agent.id);
-    toast.info('Agent duplicated', `Opened "${agent.id}-copy" in the create modal.`);
+  const handleNewAgent = () => {
+    resetForm();
+    setCreateOpen(true);
   };
 
-  const confirmDelete = () => {
+  const handleDuplicate = (agent: AgentSummary) => {
+    duplicateAgent(agent.id);
+    toast.info('Agent 已复制', `已为 "${agent.id}" 打开复制创建窗口。`);
+  };
+
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    onRemove(deleteTarget.id);
-    toast.success('Agent deleted', `"${deleteTarget.name}" removed from the list.`);
-    setDeleteTarget(null);
+    setDeleting(true);
+    try {
+      const ok = await deleteAgent(deleteTarget.id);
+      if (ok) {
+        toast.success('Agent 已删除', `"${deleteTarget.name}" 已删除。`);
+        setDeleteTarget(null);
+      } else {
+        toast.error('删除失败', '请检查后端连接或重试。');
+      }
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -74,16 +90,12 @@ export function AgentList({
   if (agents.length === 0) {
     return (
       <EmptyState
-        icon={<MoreVertical size={28} />}
-        title="No agents yet"
-        description="Create your first agent to get started with Nebula Agent Studio."
+        icon={<Plus size={28} />}
+        title="尚无 Agent"
+        description="创建你的第一个 Agent 以开始使用 Nebula Agent Studio。"
         action={
-          <Button
-            variant="primary"
-            icon={<Edit size={16} />}
-            onClick={() => useAgentStore.getState().setCreateOpen(true)}
-          >
-            New Agent
+          <Button variant="primary" icon={<Plus size={16} />} onClick={handleNewAgent}>
+            新建 Agent
           </Button>
         }
         className={className}
@@ -102,6 +114,7 @@ export function AgentList({
             agent={agent}
             toolNames={toolNames}
             onOpen={open}
+            onEdit={() => startEdit(agent.id)}
             onDuplicate={handleDuplicate}
             onTogglePause={onTogglePause}
             onDeleteRequest={() => setDeleteTarget(agent)}
@@ -112,23 +125,22 @@ export function AgentList({
       <Modal
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="Delete agent"
+        title="删除 Agent"
         danger
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
-              Cancel
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              取消
             </Button>
-            <Button variant="danger" icon={<Trash2 size={16} />} onClick={confirmDelete}>
-              Delete
+            <Button variant="danger" icon={<Trash2 size={16} />} loading={deleting} onClick={confirmDelete}>
+              删除
             </Button>
           </>
         }
       >
         <p className={styles.confirmText}>
-          Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This action
-          cannot be undone.
+          确定要删除 <strong>{deleteTarget?.name}</strong> 吗？此操作无法撤销。
         </p>
       </Modal>
     </>
@@ -143,6 +155,7 @@ interface AgentCardItemProps {
   agent: AgentSummary;
   toolNames: string[];
   onOpen: (id: string) => void;
+  onEdit: () => void;
   onDuplicate: (agent: AgentSummary) => void;
   onTogglePause: (id: string) => void;
   onDeleteRequest: () => void;
@@ -152,6 +165,7 @@ function AgentCardItem({
   agent,
   toolNames,
   onOpen,
+  onEdit,
   onDuplicate,
   onTogglePause,
   onDeleteRequest,
@@ -180,7 +194,7 @@ function AgentCardItem({
     stop(e);
     setMenuOpen(false);
     onTogglePause(agent.id);
-    toast.info(isActive ? 'Agent paused' : 'Agent resumed', agent.name);
+    toast.info(isActive ? 'Agent 已暂停' : 'Agent 已恢复', agent.name);
   };
 
   const previewTools = toolNames.slice(0, 2);
@@ -200,7 +214,7 @@ function AgentCardItem({
           <button
             type="button"
             className={styles.menuBtn}
-            aria-label={`Actions for ${agent.name}`}
+            aria-label={`操作 ${agent.name}`}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
@@ -216,11 +230,11 @@ function AgentCardItem({
                 onClick={(e) => {
                   stop(e);
                   setMenuOpen(false);
-                  onOpen(agent.id);
+                  onEdit();
                 }}
               >
                 <Edit size={14} />
-                <span>Edit</span>
+                <span>编辑</span>
               </button>
               <button
                 type="button"
@@ -233,7 +247,7 @@ function AgentCardItem({
                 }}
               >
                 <Copy size={14} />
-                <span>Duplicate</span>
+                <span>复制</span>
               </button>
               <button
                 type="button"
@@ -242,7 +256,7 @@ function AgentCardItem({
                 onClick={handlePauseToggle}
               >
                 {isActive ? <Pause size={14} /> : <Play size={14} />}
-                <span>{isActive ? 'Pause' : 'Resume'}</span>
+                <span>{isActive ? '暂停' : '恢复'}</span>
               </button>
               <div className={styles.menuDivider} />
               <button
@@ -256,7 +270,7 @@ function AgentCardItem({
                 }}
               >
                 <Trash2 size={14} />
-                <span>Delete</span>
+                <span>删除</span>
               </button>
             </div>
           )}
@@ -266,13 +280,13 @@ function AgentCardItem({
       <div className={styles.roleRow}>
         <StatusDot status={status} />
         <span className={styles.role}>{agent.role}</span>
-        <span className={styles.statusText}>{isActive ? 'Active' : 'Idle'}</span>
+        <span className={styles.statusText}>{isActive ? '运行中' : '空闲'}</span>
       </div>
 
       <div className={styles.divider} />
 
       <div className={styles.metaRow}>
-        <span className={styles.metaKey}>Thinking</span>
+        <span className={styles.metaKey}>思维</span>
         <Badge variant="mono">ReAct</Badge>
       </div>
       <div className={styles.metaRow}>
@@ -280,7 +294,7 @@ function AgentCardItem({
         <Badge variant="mono">gpt-4o</Badge>
       </div>
       <div className={styles.metaRow}>
-        <span className={styles.metaKey}>Tools</span>
+        <span className={styles.metaKey}>工具</span>
         <div className={styles.toolBadges}>
           {previewTools.length > 0 ? (
             <>
@@ -301,11 +315,11 @@ function AgentCardItem({
 
       <div className={styles.stats}>
         <span className={styles.stat}>
-          <span className={styles.statLabel}>Messages</span>
+          <span className={styles.statLabel}>消息数</span>
           <span className={styles.statValue}>0</span>
         </span>
         <span className={styles.stat}>
-          <span className={styles.statLabel}>Tokens</span>
+          <span className={styles.statLabel}>Token</span>
           <span className={styles.statValue}>0</span>
         </span>
       </div>

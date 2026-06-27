@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import TopBar from './TopBar';
 import SideNav from './SideNav';
 import ShortcutHelp from './ShortcutHelp';
 import { ToastContainer } from '@/components/ui';
@@ -10,7 +9,6 @@ export default function Shell() {
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   return (
     <div className={styles.shell}>
-      <TopBar />
       <div className={styles.body} data-collapsed={collapsed}>
         <SideNav />
         <main className={styles.content}>

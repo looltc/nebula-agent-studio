@@ -1,7 +1,9 @@
 import type {
   AgentCreateRequest,
   AgentCreateResponse,
+  AgentDetailResponse,
   AgentListResponse,
+  AgentUpdateRequest,
   ApiErrorBody,
   ChatRequest,
   ChatResponse,
@@ -13,6 +15,11 @@ import type {
   GroupChatListResponse,
   HealthResponse,
   MetricsText,
+  ProviderCreateRequest,
+  ProviderListResponse,
+  ProviderModelsResponse,
+  ProviderTestResponse,
+  ProviderSummary,
   RelationGraphResponse,
   ToolListResponse,
   WorldStateResponse,
@@ -53,11 +60,44 @@ export const apiClient = {
 
   /* Agents */
   listAgents: () => api<AgentListResponse>('/agents'),
+  getAgent: (id: string) => api<AgentDetailResponse>(`/agents/${encodeURIComponent(id)}`),
   createAgent: (body: AgentCreateRequest) =>
     api<AgentCreateResponse>('/agents', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  updateAgent: (id: string, body: AgentUpdateRequest) =>
+    api<AgentCreateResponse>(`/agents/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteAgent: (id: string) =>
+    api<{ id: string; status: string }>(`/agents/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+
+  /* LLM Providers */
+  listProviders: () => api<ProviderListResponse>('/llm/providers'),
+  createProvider: (body: ProviderCreateRequest) =>
+    api<ProviderSummary>('/llm/providers', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateProvider: (id: string, body: ProviderCreateRequest) =>
+    api<ProviderSummary>(`/llm/providers/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteProvider: (id: string) =>
+    api<{ id: string; status: string }>(`/llm/providers/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+  testProvider: (id: string) =>
+    api<ProviderTestResponse>(`/llm/providers/${encodeURIComponent(id)}/test`, {
+      method: 'POST',
+    }),
+  listProviderModels: (id: string) =>
+    api<ProviderModelsResponse>(`/llm/providers/${encodeURIComponent(id)}/models`),
 
   /* Chat (HTTP) */
   chat: (body: ChatRequest) =>

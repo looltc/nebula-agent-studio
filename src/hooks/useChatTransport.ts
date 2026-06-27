@@ -35,6 +35,9 @@ export function useChatTransport() {
       const st = getStore();
       if (data.type === 'message') {
         st.appendAssistantMessage(data.content);
+        if (data.conversation_id) {
+          st.setCurrentConversationId(data.conversation_id);
+        }
         st.markRead(data.source);
       } else {
         // StreamEvent
@@ -53,6 +56,9 @@ export function useChatTransport() {
             break;
           case 'stream_done':
             st.onStreamDone(data.payload.message_id ?? data.message_id);
+            if (data.conversation_id) {
+              st.setCurrentConversationId(data.conversation_id);
+            }
             break;
           case 'stream_error':
             st.onStreamError(data.payload.error ?? 'Unknown stream error');
@@ -146,7 +152,7 @@ export function useChatTransport() {
       if (mode === 'ws') {
         const client = clientRef.current;
         if (client && client.isOpen) {
-          client.send(text);
+          client.send(text, st.currentConversationId);
         } else {
           // fallback to http if ws not ready
           st.onStreamError('WebSocket not connected, falling back to HTTP');
@@ -158,6 +164,7 @@ export function useChatTransport() {
                 conversation_id: st.currentConversationId,
               }),
             );
+            st.setCurrentConversationId(res.conversation_id);
             st.onStreamDone(res.conversation_id);
             st.markRead(id);
           } catch (e) {
@@ -166,24 +173,34 @@ export function useChatTransport() {
         }
       } else if (mode === 'sse') {
         sseCancelRef.current?.();
-        sseCancelRef.current = streamSSEChat(id, text, {
-          onEvent: (evt) => {
-            const s = getStore();
-            if (evt.type === 'start') {
-              // nothing, streaming already started
-            } else if (evt.type === 'chunk') {
-              s.onStreamChunk(evt.text);
-            } else if (evt.type === 'end') {
-              s.onStreamDone();
-              s.markRead(id);
-            } else if (evt.type === 'error') {
-              s.onStreamError(evt.error);
-            }
+        sseCancelRef.current = streamSSEChat(
+          id,
+          text,
+          {
+            onEvent: (evt) => {
+              const s = getStore();
+              if (evt.type === 'start') {
+                if (evt.conversation_id) {
+                  s.setCurrentConversationId(evt.conversation_id);
+                }
+              } else if (evt.type === 'chunk') {
+                s.onStreamChunk(evt.text);
+              } else if (evt.type === 'end') {
+                if (evt.conversation_id) {
+                  s.setCurrentConversationId(evt.conversation_id);
+                }
+                s.onStreamDone();
+                s.markRead(id);
+              } else if (evt.type === 'error') {
+                s.onStreamError(evt.error);
+              }
+            },
+            onError: (err) => {
+              getStore().onStreamError(err.message);
+            },
           },
-          onError: (err) => {
-            getStore().onStreamError(err.message);
-          },
-        });
+          st.currentConversationId,
+        );
       }
     },
     [getStore],

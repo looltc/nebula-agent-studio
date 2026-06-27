@@ -57,7 +57,7 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
     message.role === 'assistant'
       ? agentName ?? message.source
       : message.role === 'user'
-        ? 'You'
+        ? '你'
         : message.source;
   const segments = parseContent(message.content);
 

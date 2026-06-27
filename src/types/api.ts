@@ -32,18 +32,98 @@ export interface AgentListResponse {
   agents: AgentSummary[];
 }
 
+export interface LLMSpecRequest {
+  provider: string;
+  model: string;
+  temperature: number;
+  api_key?: string | null;
+  base_url?: string | null;
+}
+
 export interface AgentCreateRequest {
   id: string;
   name: string;
   role: string;
   persona: string;
   thinking_model: string;
+  max_iterations: number;
+  max_messages: number;
+  system_prompt: string;
+  goals: string[];
+  constraints: string[];
+  tools: string[];
+  llm: LLMSpecRequest | null;
 }
 
 export interface AgentCreateResponse {
   id: string;
   name: string;
   status: string;
+}
+
+export interface AgentDetailResponse {
+  id: string;
+  name: string;
+  role: string;
+  persona: string;
+  enabled: boolean;
+  thinking_model: string;
+  max_iterations: number;
+  max_messages: number;
+  system_prompt: string;
+  goals: string[];
+  constraints: string[];
+  tools: string[];
+  llm: {
+    provider: string;
+    model: string;
+    temperature: number;
+    base_url: string | null;
+    has_api_key: boolean;
+  };
+}
+
+export interface AgentUpdateRequest {
+  name: string;
+  role: string;
+  persona: string;
+  thinking_model: string;
+  max_iterations: number;
+  max_messages: number;
+  system_prompt: string;
+  goals: string[];
+  constraints: string[];
+  tools: string[];
+  llm: LLMSpecRequest | null;
+}
+
+/* ---------- LLM Providers ---------- */
+export interface ProviderSummary {
+  id: string;
+  name: string;
+  base_url: string | null;
+  api_key_set: boolean;
+}
+
+export interface ProviderListResponse {
+  providers: ProviderSummary[];
+}
+
+export interface ProviderCreateRequest {
+  name: string;
+  base_url?: string | null;
+  api_key?: string | null;
+}
+
+export interface ProviderTestResponse {
+  status: 'ok' | 'error';
+  models?: string[];
+  error?: string;
+}
+
+export interface ProviderModelsResponse {
+  models: string[];
+  error?: string;
 }
 
 /* ---------- Chat ---------- */
@@ -66,6 +146,7 @@ export interface ConversationSummary {
   participants: string[];
   message_count: number;
   started_at: string;
+  title?: string;
 }
 
 export interface ConversationListResponse {

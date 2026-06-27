@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
-import type { AgentSummary, ToolInfo } from '@/types/api';
+import type {
+  AgentCreateRequest,
+  AgentDetailResponse,
+  AgentSummary,
+  AgentUpdateRequest,
+  LLMSpecRequest,
+  ToolInfo,
+} from '@/types/api';
 
 export type ThinkingModel = 'react' | 'plan_execute';
 
@@ -10,23 +17,29 @@ export interface AgentFormState {
   role: string;
   persona: string;
   thinkingModel: ThinkingModel;
-  provider: string;
-  model: string;
-  temperature: number;
   maxIterations: number;
   maxMessages: number;
   systemPrompt: string;
   goals: string[];
   constraints: string[];
+  tools: string[];
+  provider: string;
+  model: string;
+  temperature: number;
+  baseUrl: string;
+  apiKey: string;
 }
 
 export interface AgentState {
   agents: AgentSummary[];
   loading: boolean;
   currentAgent: AgentSummary | null;
+  currentDetail: AgentDetailResponse | null;
+  detailLoading: boolean;
   tools: ToolInfo[];
   selectedToolIds: string[];
   createOpen: boolean;
+  editingId: string | null; // null = create mode, string = edit mode
   setCreateOpen: (open: boolean) => void;
   form: AgentFormState;
   errors: Record<string, string>;
@@ -34,6 +47,7 @@ export interface AgentState {
   loadAgents: () => Promise<void>;
   loadTools: () => Promise<void>;
   selectAgent: (id: string) => void;
+  loadAgentDetail: (id: string) => Promise<void>;
   updateForm: (partial: Partial<AgentFormState>) => void;
   toggleTool: (name: string) => void;
   addGoal: () => void;
@@ -44,8 +58,11 @@ export interface AgentState {
   removeConstraint: (index: number) => void;
   validate: () => boolean;
   createAgent: () => Promise<boolean>;
+  updateAgent: (id: string) => Promise<boolean>;
+  deleteAgent: (id: string) => Promise<boolean>;
   resetForm: () => void;
   duplicateAgent: (id: string) => void;
+  startEdit: (id: string) => Promise<void>;
 }
 
 function defaultForm(): AgentFormState {
@@ -55,14 +72,60 @@ function defaultForm(): AgentFormState {
     role: 'assistant',
     persona: '',
     thinkingModel: 'react',
-    provider: 'openai',
-    model: 'gpt-4o-mini',
-    temperature: 0.7,
-    maxIterations: 5,
+    maxIterations: 10,
     maxMessages: 50,
     systemPrompt: '',
     goals: [],
     constraints: [],
+    tools: [],
+    provider: 'openai',
+    model: 'gpt-4o-mini',
+    temperature: 0.7,
+    baseUrl: '',
+    apiKey: '',
+  };
+}
+
+function buildLLMSpec(form: AgentFormState): LLMSpecRequest | null {
+  return {
+    provider: form.provider,
+    model: form.model,
+    temperature: form.temperature,
+    base_url: form.baseUrl || null,
+    api_key: form.apiKey || null,
+  };
+}
+
+function buildCreateBody(form: AgentFormState): AgentCreateRequest {
+  return {
+    id: form.id,
+    name: form.name,
+    role: form.role,
+    persona: form.persona,
+    thinking_model: form.thinkingModel,
+    max_iterations: form.maxIterations,
+    max_messages: form.maxMessages,
+    system_prompt: form.systemPrompt,
+    goals: form.goals.filter((g) => g.trim()),
+    constraints: form.constraints.filter((c) => c.trim()),
+    tools: form.tools,
+    llm: buildLLMSpec(form),
+  };
+}
+
+function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
+  return {
+    name: form.name,
+    role: form.role,
+    persona: form.persona,
+    thinking_model: form.thinkingModel,
+    max_iterations: form.maxIterations,
+    max_messages: form.maxMessages,
+    system_prompt: form.systemPrompt,
+    goals: form.goals.filter((g) => g.trim()),
+    constraints: form.constraints.filter((c) => c.trim()),
+    tools: form.tools,
+    llm: buildLLMSpec(form),
   };
 }
 
@@ -70,9 +133,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   agents: [],
   loading: false,
   currentAgent: null,
+  currentDetail: null,
+  detailLoading: false,
   tools: [],
   selectedToolIds: [],
   createOpen: false,
+  editingId: null,
   setCreateOpen: (open) => set({ createOpen: open }),
   form: defaultForm(),
   errors: {},
@@ -103,6 +169,18 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ currentAgent: agent });
   },
 
+  loadAgentDetail: async (id) => {
+    set({ detailLoading: true });
+    try {
+      const detail = await apiClient.getAgent(id);
+      set({ currentDetail: detail });
+    } catch (e) {
+      console.error('Failed to load agent detail:', e);
+    } finally {
+      set({ detailLoading: false });
+    }
+  },
+
   updateForm: (partial) => {
     set((s) => ({ form: { ...s.form, ...partial } }));
   },
@@ -110,11 +188,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   toggleTool: (name) => {
     set((s) => {
       const has = s.selectedToolIds.includes(name);
-      return {
-        selectedToolIds: has
-          ? s.selectedToolIds.filter((t) => t !== name)
-          : [...s.selectedToolIds, name],
-      };
+      const next = has
+        ? s.selectedToolIds.filter((t) => t !== name)
+        : [...s.selectedToolIds, name];
+      return { selectedToolIds: next, form: { ...s.form, tools: next } };
     });
   },
 
@@ -162,31 +239,34 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   validate: () => {
-    const { form, agents } = get();
+    const { form, agents, editingId } = get();
     const errors: Record<string, string> = {};
 
-    if (!form.id) {
-      errors.id = 'ID is required';
-    } else if (!/^[a-z0-9-]+$/.test(form.id)) {
-      errors.id = 'ID must be lowercase alphanumeric with dashes';
-    } else if (agents.some((a) => a.id === form.id)) {
-      errors.id = 'ID already exists';
+    // id only required for create mode
+    if (!editingId) {
+      if (!form.id) {
+        errors.id = 'ID 不能为空';
+      } else if (!/^[a-z0-9-]+$/.test(form.id)) {
+        errors.id = 'ID 只能包含小写字母、数字和连字符';
+      } else if (agents.some((a) => a.id === form.id)) {
+        errors.id = 'ID 已存在';
+      }
     }
 
-    if (!form.name) errors.name = 'Name is required';
-    if (!form.role) errors.role = 'Role is required';
+    if (!form.name) errors.name = '名称不能为空';
+    if (!form.role) errors.role = '角色不能为空';
 
     if (form.temperature < 0 || form.temperature > 2) {
-      errors.temperature = 'Temperature must be between 0 and 2';
+      errors.temperature = 'Temperature 必须在 0 到 2 之间';
     }
     if (form.maxIterations < 1 || form.maxIterations > 50) {
-      errors.maxIterations = 'Max iterations must be between 1 and 50';
+      errors.maxIterations = '最大迭代次数必须在 1 到 50 之间';
     }
     if (form.maxMessages < 1 || form.maxMessages > 200) {
-      errors.maxMessages = 'Max messages must be between 1 and 200';
+      errors.maxMessages = '最大消息数必须在 1 到 200 之间';
     }
     if (form.systemPrompt.length > 4096) {
-      errors.systemPrompt = 'System prompt must be 4096 characters or less';
+      errors.systemPrompt = 'System Prompt 不能超过 4096 字符';
     }
 
     set({ errors });
@@ -198,13 +278,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (!valid) return false;
     const { form } = get();
     try {
-      await apiClient.createAgent({
-        id: form.id,
-        name: form.name,
-        role: form.role,
-        persona: form.persona,
-        thinking_model: form.thinkingModel,
-      });
+      await apiClient.createAgent(buildCreateBody(form));
       await get().loadAgents();
       set({ createOpen: false });
       get().resetForm();
@@ -217,8 +291,44 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
+  updateAgent: async (id) => {
+    const { form } = get();
+    // For edit mode, skip id validation
+    set({ editingId: id });
+    const valid = get().validate();
+    if (!valid) {
+      set({ editingId: null });
+      return false;
+    }
+    try {
+      await apiClient.updateAgent(id, buildUpdateBody(form));
+      await get().loadAgents();
+      await get().loadAgentDetail(id);
+      set({ createOpen: false, editingId: null });
+      get().resetForm();
+      return true;
+    } catch (e) {
+      set((s) => ({
+        errors: { ...s.errors, form: e instanceof Error ? e.message : String(e) },
+        editingId: null,
+      }));
+      return false;
+    }
+  },
+
+  deleteAgent: async (id) => {
+    try {
+      await apiClient.deleteAgent(id);
+      await get().loadAgents();
+      return true;
+    } catch (e) {
+      console.error('Failed to delete agent:', e);
+      return false;
+    }
+  },
+
   resetForm: () => {
-    set({ form: defaultForm(), errors: {}, selectedToolIds: [] });
+    set({ form: defaultForm(), errors: {}, selectedToolIds: [], editingId: null });
   },
 
   duplicateAgent: (id) => {
@@ -232,6 +342,36 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         role: agent.role,
       },
       createOpen: true,
+      errors: {},
+      editingId: null,
+    });
+  },
+
+  startEdit: async (id) => {
+    set({ editingId: id, createOpen: true });
+    await get().loadAgentDetail(id);
+    const detail = get().currentDetail;
+    if (!detail) return;
+    set({
+      form: {
+        id: detail.id,
+        name: detail.name,
+        role: detail.role,
+        persona: detail.persona,
+        thinkingModel: (detail.thinking_model === 'plan_execute' ? 'plan_execute' : 'react'),
+        maxIterations: detail.max_iterations,
+        maxMessages: detail.max_messages,
+        systemPrompt: detail.system_prompt,
+        goals: detail.goals,
+        constraints: detail.constraints,
+        tools: detail.tools,
+        provider: detail.llm.provider,
+        model: detail.llm.model,
+        temperature: detail.llm.temperature,
+        baseUrl: detail.llm.base_url ?? '',
+        apiKey: '',
+      },
+      selectedToolIds: detail.tools,
       errors: {},
     });
   },

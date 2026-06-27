@@ -12,3 +12,4 @@ export type { MessageBubbleProps } from './MessageBubble';
 export type { ToolCallBlockProps } from './ToolCallBlock';
 export type { ChatInputProps } from './ChatInput';
 export type { HITLApprovalProps } from './HITLApproval';
+export type { ConversationHistoryProps } from './ConversationHistory';

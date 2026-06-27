@@ -12,10 +12,10 @@ import styles from './AgentsPage.module.css';
 type FilterTab = 'all' | 'active' | 'idle' | 'error';
 
 const FILTERS: { key: FilterTab; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'active', label: 'Active' },
-  { key: 'idle', label: 'Idle' },
-  { key: 'error', label: 'Error' },
+  { key: 'all', label: '全部' },
+  { key: 'active', label: '运行中' },
+  { key: 'idle', label: '空闲' },
+  { key: 'error', label: '错误' },
 ];
 
 export default function AgentsPage() {
@@ -27,12 +27,12 @@ export default function AgentsPage() {
   const loadAgents = useAgentStore((s) => s.loadAgents);
   const loadTools = useAgentStore((s) => s.loadTools);
   const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
+  const resetForm = useAgentStore((s) => s.resetForm);
 
   const [filterTab, setFilterTab] = useState<FilterTab>('all');
   const [sortKey, setSortKey] = useState<'name'>('name');
   const [query, setQuery] = useState('');
   const [pausedIds, setPausedIds] = useState<string[]>([]);
-  const [removedIds, setRemovedIds] = useState<string[]>([]);
 
   useEffect(() => {
     loadAgents();
@@ -45,20 +45,14 @@ export default function AgentsPage() {
     );
   };
 
-  const handleRemove = (id: string) => {
-    setRemovedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  };
-
-  // Apply local pause/remove overrides.
+  // Apply local pause overrides.
   const adjustedAgents = useMemo<AgentSummary[]>(
     () =>
-      agents
-        .filter((a) => !removedIds.includes(a.id))
-        .map((a) => ({
-          ...a,
-          enabled: pausedIds.includes(a.id) ? false : a.enabled,
-        })),
-    [agents, removedIds, pausedIds],
+      agents.map((a) => ({
+        ...a,
+        enabled: pausedIds.includes(a.id) ? false : a.enabled,
+      })),
+    [agents, pausedIds],
   );
 
   const displayedAgents = useMemo(() => {
@@ -98,15 +92,20 @@ export default function AgentsPage() {
     [adjustedAgents],
   );
 
+  const handleNewAgent = () => {
+    resetForm();
+    setCreateOpen(true);
+  };
+
   const newAgentAction = (
-    <Button variant="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
-      New Agent
+    <Button variant="primary" icon={<Plus size={16} />} onClick={handleNewAgent}>
+      新建 Agent
     </Button>
   );
 
   const filters = (
     <>
-      <div className={styles.pills} role="tablist" aria-label="Filter agents">
+      <div className={styles.pills} role="tablist" aria-label="筛选 Agent">
         {FILTERS.map((f) => (
           <button
             key={f.key}
@@ -124,19 +123,19 @@ export default function AgentsPage() {
       <div className={styles.controls}>
         <TextInput
           icon={<Search size={14} />}
-          placeholder="Search agents"
+          placeholder="搜索 Agent"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={styles.search}
-          aria-label="Search agents"
+          aria-label="搜索 Agent"
         />
         <Select
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as 'name')}
           className={styles.sort}
-          aria-label="Sort agents"
+          aria-label="排序 Agent"
         >
-          <option value="name">Name</option>
+          <option value="name">名称</option>
         </Select>
       </div>
     </>
@@ -145,16 +144,12 @@ export default function AgentsPage() {
   return (
     <PageContainer>
       {agentId ? (
-        <AgentDetail
-          agent={detailAgent}
-          onTogglePause={handleTogglePause}
-          onRemove={handleRemove}
-        />
+        <AgentDetail agent={detailAgent} />
       ) : (
         <>
           <ContentHeader
-            title="Agents"
-            subtitle="Create, configure, and manage your autonomous agents."
+            title="Agent 管理"
+            subtitle="创建、配置和管理你的自治 Agent。"
             actions={newAgentAction}
             filters={filters}
           />
@@ -163,7 +158,6 @@ export default function AgentsPage() {
             loading={loading}
             tools={tools}
             onTogglePause={handleTogglePause}
-            onRemove={handleRemove}
           />
         </>
       )}

@@ -7,7 +7,7 @@
 
 .field {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: var(--space-2);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -21,6 +21,13 @@
 .field:focus-within {
   border-color: var(--accent-ring);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-ring) 20%, transparent);
+}
+
+.textareaRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  min-height: 48px;
 }
 
 .attach {
@@ -56,4 +63,12 @@
 .textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 0 var(--space-1);
 }
