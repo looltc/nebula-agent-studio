@@ -137,73 +137,10 @@
   white-space: nowrap;
 }
 
-/* ===== Fenced code blocks ===== */
-.codeBlock {
-  margin: var(--space-2) 0;
-  padding: var(--space-3);
-  background: var(--bg-muted);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  line-height: var(--line-sm);
-  overflow-x: auto;
-  white-space: pre;
-}
-
-.codeBlock code {
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  color: var(--text-foreground);
-  /* Override .md :global(*) { white-space: normal } which would otherwise
-     collapse newlines inside <pre><code> blocks. Must be `pre` (not `inherit`)
-     so nested code (e.g. LLM emitting a markdown sample inside a fenced
-     block) preserves every newline. */
-  white-space: pre;
-}
-
-/* Syntax-highlight tokens (highlight.js) — map to design tokens so they
-   adapt to light/dark themes. These are conservative defaults that read well
-   on both backgrounds. */
-.codeBlock :global(.hljs-keyword),
-.codeBlock :global(.hljs-selector-tag),
-.codeBlock :global(.hljs-built_in) {
-  color: var(--accent-primary);
-}
-
-.codeBlock :global(.hljs-string),
-.codeBlock :global(.hljs-attr) {
-  color: var(--status-success);
-}
-
-.codeBlock :global(.hljs-number),
-.codeBlock :global(.hljs-literal) {
-  color: #f59e0b;
-}
-
-.codeBlock :global(.hljs-comment),
-.codeBlock :global(.hljs-quote) {
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.codeBlock :global(.hljs-title),
-.codeBlock :global(.hljs-section),
-.codeBlock :global(.hljs-function .hljs-title) {
-  color: #a78bfa;
-}
-
-.codeBlock :global(.hljs-type),
-.codeBlock :global(.hljs-class .hljs-title) {
-  color: #22d3ee;
-}
-
-.codeBlock :global(.hljs-variable),
-.codeBlock :global(.hljs-template-variable) {
-  color: var(--status-destructive);
-}
+/* ===== Fenced code blocks =====
+   Code block styling lives in CodeBlock.module.css (header + copy button +
+   syntax highlight tokens). The .md :global(*) { white-space: normal } reset
+   below is overridden by .codeBlock code { white-space: pre } there. */
 
 /* ===== Blockquotes ===== */
 .md blockquote {

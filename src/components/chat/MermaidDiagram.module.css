@@ -1,0 +1,124 @@
+.wrap {
+  margin: var(--space-2) 0;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: color-mix(in srgb, var(--bg-muted) 80%, var(--bg-background));
+  border-bottom: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.lang {
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.iconBtn:hover {
+  background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+  color: var(--text-foreground);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* Preview (SVG) — center, allow horizontal scroll for wide diagrams. */
+.preview {
+  padding: var(--space-3);
+  background: var(--bg-card);
+  text-align: center;
+  overflow-x: auto;
+}
+
+.preview svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Source view — preserves newlines. */
+.source {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--bg-card);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  color: var(--text-foreground);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.source code {
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  /* Override .md :global(*) { white-space: normal } which would otherwise
+     collapse newlines inside the source view. */
+  white-space: pre;
+}
+
+.loading {
+  padding: var(--space-3);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.error {
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--status-destructive) 8%, var(--bg-card));
+  font-size: var(--text-xs);
+  color: var(--text-foreground);
+}
+
+.errorTitle {
+  font-weight: var(--font-semibold);
+  color: var(--status-destructive);
+  margin-bottom: var(--space-2);
+}
+
+.errorDetail {
+  margin: 0;
+  padding: var(--space-2);
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

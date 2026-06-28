@@ -41,9 +41,64 @@
 }
 
 .agentCardEmpty {
+  /* 未选 Agent 时 —— 弱化，呈现空态提示 */
   background: transparent;
   border-style: dashed;
   opacity: 0.7;
+}
+
+/* 新聊天 —— 与头像同行靠右，无边框无背景色，圆润。
+   默认仅图标，hover 时展开文字。 */
+.newChatFab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin-left: auto;
+  padding: 6px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: background-color var(--duration-normal) var(--ease-default),
+    color var(--duration-normal) var(--ease-default),
+    padding var(--duration-normal) var(--ease-default);
+}
+
+.newChatFab:hover {
+  background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+  color: var(--text-foreground);
+  padding: 6px 10px 6px 8px;
+}
+
+.newChatFab:active {
+  background: color-mix(in srgb, var(--bg-card) 75%, transparent);
+}
+
+.newChatFab:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* 文字标签 —— 默认 max-width:0 不可见，hover 时展开 */
+.newChatFabLabel {
+  max-width: 0;
+  opacity: 0;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  font-weight: var(--font-medium);
+  overflow: hidden;
+  transition: max-width var(--duration-normal) var(--ease-default),
+    opacity var(--duration-fast) var(--ease-default),
+    margin-left var(--duration-normal) var(--ease-default);
+}
+
+.newChatFab:hover .newChatFabLabel {
+  max-width: 80px;
+  opacity: 1;
+  margin-left: var(--space-1);
 }
 
 .agentAvatar {

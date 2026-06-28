@@ -1,0 +1,115 @@
+/* Fenced code block wrapper with header (language + copy button). */
+.wrap {
+  margin: var(--space-2) 0;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: color-mix(in srgb, var(--bg-muted) 80%, var(--bg-background));
+  border-bottom: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.lang {
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  min-width: 0;
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.copyBtn:hover {
+  background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+  color: var(--text-foreground);
+}
+
+.copyBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* Code body — white-space: pre preserves all newlines including nested
+   markdown samples inside ``` ``` blocks. */
+.codeBlock {
+  margin: 0;
+  padding: var(--space-3);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.codeBlock code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  color: var(--text-foreground);
+  /* Override .md :global(*) { white-space: normal } — must be `pre` so
+     nested code preserves every newline. */
+  white-space: pre;
+}
+
+/* Syntax-highlight tokens (highlight.js) — adapt to light/dark themes. */
+.codeBlock :global(.hljs-keyword),
+.codeBlock :global(.hljs-selector-tag),
+.codeBlock :global(.hljs-built_in) {
+  color: var(--accent-primary);
+}
+
+.codeBlock :global(.hljs-string),
+.codeBlock :global(.hljs-attr) {
+  color: var(--status-success);
+}
+
+.codeBlock :global(.hljs-number),
+.codeBlock :global(.hljs-literal) {
+  color: #f59e0b;
+}
+
+.codeBlock :global(.hljs-comment),
+.codeBlock :global(.hljs-quote) {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.codeBlock :global(.hljs-title),
+.codeBlock :global(.hljs-section),
+.codeBlock :global(.hljs-function .hljs-title) {
+  color: #a78bfa;
+}
+
+.codeBlock :global(.hljs-type),
+.codeBlock :global(.hljs-class .hljs-title) {
+  color: #22d3ee;
+}
+
+.codeBlock :global(.hljs-variable),
+.codeBlock :global(.hljs-template-variable) {
+  color: var(--status-destructive);
+}

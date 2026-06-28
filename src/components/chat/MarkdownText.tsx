@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import rehypeHighlight from 'rehype-highlight';
+import { CodeBlock } from './CodeBlock';
+import { MermaidDiagram } from './MermaidDiagram';
 import styles from './MarkdownText.module.css';
 
 export interface MarkdownTextProps {
@@ -19,9 +21,10 @@ export interface MarkdownTextProps {
  * spacing, inline code chips, fenced code blocks with a scroll area, and
  * links that open in a new tab.
  *
- * Why a separate component (not inline in MessageBubble): the same renderer
- * is reused by StreamingMessage so partial streaming output also renders as
- * Markdown.
+ * Fenced code blocks are wrapped by <CodeBlock> which adds a header showing
+ * the language (top-left) and a copy button (top-right). Mermaid blocks
+ * (` ```mermaid `) are rendered as diagrams via <MermaidDiagram>, which
+ * lazy-loads the mermaid library on first use.
  */
 function MarkdownTextBase({ content, streaming = false }: MarkdownTextProps) {
   // remark-gfm enables tables, strikethrough, task lists, autolinked literals.
@@ -35,7 +38,7 @@ function MarkdownTextBase({ content, streaming = false }: MarkdownTextProps) {
     <div className={styles.md}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
-        rehypePlugins={[[rehypeHighlight, { detect: true, ignoreMissing: true }]]}
+        rehypePlugins={[[rehypeHighlight, { detect: false, ignoreMissing: true }]]}
         components={{
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noopener noreferrer" />
@@ -50,17 +53,32 @@ function MarkdownTextBase({ content, streaming = false }: MarkdownTextProps) {
                 </code>
               );
             }
+            // Extract language from className like "language-mermaid".
+            const langMatch = /language-([\w-]+)/.exec(className ?? '');
+            const language = langMatch ? langMatch[1].toLowerCase() : null;
+
+            // react-markdown passes the raw text as children; we need a plain
+            // string for copy + mermaid source. Join react nodes back to text.
+            const raw = typeof children === 'string'
+              ? children
+              : Array.isArray(children)
+                ? children.join('')
+                : String(children ?? '');
+
+            if (language === 'mermaid') {
+              return <MermaidDiagram code={raw.replace(/\n$/, '')} />;
+            }
+
             return (
-              <code className={className} {...props}>
+              <CodeBlock language={language} raw={raw}>
                 {children}
-              </code>
+              </CodeBlock>
             );
           },
-          pre: ({ children, ...props }) => (
-            <pre className={styles.codeBlock} {...props}>
-              {children}
-            </pre>
-          ),
+          // react-markdown wraps fenced code in <pre><code>. Since CodeBlock
+          // renders its own <pre>, replace the default <pre> with a fragment
+          // to avoid double-nesting that breaks layout.
+          pre: ({ children }) => <>{children}</>,
         }}
       >
         {content}

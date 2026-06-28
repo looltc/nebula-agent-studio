@@ -70,7 +70,6 @@ export default function SideNav() {
   const loadAgents = useChatStore((s) => s.loadAgents);
 
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [chatAccordionOpen, setChatAccordionOpen] = useState(true);
   const [agentQuery, setAgentQuery] = useState('');
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
@@ -112,15 +111,7 @@ export default function SideNav() {
   };
 
   const handleNavClick = (item: NavItem) => {
-    if (item.accordion) {
-      // Toggle accordion on re-click; otherwise navigate + open.
-      const isOnPage = location.pathname.startsWith(item.path);
-      if (isOnPage) {
-        setChatAccordionOpen((o) => !o);
-      } else {
-        setChatAccordionOpen(true);
-      }
-    }
+    // Chat accordion is always expanded; clicking the nav item just navigates.
     go(item.path, item.key);
   };
 
@@ -177,24 +168,19 @@ export default function SideNav() {
           const Icon = item.icon;
           const active = location.pathname.startsWith(item.path);
           const isChatAccordion =
-            item.accordion && active && !collapsed && chatAccordionOpen;
+            item.accordion && !collapsed;
           return (
             <li key={item.key} className={styles.navItemLi}>
               <button
                 className={cx(styles.navItem, active && styles.active)}
                 onClick={() => handleNavClick(item)}
                 title={collapsed ? item.label : undefined}
-                aria-expanded={item.accordion ? isChatAccordion : undefined}
               >
                 <Icon size={20} className={styles.navIcon} />
                 {!collapsed && <span className={styles.navLabel}>{item.label}</span>}
                 {!collapsed && item.accordion && (
                   <span className={styles.chevronSlot}>
-                    {isChatAccordion ? (
-                      <ChevronDown size={14} />
-                    ) : (
-                      <ChevronUp size={14} className={styles.chevronRotated} />
-                    )}
+                    <ChevronDown size={14} />
                   </span>
                 )}
               </button>

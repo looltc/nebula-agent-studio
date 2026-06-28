@@ -8,6 +8,8 @@ export { ChatInput } from './ChatInput';
 export { HITLApproval } from './HITLApproval';
 export { ConversationHistory } from './ConversationHistory';
 export { MarkdownText } from './MarkdownText';
+export { CodeBlock } from './CodeBlock';
+export { MermaidDiagram } from './MermaidDiagram';
 
 export type { MessageBubbleProps } from './MessageBubble';
 export type { ToolCallBlockProps } from './ToolCallBlock';
