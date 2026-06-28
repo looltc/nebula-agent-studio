@@ -4,8 +4,9 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
-  padding: var(--space-3) 0;
+  /* 不设 overflow：避免裁剪 bottom 内向右弹出的折叠态账户菜单。
+     滚动交给 navList 自己处理。 */
+  padding: var(--space-3) 0 0;
 }
 
 /* ===== Top bar: brand + collapse button ===== */
@@ -142,6 +143,22 @@
   flex-direction: column;
   gap: 2px;
   padding: 0 var(--space-2);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* chat 项占满剩余空间，让内部的 Agent 头像列表自适应剩余高度；
+   其余 nav items（Agents/编排/可观测）因 flex-shrink:0 紧贴底部。 */
+.navItemLi {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.navItemLiChat {
+  flex: 1;
+  min-height: 0;
 }
 
 .navItem {
@@ -205,11 +222,6 @@
 }
 
 /* ===== Accordion panel (Chat → Agent picker) ===== */
-.navItemLi {
-  display: flex;
-  flex-direction: column;
-}
-
 .accordionPanel {
   display: flex;
   flex-direction: column;
@@ -219,7 +231,8 @@
   background: var(--bg-muted);
   border-radius: var(--radius-md);
   animation: accordionIn var(--duration-fast) var(--ease-out);
-  max-height: 320px;
+  /* 自适应占满 chat li 剩余空间 */
+  flex: 1;
   min-height: 0;
 }
 
@@ -287,6 +300,66 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ===== Collapsed mode: vertical agent avatar stack under Chat icon ===== */
+.collapsedAgentStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  margin-top: var(--space-1);
+  border-top: 1px solid var(--border-subtle);
+  /* 自适应占满 chat li 剩余空间 */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+.collapsedAgentStack::-webkit-scrollbar {
+  width: 2px;
+}
+
+.collapsedAgentStack::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.collapsedAgentStack::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.collapsedAgentStack::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.collapsedAgentBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+.collapsedAgentBtn:hover {
+  transform: scale(1.05);
+}
+
+.collapsedAgentBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.collapsedAgentBtnActive {
+  border-color: var(--accent-primary);
 }
 
 @keyframes accordionIn {
@@ -399,6 +472,15 @@
   box-shadow: var(--shadow-lg);
   animation: fadeIn var(--duration-fast) var(--ease-out);
   z-index: 40;
+}
+
+/* Collapsed mode: menu pops up to the right of the sidebar icon instead of
+   spanning the full width (which is just the icon width). */
+.accountMenuCollapsed {
+  left: calc(100% + 4px);
+  right: auto;
+  min-width: 160px;
+  bottom: 0;
 }
 
 .menuItem {

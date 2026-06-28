@@ -62,6 +62,7 @@ export default function SideNav() {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const theme = useUIStore((s) => s.theme);
   const connState = useUIStore((s) => s.connectionState);
+  const collapsedShowAgents = useUIStore((s) => s.sidebarCollapsedShowAgents);
 
   // Chat accordion + agent picker
   const agents = useChatStore((s) => s.agents);
@@ -169,8 +170,11 @@ export default function SideNav() {
           const active = location.pathname.startsWith(item.path);
           const isChatAccordion =
             item.accordion && !collapsed;
+          // chat 项占满剩余空间（让 Agent 头像列表自适应）；
+          // 其余 nav items 因 flex-shrink:0 紧贴底部
+          const isChat = item.key === 'chat';
           return (
-            <li key={item.key} className={styles.navItemLi}>
+            <li key={item.key} className={cx(styles.navItemLi, isChat && styles.navItemLiChat)}>
               <button
                 className={cx(styles.navItem, active && styles.active)}
                 onClick={() => handleNavClick(item)}
@@ -231,12 +235,42 @@ export default function SideNav() {
                   </div>
                 </div>
               )}
+
+              {/* Collapsed mode: show agents as a vertical avatar stack
+                  under the Chat icon. No labels, hover for tooltip.
+                  受设置「折叠时显示 Agent 头像」控制。 */}
+              {collapsed && item.accordion && collapsedShowAgents && (
+                <div className={styles.collapsedAgentStack} role="list" aria-label="Agent 列表">
+                  {agents.map((a) => {
+                    const isActive = a.id === currentAgentId;
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        className={cx(
+                          styles.collapsedAgentBtn,
+                          isActive && styles.collapsedAgentBtnActive,
+                        )}
+                        onClick={() => handleSelectAgent(a.id)}
+                        aria-pressed={isActive}
+                        title={a.name}
+                        role="listitem"
+                      >
+                        <Avatar
+                          name={a.name}
+                          size="sm"
+                          online={a.enabled}
+                          src={a.avatar ? `/avatars/${a.avatar}` : null}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </li>
           );
         })}
       </ul>
-
-      <div className={styles.spacer} />
 
       {/* ===== Bottom: account + expandable menu ===== */}
       <div className={styles.bottom} ref={accountMenuRef}>
@@ -267,8 +301,8 @@ export default function SideNav() {
           )}
         </button>
 
-        {accountMenuOpen && !collapsed && (
-          <div className={styles.accountMenu} role="menu">
+        {accountMenuOpen && (
+          <div className={cx(styles.accountMenu, collapsed && styles.accountMenuCollapsed)} role="menu">
             <button
               type="button"
               className={styles.menuItem}

@@ -23,19 +23,25 @@
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-base);
   line-height: var(--line-base);
+  letter-spacing: 0.005em;
   word-break: break-word;
   box-shadow: var(--shadow-sm);
 }
 
 /* user 气泡限宽 75%，保持多行时的视觉区分度。
-   底色取 #edf3fe 近似的淡蓝（亮色模式下 accent-primary 8% + bg-card 92%
-   ≈ #e9f0ff），暗色模式下自动落到深蓝灰，文字色随之反转。 */
+   亮色：淡蓝 #e9f0ff（accent-primary 8% + bg-card）。
+   暗色：深蓝灰，避免淡蓝在暗背景下过于突兀，参考 iMessage 暗色气泡。 */
 .user {
   max-width: 75%;
   background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-card));
   color: var(--text-foreground);
   border: none;
   border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+}
+
+[data-theme='dark'] .user {
+  background: #1c2842;
+  color: #e6ecf5;
 }
 
 /* Agent 气泡无边框，宽度 100% 等宽容器 */

@@ -48,7 +48,7 @@ function CodeBlockBase({ language, raw, children }: CodeBlockProps) {
   const langLabel = language && language !== 'text' ? language : '';
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-language={language ?? ''}>
       <div className={styles.header}>
         <span className={styles.lang}>{langLabel}</span>
         <button

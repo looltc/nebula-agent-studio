@@ -54,6 +54,12 @@
 }
 
 /* ===== Appearance ===== */
+.appearanceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .themeRow {
   display: flex;
   align-items: center;

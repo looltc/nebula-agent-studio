@@ -1,8 +1,15 @@
+/* ===== 代码块：MacBook 风格 =====
+   设计参考 macOS Terminal / VSCode：
+   - 字体：SF Mono → Menlo → Monaco → Cascadia Code → JetBrains Mono 回退链
+   - 字号 13px、行高 1.55、letter-spacing 0.01em，启用连字
+   - 配色参考 One Light (亮) / VSCode Dark+ (暗)
+*/
+
 /* Fenced code block wrapper with header (language + copy button). */
 .wrap {
   margin: var(--space-2) 0;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-default);
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -12,11 +19,12 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-1) var(--space-2);
-  background: color-mix(in srgb, var(--bg-muted) 80%, var(--bg-background));
-  border-bottom: 1px solid var(--border-default);
-  font-family: var(--font-mono);
+  background: #f2f2f2;
+  border-bottom: 1px solid #e8e8e8;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'JetBrains Mono',
+    Consolas, monospace;
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: #8a8a8a;
 }
 
 .lang {
@@ -35,15 +43,15 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-muted);
+  color: #8a8a8a;
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-default),
     color var(--duration-fast) var(--ease-default);
 }
 
 .copyBtn:hover {
-  background: color-mix(in srgb, var(--bg-card) 60%, transparent);
-  color: var(--text-foreground);
+  background: rgba(0, 0, 0, 0.06);
+  color: #383a42;
 }
 
 .copyBtn:focus-visible {
@@ -57,9 +65,12 @@
   margin: 0;
   padding: var(--space-3);
   background: transparent;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  line-height: var(--line-sm);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'JetBrains Mono',
+    Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'liga' 1, 'calt' 1;
   overflow-x: auto;
   white-space: pre;
 }
@@ -69,47 +80,160 @@
   border: none;
   padding: 0;
   font-family: inherit;
-  color: var(--text-foreground);
+  color: #383a42;
   /* Override .md :global(*) { white-space: normal } — must be `pre` so
      nested code preserves every newline. */
   white-space: pre;
 }
 
-/* Syntax-highlight tokens (highlight.js) — adapt to light/dark themes. */
+/* Syntax-highlight tokens (highlight.js) — One Light 风格（亮色）。
+   色相柔和低饱和，长时间阅读不刺眼。 */
 .codeBlock :global(.hljs-keyword),
-.codeBlock :global(.hljs-selector-tag),
+.codeBlock :global(.hljs-selector-tag) {
+  color: #a626a4;
+}
+
 .codeBlock :global(.hljs-built_in) {
-  color: var(--accent-primary);
+  color: #c18401;
 }
 
 .codeBlock :global(.hljs-string),
 .codeBlock :global(.hljs-attr) {
-  color: var(--status-success);
+  color: #50a14f;
 }
 
 .codeBlock :global(.hljs-number),
 .codeBlock :global(.hljs-literal) {
-  color: #f59e0b;
+  color: #986801;
 }
 
 .codeBlock :global(.hljs-comment),
 .codeBlock :global(.hljs-quote) {
-  color: var(--text-muted);
+  color: #a0a1a7;
   font-style: italic;
 }
 
 .codeBlock :global(.hljs-title),
 .codeBlock :global(.hljs-section),
 .codeBlock :global(.hljs-function .hljs-title) {
-  color: #a78bfa;
+  color: #4078f2;
 }
 
 .codeBlock :global(.hljs-type),
 .codeBlock :global(.hljs-class .hljs-title) {
-  color: #22d3ee;
+  color: #c18401;
 }
 
 .codeBlock :global(.hljs-variable),
 .codeBlock :global(.hljs-template-variable) {
-  color: var(--status-destructive);
+  color: #e45649;
+}
+
+.codeBlock :global(.hljs-tag) {
+  color: #e45649;
+}
+
+.codeBlock :global(.hljs-name) {
+  color: #4078f2;
+}
+
+.codeBlock :global(.hljs-attribute) {
+  color: #986801;
+}
+
+.codeBlock :global(.hljs-symbol),
+.codeBlock :global(.hljs-bullet),
+.codeBlock :global(.hljs-link) {
+  color: #4078f2;
+}
+
+.codeBlock :global(.hljs-emphasis) {
+  font-style: italic;
+}
+
+.codeBlock :global(.hljs-strong) {
+  font-weight: 600;
+}
+
+/* ===== 暗色主题：VSCode Dark+ 风格 ===== */
+[data-theme='dark'] .wrap {
+  background: #1e1e1e;
+  border-color: #2a2a2a;
+}
+
+[data-theme='dark'] .header {
+  background: #252526;
+  border-bottom-color: #2a2a2a;
+  color: #9d9d9d;
+}
+
+[data-theme='dark'] .copyBtn {
+  color: #9d9d9d;
+}
+
+[data-theme='dark'] .copyBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d4;
+}
+
+[data-theme='dark'] .codeBlock code {
+  color: #d4d4d4;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-keyword),
+[data-theme='dark'] .codeBlock :global(.hljs-selector-tag) {
+  color: #569cd6;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-built_in) {
+  color: #4ec9b0;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-string),
+[data-theme='dark'] .codeBlock :global(.hljs-attr) {
+  color: #ce9178;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-number),
+[data-theme='dark'] .codeBlock :global(.hljs-literal) {
+  color: #b5cea8;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-comment),
+[data-theme='dark'] .codeBlock :global(.hljs-quote) {
+  color: #6a9955;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-title),
+[data-theme='dark'] .codeBlock :global(.hljs-section),
+[data-theme='dark'] .codeBlock :global(.hljs-function .hljs-title) {
+  color: #dcdcaa;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-type),
+[data-theme='dark'] .codeBlock :global(.hljs-class .hljs-title) {
+  color: #4ec9b0;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-variable),
+[data-theme='dark'] .codeBlock :global(.hljs-template-variable) {
+  color: #9cdcfe;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-tag) {
+  color: #569cd6;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-name) {
+  color: #dcdcaa;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-attribute) {
+  color: #9cdcfe;
+}
+
+[data-theme='dark'] .codeBlock :global(.hljs-symbol),
+[data-theme='dark'] .codeBlock :global(.hljs-bullet),
+[data-theme='dark'] .codeBlock :global(.hljs-link) {
+  color: #569cd6;
 }

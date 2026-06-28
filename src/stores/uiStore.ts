@@ -20,6 +20,10 @@ export interface UIState {
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
 
+  /** 折叠态下是否仍在 chat 项下方展示 Agent 头像竖排。 */
+  sidebarCollapsedShowAgents: boolean;
+  setSidebarCollapsedShowAgents: (show: boolean) => void;
+
   activeTab: string;
   setActiveTab: (tab: string) => void;
 
@@ -83,6 +87,11 @@ function initialSidebar(): boolean {
   return readLS('sidebar') === 'true';
 }
 
+function initialSidebarCollapsedShowAgents(): boolean {
+  // 默认 true（保持既有行为）；仅在显式存储为 'false' 时关闭。
+  return readLS('sidebarCollapsedShowAgents') !== 'false';
+}
+
 export const useUIStore = create<UIState>((set, get) => ({
   theme: initialTheme(),
 
@@ -108,6 +117,13 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSidebarCollapsed: (collapsed) => {
     writeLS('sidebar', String(collapsed));
     set({ sidebarCollapsed: collapsed });
+  },
+
+  sidebarCollapsedShowAgents: initialSidebarCollapsedShowAgents(),
+
+  setSidebarCollapsedShowAgents: (show) => {
+    writeLS('sidebarCollapsedShowAgents', String(show));
+    set({ sidebarCollapsedShowAgents: show });
   },
 
   activeTab: 'chat',

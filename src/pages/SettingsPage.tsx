@@ -10,6 +10,7 @@ import {
   DollarSign,
   Sun,
   Moon,
+  PanelLeft,
   Check,
 } from 'lucide-react';
 import { ContentHeader, PageContainer } from '@/components/layout';
@@ -62,6 +63,8 @@ export default function SettingsPage() {
 
   const theme = useUIStore((s) => s.theme);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
+  const sidebarCollapsedShowAgents = useUIStore((s) => s.sidebarCollapsedShowAgents);
+  const setSidebarCollapsedShowAgents = useUIStore((s) => s.setSidebarCollapsedShowAgents);
 
   const toast = useToast();
 
@@ -233,21 +236,40 @@ export default function SettingsPage() {
         {/* ===== Appearance ===== */}
         <Card className={styles.section}>
           <SectionTitle icon={<Sun size={14} />}>外观</SectionTitle>
-          <div className={styles.themeRow}>
-            <div className={styles.themeMeta}>
-              <span className={styles.themeLabel}>
-                {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-                <span>{theme === 'dark' ? '深色模式' : '浅色模式'}</span>
-              </span>
-              <p className={styles.themeHint}>
-                在深色与浅色主题之间切换，你的选择会被记住。
-              </p>
+          <div className={styles.appearanceGroup}>
+            <div className={styles.themeRow}>
+              <div className={styles.themeMeta}>
+                <span className={styles.themeLabel}>
+                  {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+                  <span>{theme === 'dark' ? '深色模式' : '浅色模式'}</span>
+                </span>
+                <p className={styles.themeHint}>
+                  在深色与浅色主题之间切换，你的选择会被记住。
+                </p>
+              </div>
+              <Toggle
+                checked={theme === 'dark'}
+                onChange={toggleTheme}
+                aria-label="切换深色模式"
+              />
             </div>
-            <Toggle
-              checked={theme === 'dark'}
-              onChange={toggleTheme}
-              aria-label="切换深色模式"
-            />
+
+            <div className={styles.themeRow}>
+              <div className={styles.themeMeta}>
+                <span className={styles.themeLabel}>
+                  <PanelLeft size={16} />
+                  <span>折叠时显示 Agent 头像</span>
+                </span>
+                <p className={styles.themeHint}>
+                  侧边栏折叠后，是否在聊天按钮下方继续展示 Agent 头像竖排。
+                </p>
+              </div>
+              <Toggle
+                checked={sidebarCollapsedShowAgents}
+                onChange={setSidebarCollapsedShowAgents}
+                aria-label="切换折叠时显示 Agent 头像"
+              />
+            </div>
           </div>
         </Card>
 

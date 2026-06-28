@@ -1,17 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="170 170 684 684" width="1024" height="1024">
 
 <g>
 
+<!-- 蛇身（底部 S 形装饰，从大头照下方蜿蜒而过） -->
+<path d="M 200 820 Q 360 740 512 800 Q 700 860 840 760"
+      fill="none" stroke="#16a34a" stroke-width="90" stroke-linecap="round"/>
+<!-- 蛇身腹色高光 -->
+<path d="M 200 820 Q 360 740 512 800 Q 700 860 840 760"
+      fill="none" stroke="#22c55e" stroke-width="45" stroke-linecap="round" opacity="0.6"/>
+<!-- 蛇身菱形花纹 -->
+<g fill="#15803d">
+  <path d="M 280 800 L 310 830 L 280 860 L 250 830 Z"/>
+  <path d="M 512 820 L 542 850 L 512 880 L 482 850 Z"/>
+  <path d="M 740 800 L 770 830 L 740 860 L 710 830 Z"/>
+</g>
 
-<ellipse cx="512" cy="540" rx="260" ry="200" fill="#22c55e"/>
-<path d="M 280 540 Q 512 380 744 540 Q 512 700 280 540 Z" fill="#16a34a" opacity="0.5"/>
-<ellipse cx="400" cy="500" rx="30" ry="40" fill="#fde047"/>
-<ellipse cx="624" cy="500" rx="30" ry="40" fill="#fde047"/>
-<ellipse cx="400" cy="505" rx="6" ry="30" fill="#1a1a1a"/>
-<ellipse cx="624" cy="505" rx="6" ry="30" fill="#1a1a1a"/>
-<path d="M 480 600 Q 512 630 544 600" stroke="#1a1a1a" stroke-width="10" fill="none" stroke-linecap="round"/>
-<circle cx="350" cy="620" r="28" fill="#fde047" opacity="0.6"/>
-<circle cx="674" cy="620" r="28" fill="#fde047" opacity="0.6"/>
+<!-- 蛇头（大头照主体） -->
+<ellipse cx="512" cy="450" rx="240" ry="200" fill="#16a34a"/>
+<!-- 头部腹色高光 -->
+<ellipse cx="512" cy="500" rx="160" ry="130" fill="#22c55e" opacity="0.5"/>
+<!-- 头顶菱形花纹 -->
+<path d="M 512 270 L 545 320 L 512 370 L 479 320 Z" fill="#15803d"/>
+<!-- 眼睛（黄底竖瞳，蛇特征） -->
+<ellipse cx="410" cy="400" rx="40" ry="48" fill="#fde047"/>
+<ellipse cx="614" cy="400" rx="40" ry="48" fill="#fde047"/>
+<ellipse cx="410" cy="408" rx="14" ry="32" fill="#1a1a1a"/>
+<ellipse cx="614" cy="408" rx="14" ry="32" fill="#1a1a1a"/>
+<!-- 眼神光 -->
+<circle cx="416" cy="396" r="6" fill="#ffffff"/>
+<circle cx="620" cy="396" r="6" fill="#ffffff"/>
+<!-- 鼻孔 -->
+<circle cx="488" cy="350" r="7" fill="#1a1a1a"/>
+<circle cx="536" cy="350" r="7" fill="#1a1a1a"/>
+<!-- 分叉舌头（红色，从嘴部伸出） -->
+<path d="M 512 570 L 512 660" stroke="#dc2626" stroke-width="9" stroke-linecap="round"/>
+<path d="M 512 660 L 484 690 M 512 660 L 540 690" stroke="#dc2626" stroke-width="9" stroke-linecap="round" fill="none"/>
+<!-- 脸颊 -->
+<circle cx="320" cy="480" r="32" fill="#fb923c" opacity="0.4"/>
+<circle cx="704" cy="480" r="32" fill="#fb923c" opacity="0.4"/>
 
 </g>
 </svg>

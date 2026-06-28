@@ -4,9 +4,13 @@
 
 .md {
   font-size: var(--text-base);
-  line-height: var(--line-base);
+  line-height: 1.7;
+  letter-spacing: 0.005em;
   color: var(--text-foreground);
   word-break: break-word;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Reset the pre-wrap from .bubble so Markdown controls its own whitespace. */
@@ -55,13 +59,13 @@
 
 /* ===== Paragraphs ===== */
 .md p {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-3);
 }
 
 /* ===== Lists ===== */
 .md ul,
 .md ol {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-3);
   padding-left: var(--space-4);
 }
 
@@ -74,7 +78,7 @@
 }
 
 .md li {
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
 .md li > p {
@@ -96,10 +100,12 @@
 .md strong {
   font-weight: var(--font-semibold);
   color: var(--text-foreground);
+  letter-spacing: 0.01em;
 }
 
 .md em {
   font-style: italic;
+  color: var(--text-secondary);
 }
 
 .md del {
@@ -127,11 +133,12 @@
 
 /* ===== Inline code ===== */
 .inlineCode {
-  font-family: var(--font-mono);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'JetBrains Mono',
+    Consolas, monospace;
   font-size: 0.85em;
-  padding: 1px 5px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-default);
+  padding: 2px 6px;
+  background: color-mix(in srgb, var(--accent-primary) 7%, var(--bg-muted));
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 14%, var(--border-default));
   border-radius: var(--radius-sm);
   color: var(--text-foreground);
   white-space: nowrap;
@@ -144,12 +151,13 @@
 
 /* ===== Blockquotes ===== */
 .md blockquote {
-  margin: 0 0 var(--space-2);
-  padding: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-left: 3px solid var(--accent-primary);
-  background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 5%, transparent);
   color: var(--text-secondary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-style: italic;
 }
 
 .md blockquote p {
