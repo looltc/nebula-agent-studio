@@ -446,7 +446,14 @@ export const useChatStore = create<ChatState>((set, get) => {
     // 从 localStorage 恢复上次正在进行的 conversation
     const savedConvId = readLS(LS_CONVERSATION_ID);
     const { currentAgentId } = get();
-    if (!savedConvId || !currentAgentId) return;
+    if (!savedConvId || !currentAgentId) {
+      // 没有保存的会话 ID，但如果有残留的 streaming 状态（如新会话第一消息
+      // 发送后立即切换页面，stream_done 前连接断开），重置它避免 UI 卡在流式态
+      if (get().streaming) {
+        set({ streaming: false, streamingText: '', streamingEvents: [] });
+      }
+      return;
+    }
 
     try {
       // 拉取该 conversation 的消息列表，恢复到 store
@@ -461,7 +468,15 @@ export const useChatStore = create<ChatState>((set, get) => {
           if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
           return 0;
         });
-      set({ messages: sorted, currentConversationId: savedConvId });
+      // 重置 streaming 状态：切换页面/刷新后流式连接已断开，
+      // 后端已在 finally 块持久化部分回复，这里从 DB 加载最终内容即可。
+      set({
+        messages: sorted,
+        currentConversationId: savedConvId,
+        streaming: false,
+        streamingText: '',
+        streamingEvents: [],
+      });
     } catch {
       // conversation 已被删除或不存在，清除 localStorage
       writeLS(LS_CONVERSATION_ID, '');

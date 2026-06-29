@@ -33,11 +33,13 @@ export function useChatTransport() {
   const handleWSMessage = useCallback(
     (data: WSReceived) => {
       const st = getStore();
+      // 无论什么事件类型，只要有 conversation_id 就立即同步到 store + localStorage。
+      // 这样即使 stream_done 前连接断开（如切换页面），restoreSession 也能找到会话。
+      if (data.conversation_id) {
+        st.setCurrentConversationId(data.conversation_id);
+      }
       if (data.type === 'message') {
         st.appendAssistantMessage(data.content);
-        if (data.conversation_id) {
-          st.setCurrentConversationId(data.conversation_id);
-        }
         st.markRead(data.source);
       } else {
         // StreamEvent
@@ -56,9 +58,6 @@ export function useChatTransport() {
             break;
           case 'stream_done':
             st.onStreamDone(data.payload.message_id ?? data.message_id);
-            if (data.conversation_id) {
-              st.setCurrentConversationId(data.conversation_id);
-            }
             break;
           case 'stream_error':
             st.onStreamError(data.payload.error ?? 'Unknown stream error');
