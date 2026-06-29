@@ -68,6 +68,7 @@ interface ExportPayload {
  */
 export default function ChatPage() {
   const loadConversations = useChatStore((s) => s.loadConversations);
+  const restoreSession = useChatStore((s) => s.restoreSession);
   const agents = useChatStore((s) => s.agents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
   const messages = useChatStore((s) => s.messages);
@@ -85,8 +86,12 @@ export default function ChatPage() {
 
   // Keep the conversation list fresh whenever the active agent changes.
   useEffect(() => {
-    if (currentAgentId) void loadConversations();
-  }, [currentAgentId, loadConversations]);
+    if (currentAgentId) {
+      void loadConversations();
+      // 刷新页面后恢复上次正在进行的 conversation（后端已在断开时持久化部分回复）
+      void restoreSession();
+    }
+  }, [currentAgentId, loadConversations, restoreSession]);
 
   const agentName = useMemo(() => {
     const a = agents.find((x) => x.id === currentAgentId);

@@ -1,0 +1,89 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* 正文片段：与正常消息正文一致，无特殊样式 */
+.textSegment {
+  word-break: break-word;
+}
+
+.cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--accent-primary);
+  font-weight: var(--font-bold);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* 思考步骤：轻量折叠行，无独立背景色，比正文较暗 */
+.thinkingItem {
+  padding: 0;
+  border: none;
+  background: transparent;
+  /* 比正文暗：正文用 --text-foreground，这里用 --text-muted */
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+}
+
+.thinkingSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  padding: 2px 0;
+  color: var(--text-muted);
+  /* 折叠时单行，溢出省略 */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thinkingSummary::-webkit-details-marker {
+  display: none;
+}
+
+.thinkingSummary::marker {
+  content: '';
+}
+
+/* › 折叠符号：展开时旋转 90° 向下 */
+.chevron {
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.thinkingItem[open] .chevron {
+  transform: rotate(90deg);
+}
+
+.thinkingLabel {
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thinkingContent {
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* 无背景色，仅用左边框做轻量引导线 */
+  border-left: 1px solid var(--border-subtle);
+  margin-left: 2px;
+}

@@ -1,10 +1,10 @@
-/* 输入框容器 —— 与 MessageList .list 同宽（880px 居中），无水平 padding，
+/* 输入框容器 —— 与 MessageList .list 同宽（880px 居中），水平 padding 一致，
    这样 .field 边界与 agent 气泡左右对齐。底部 padding 留出悬浮间距。 */
 .inner {
   max-width: 880px;
   margin: 0 auto;
   width: 100%;
-  padding: 0 0 var(--space-3);
+  padding: 0 var(--space-4) var(--space-3);
   position: relative;
 }
 

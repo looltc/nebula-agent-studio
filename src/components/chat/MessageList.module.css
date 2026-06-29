@@ -9,7 +9,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-5) var(--space-4);
+  /* 仅垂直 padding，水平由 .list 的 max-width+margin auto 与 ChatInput 对齐 */
+  padding: var(--space-5) 0;
   scroll-behavior: smooth;
 }
 
@@ -20,6 +21,8 @@
   max-width: 880px;
   margin: 0 auto;
   width: 100%;
+  /* 水平 padding 在此层，与 ChatInput .inner 的视觉边距一致 */
+  padding: 0 var(--space-4);
 }
 
 .jumpBtn {

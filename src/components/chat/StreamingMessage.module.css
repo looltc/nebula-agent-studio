@@ -43,69 +43,6 @@
   animation: blink 1s step-end infinite;
 }
 
-.thinkingList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.thinkingItem {
-  background: var(--bg-muted);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
-}
-
-.thinkingSummary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  cursor: pointer;
-  list-style: none;
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-}
-
-.thinkingSummary::-webkit-details-marker {
-  display: none;
-}
-
-.thinkingSummary::marker {
-  content: '';
-}
-
-.thinkingLabel {
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: var(--font-semibold);
-  color: var(--text-muted);
-}
-
-.thinkingStep {
-  font-family: var(--font-mono);
-  color: var(--accent-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.thinkingContent {
-  margin-top: var(--space-1);
-  font-size: var(--text-xs);
-  line-height: var(--line-sm);
-  color: var(--text-secondary);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.tools {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-}
-
 .meta {
   display: inline-flex;
   align-items: center;

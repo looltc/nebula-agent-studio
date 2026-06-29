@@ -30,7 +30,7 @@
 
 | Feature | 状态 | 说明 |
 |---|---|---|
-| chatStore | ✅ | 对话/消息/流式状态/ChatMode |
+| chatStore | ✅ | 对话/消息/流式状态/ChatMode；currentConversationId 持久化到 localStorage，刷新后 restoreSession() 恢复上次会话 |
 | agentStore | ✅ | Agent 列表/配置/编辑表单 |
 | orchestStore | ✅ | 编排图/群聊/世界状态 |
 | observeStore | ✅ | 事件流/Metrics/Traces/回放 |

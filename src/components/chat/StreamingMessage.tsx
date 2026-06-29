@@ -1,20 +1,22 @@
 import { useChatStore } from '@/stores/chatStore';
 import { Spinner } from '@/components/ui';
-import { ToolCallBlock } from './ToolCallBlock';
-import { MarkdownText } from './MarkdownText';
+import { TimelineView } from './TimelineView';
 import styles from './StreamingMessage.module.css';
 
 /**
  * In-progress assistant message: streaming text rendered as Markdown with a
- * blinking cursor, collapsible thinking steps, and tool-call cards.
+ * blinking cursor, plus a timeline of thinking steps and tool-call cards
+ * rendered in arrival order (via TimelineView).
+ *
+ * 思考/工具事件与正文片段按到达顺序穿插输出（TimelineView 内统一渲染）。
+ * 进行中的步骤自动展开，当前步骤完成后自动折叠。
  */
 export function StreamingMessage() {
+  const streamingEvents = useChatStore((s) => s.streamingEvents);
   const streamingText = useChatStore((s) => s.streamingText);
-  const streamingThinking = useChatStore((s) => s.streamingThinking);
-  const streamingTools = useChatStore((s) => s.streamingTools);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
 
-  const isEmpty = streamingText.length === 0;
+  const isEmpty = streamingText.length === 0 && streamingEvents.length === 0;
 
   return (
     <div className={styles.row}>
@@ -22,49 +24,17 @@ export function StreamingMessage() {
         {isEmpty ? (
           <div className={styles.thinking}>
             <Spinner size="sm" />
-            <span>Thinking…</span>
+            <span>思考中…</span>
           </div>
         ) : (
-          <div className={styles.text}>
-            <MarkdownText content={streamingText} streaming />
-            <span className={styles.cursor} aria-hidden="true">▋</span>
-          </div>
-        )}
-
-        {streamingThinking.length > 0 && (
-          <div className={styles.thinkingList}>
-            {streamingThinking.map((step, i) => {
-              const isLast = i === streamingThinking.length - 1;
-              return (
-                <details
-                  key={`${step.step}-${i}`}
-                  className={styles.thinkingItem}
-                  open={isLast}
-                >
-                  <summary className={styles.thinkingSummary}>
-                    <span className={styles.thinkingLabel}>Thinking</span>
-                    <span className={styles.thinkingStep}>{step.step}</span>
-                  </summary>
-                  <div className={styles.thinkingContent}>{step.content}</div>
-                </details>
-              );
-            })}
-          </div>
-        )}
-
-        {streamingTools.length > 0 && (
-          <div className={styles.tools}>
-            {streamingTools.map((t) => (
-              <ToolCallBlock key={t.id} tool={t} />
-            ))}
-          </div>
+          <TimelineView events={streamingEvents} streaming />
         )}
       </div>
 
       <div className={styles.meta}>
         <span className={styles.metaAgent}>{currentAgentId ?? 'assistant'}</span>
         <span className={styles.metaDot} aria-hidden="true">·</span>
-        <span className={styles.metaStatus}>streaming…</span>
+        <span className={styles.metaStatus}>流式中…</span>
       </div>
     </div>
   );

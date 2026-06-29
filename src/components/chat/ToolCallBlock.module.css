@@ -1,11 +1,11 @@
+/* 整个工具卡片作为 <details>：header 是 summary，body 是展开内容 */
 .block {
   background: var(--bg-muted);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
   width: 100%;
   max-width: 520px;
 }
@@ -14,11 +14,24 @@
   border-color: var(--status-destructive);
 }
 
+/* summary 行：chevron + 工具图标 + 名称 + 状态 */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  cursor: pointer;
+  list-style: none;
+  padding: var(--space-3);
+  user-select: none;
+}
+
+.header::-webkit-details-marker {
+  display: none;
+}
+
+.header::marker {
+  content: '';
 }
 
 .id {
@@ -26,6 +39,18 @@
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+}
+
+/* › 折叠符号：展开时旋转 90° 向下（与 thinking 一致） */
+.chevron {
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.block[open] .chevron {
+  transform: rotate(90deg);
 }
 
 .icon {
@@ -80,6 +105,14 @@
   color: var(--status-destructive);
 }
 
+/* 展开内容区：参数/结果/错误，始终展开 */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -119,44 +152,4 @@
 
 .code code {
   font-family: inherit;
-}
-
-.result {
-  margin-top: var(--space-1);
-}
-
-.resultSummary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  cursor: pointer;
-  list-style: none;
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: var(--font-medium);
-  padding: var(--space-1) 0;
-}
-
-.resultSummary::-webkit-details-marker {
-  display: none;
-}
-
-.resultSummary::marker {
-  content: '';
-}
-
-.resultHint {
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: var(--font-normal);
-  color: var(--text-muted);
-  opacity: 0.8;
-}
-
-.result[open] .resultHint {
-  display: none;
 }

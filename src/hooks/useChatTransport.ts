@@ -185,6 +185,21 @@ export function useChatTransport() {
                 }
               } else if (evt.type === 'chunk') {
                 s.onStreamChunk(evt.text);
+              } else if (evt.type === 'thinking') {
+                s.onStreamThinking(
+                  evt.payload.step ?? '',
+                  evt.payload.content ?? '',
+                );
+              } else if (evt.type === 'tool_start') {
+                s.onStreamToolStart(
+                  evt.payload.tool ?? '',
+                  evt.payload.args,
+                );
+              } else if (evt.type === 'tool_end') {
+                s.onStreamToolEnd(
+                  evt.payload.tool ?? '',
+                  evt.payload.result,
+                );
               } else if (evt.type === 'end') {
                 if (evt.conversation_id) {
                   s.setCurrentConversationId(evt.conversation_id);

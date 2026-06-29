@@ -25,7 +25,7 @@ export function MessageList() {
   const messages = useChatStore((s) => s.messages);
   const streaming = useChatStore((s) => s.streaming);
   const streamingText = useChatStore((s) => s.streamingText);
-  const streamingTools = useChatStore((s) => s.streamingTools);
+  const streamingEvents = useChatStore((s) => s.streamingEvents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
   const agents = useChatStore((s) => s.agents);
   const onStreamToolEnd = useChatStore((s) => s.onStreamToolEnd);
@@ -63,7 +63,7 @@ export function MessageList() {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [orderedMessages, streamingText, streaming, streamingTools, autoScroll]);
+  }, [orderedMessages, streamingText, streaming, streamingEvents, autoScroll]);
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
@@ -72,9 +72,16 @@ export function MessageList() {
     setAutoScroll(true);
   };
 
-  const hitlTool = streamingTools.find(
-    (t) => t.status === 'loading' && isDangerousTool(t.tool),
-  );
+  // HITL: 从 streamingEvents 中找 loading 态的危险工具
+  const hitlTool = useMemo(() => {
+    for (let i = streamingEvents.length - 1; i >= 0; i--) {
+      const ev = streamingEvents[i];
+      if (ev.kind === 'tool' && ev.status === 'loading' && isDangerousTool(ev.tool)) {
+        return ev;
+      }
+    }
+    return undefined;
+  }, [streamingEvents]);
 
   return (
     <div className={styles.wrap}>

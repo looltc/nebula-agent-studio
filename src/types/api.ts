@@ -182,6 +182,44 @@ export interface MessageInfo {
   role: string;
   content: string;
   ts: string;
+  /**
+   * 思考过程与工具调用的时间线事件，按到达顺序排列。
+   * 仅在流式期间由 chatStore 写入；历史会话从后端加载时此字段可能为空。
+   */
+  events?: TimelineEvent[];
+}
+
+/**
+ * 时间线事件：思考过程、工具调用、正文片段按到达顺序统一记录。
+ * 渲染时按 seq 升序排列，思考/工具与正文穿插输出，形成完整的对话流。
+ */
+export type TimelineEvent =
+  | TimelineTextEvent
+  | TimelineThinkingEvent
+  | TimelineToolEvent;
+
+export interface TimelineTextEvent {
+  kind: 'text';
+  seq: number;
+  content: string;
+}
+
+export interface TimelineThinkingEvent {
+  kind: 'thinking';
+  seq: number;
+  step: string;
+  content: string;
+}
+
+export interface TimelineToolEvent {
+  kind: 'tool';
+  seq: number;
+  id: string;
+  tool: string;
+  args?: Record<string, unknown>;
+  status: 'loading' | 'done' | 'error';
+  result?: unknown;
+  error?: string;
 }
 
 export interface ConversationMessagesResponse {
@@ -332,7 +370,26 @@ export interface SSEErrorEvent {
   type: 'error';
   error: string;
 }
-export type SSEEvent = SSEStartEvent | SSEChunkEvent | SSEEndEvent | SSEErrorEvent;
+export interface SSEThinkingEvent {
+  type: 'thinking';
+  payload: { step?: string; content?: string };
+}
+export interface SSEToolStartEvent {
+  type: 'tool_start';
+  payload: { tool?: string; args?: Record<string, unknown> };
+}
+export interface SSEToolEndEvent {
+  type: 'tool_end';
+  payload: { tool?: string; result?: unknown };
+}
+export type SSEEvent =
+  | SSEStartEvent
+  | SSEChunkEvent
+  | SSEEndEvent
+  | SSEErrorEvent
+  | SSEThinkingEvent
+  | SSEToolStartEvent
+  | SSEToolEndEvent;
 
 /* ---------- Metrics ---------- */
 export type MetricsText = string;

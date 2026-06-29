@@ -4,6 +4,7 @@ import type {
   AgentSummary,
   ConversationSummary,
   MessageInfo,
+  TimelineEvent,
 } from '@/types/api';
 
 export type ChatMode = 'ws' | 'sse' | 'http';
@@ -28,6 +29,7 @@ function writeLS(key: string, value: string): void {
 
 const LS_AGENT_ID = 'chat.currentAgentId';
 const LS_CHAT_MODE = 'chat.chatMode';
+const LS_CONVERSATION_ID = 'chat.currentConversationId';
 
 function initialChatMode(): ChatMode {
   const stored = readLS(LS_CHAT_MODE);
@@ -35,6 +37,10 @@ function initialChatMode(): ChatMode {
   return 'ws';
 }
 
+/**
+ * 流式期间使用的思考步骤类型（向后兼容导出）。
+ * 内部统一用 TimelineEvent，此类型仅用于 ToolCallBlock 等历史组件兼容。
+ */
 export interface StreamingThinkingStep {
   step: string;
   content: string;
@@ -62,8 +68,8 @@ export interface ChatState {
 
   streaming: boolean;
   streamingText: string;
-  streamingThinking: StreamingThinkingStep[];
-  streamingTools: StreamingTool[];
+  /** 流式期间的统一时间线事件（思考 + 工具），按 seq 升序。 */
+  streamingEvents: TimelineEvent[];
 
   loading: boolean;
   error: string | null;
@@ -89,6 +95,11 @@ export interface ChatState {
   clearChat: () => void;
   startNewChat: () => void;
   deleteConversation: (convId: string) => Promise<void>;
+  /**
+   * 页面刷新后恢复会话：从 localStorage 读取上次的 conversation_id，
+   * 若存在则重新加载该会话的消息列表，避免刷新后"正在进行的对话找不到"。
+   */
+  restoreSession: () => Promise<void>;
 }
 
 function genId(): string {
@@ -117,7 +128,11 @@ function trimLeadingNewlines(s: string): string {
   return s.replace(/^[\r\n\t ]+/, '');
 }
 
-export const useChatStore = create<ChatState>((set, get) => ({
+export const useChatStore = create<ChatState>((set, get) => {
+  /** 流式事件自增 seq，保证时间线顺序。每次 startStreaming 重置。 */
+  let streamSeq = 0;
+
+  return {
   agents: [],
   currentAgentId: readLS(LS_AGENT_ID),
   conversations: [],
@@ -132,8 +147,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   streaming: false,
   streamingText: '',
-  streamingThinking: [],
-  streamingTools: [],
+  streamingEvents: [],
 
   loading: false,
   error: null,
@@ -156,14 +170,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const { currentAgentId } = get();
     if (currentAgentId === agentId) return;
     writeLS(LS_AGENT_ID, agentId);
+    writeLS(LS_CONVERSATION_ID, '');
     set({
       currentAgentId: agentId,
       messages: [],
       currentConversationId: null,
       streaming: false,
       streamingText: '',
-      streamingThinking: [],
-      streamingTools: [],
+      streamingEvents: [],
       error: null,
     });
     void get().loadConversations();
@@ -212,7 +226,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   setCurrentConversationId: (id) => {
-    if (id) set({ currentConversationId: id });
+    if (id) {
+      writeLS(LS_CONVERSATION_ID, id);
+      set({ currentConversationId: id });
+    }
   },
 
   sendMessage: async (text) => {
@@ -235,8 +252,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         currentConversationId: res.conversation_id,
         streaming: false,
         streamingText: '',
-        streamingThinking: [],
-        streamingTools: [],
+        streamingEvents: [],
         loading: false,
       });
       // Refresh conversation list so the new conversation appears with its title
@@ -247,8 +263,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         error: msg,
         streaming: false,
         streamingText: '',
-        streamingThinking: [],
-        streamingTools: [],
+        streamingEvents: [],
         loading: false,
       });
     }
@@ -278,61 +293,84 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   startStreaming: () => {
+    streamSeq = 0;
     set({
       streaming: true,
       streamingText: '',
-      streamingThinking: [],
-      streamingTools: [],
+      streamingEvents: [],
     });
   },
 
   onStreamChunk: (text) => {
-    set((s) => ({ streamingText: s.streamingText + text }));
+    set((s) => {
+      const events = [...s.streamingEvents];
+      // 连续 chunk 合并到同一个 text 事件，避免文本碎片化
+      const last = events[events.length - 1];
+      if (last && last.kind === 'text') {
+        events[events.length - 1] = { ...last, content: last.content + text };
+      } else {
+        events.push({ kind: 'text' as const, seq: ++streamSeq, content: text });
+      }
+      return { streamingText: s.streamingText + text, streamingEvents: events };
+    });
   },
 
   onStreamThinking: (step, content) => {
-    set((s) => ({
-      streamingThinking: [...s.streamingThinking, { step, content }],
-    }));
+    set((s) => {
+      const events = [...s.streamingEvents];
+      // 连续相同 step 的 thinking 片段合并（如 reasoning 的多个 token 片段）
+      const last = events[events.length - 1];
+      if (last && last.kind === 'thinking' && last.step === step) {
+        events[events.length - 1] = { ...last, content: last.content + content };
+      } else {
+        events.push({ kind: 'thinking' as const, seq: ++streamSeq, step, content });
+      }
+      return { streamingEvents: events };
+    });
   },
 
   onStreamToolStart: (tool, args) => {
-    const t: StreamingTool = { id: genId(), tool, args, status: 'loading' };
-    set((s) => ({ streamingTools: [...s.streamingTools, t] }));
+    const seq = ++streamSeq;
+    const id = genId();
+    set((s) => ({
+      streamingEvents: [
+        ...s.streamingEvents,
+        { kind: 'tool' as const, seq, id, tool, args, status: 'loading' as const },
+      ],
+    }));
   },
 
   onStreamToolEnd: (tool, result) => {
     set((s) => {
-      const tools = [...s.streamingTools];
-      let idx = -1;
-      for (let i = tools.length - 1; i >= 0; i--) {
-        if (tools[i].tool === tool && tools[i].status === 'loading') {
-          idx = i;
+      // 从后向前找到第一个同名且 loading 的工具事件，更新为 done
+      const events = [...s.streamingEvents];
+      for (let i = events.length - 1; i >= 0; i--) {
+        const ev = events[i];
+        if (ev.kind === 'tool' && ev.tool === tool && ev.status === 'loading') {
+          events[i] = { ...ev, status: 'done', result };
           break;
         }
       }
-      if (idx >= 0) {
-        tools[idx] = { ...tools[idx], status: 'done', result };
-      }
-      return { streamingTools: tools };
+      return { streamingEvents: events };
     });
   },
 
   onStreamDone: (messageId) => {
-    const { streamingText, currentAgentId } = get();
+    const { streamingText, streamingEvents, currentAgentId } = get();
     const msg: MessageInfo = {
       id: messageId ?? genId(),
       source: currentAgentId ?? 'assistant',
       role: 'assistant',
       content: trimLeadingNewlines(streamingText),
       ts: nowIso(),
+      // 持久化思考/工具时间线，不再丢弃
+      events: streamingEvents.length > 0 ? streamingEvents : undefined,
     };
     set((s) => ({
       messages: [...s.messages, msg],
       streaming: false,
       streamingText: '',
-      streamingThinking: [],
-      streamingTools: [],
+      streamingEvents: [],
       loading: false,
     }));
     // Refresh conversation list so title updates
@@ -340,34 +378,45 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   onStreamError: (error) => {
-    get().appendAssistantMessage(`[Error: ${error}]`);
-    set({
+    // 错误时也保留已发生的思考/工具事件到错误消息上，便于排查
+    const { streamingEvents, currentAgentId } = get();
+    const msg: MessageInfo = {
+      id: genId(),
+      source: currentAgentId ?? 'assistant',
+      role: 'assistant',
+      content: `[Error: ${error}]`,
+      ts: nowIso(),
+      events: streamingEvents.length > 0 ? streamingEvents : undefined,
+    };
+    set((s) => ({
+      messages: [...s.messages, msg],
       error,
       streaming: false,
       streamingText: '',
-      streamingThinking: [],
-      streamingTools: [],
+      streamingEvents: [],
       loading: false,
-    });
+    }));
   },
 
   clearChat: () => {
+    writeLS(LS_CONVERSATION_ID, '');
     set({
       messages: [],
       streaming: false,
       streamingText: '',
+      streamingEvents: [],
       currentConversationId: null,
     });
   },
 
   startNewChat: () => {
+    writeLS(LS_CONVERSATION_ID, '');
     set({
       messages: [],
       currentConversationId: null,
       streaming: false,
       streamingText: '',
-      streamingThinking: [],
-      streamingTools: [],
+      streamingEvents: [],
       error: null,
     });
   },
@@ -382,13 +431,43 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set({ error: e instanceof Error ? e.message : String(e) });
       return;
     }
-    set((s) => ({
-      conversations: s.conversations.filter((c) => c.id !== convId),
-      currentConversationId:
-        s.currentConversationId === convId ? null : s.currentConversationId,
-      messages: s.currentConversationId === convId ? [] : s.messages,
-    }));
+    set((s) => {
+      const isCurrent = s.currentConversationId === convId;
+      if (isCurrent) writeLS(LS_CONVERSATION_ID, '');
+      return {
+        conversations: s.conversations.filter((c) => c.id !== convId),
+        currentConversationId: isCurrent ? null : s.currentConversationId,
+        messages: isCurrent ? [] : s.messages,
+      };
+    });
   },
-}));
+
+  restoreSession: async () => {
+    // 从 localStorage 恢复上次正在进行的 conversation
+    const savedConvId = readLS(LS_CONVERSATION_ID);
+    const { currentAgentId } = get();
+    if (!savedConvId || !currentAgentId) return;
+
+    try {
+      // 拉取该 conversation 的消息列表，恢复到 store
+      const res = await apiClient.getConversationMessages(savedConvId, 100);
+      const sorted = [...res.messages]
+        .map((m) =>
+          m.role === 'assistant' ? { ...m, content: trimLeadingNewlines(m.content) } : m,
+        )
+        .sort((a, b) => {
+          const ta = Date.parse(a.ts);
+          const tb = Date.parse(b.ts);
+          if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
+          return 0;
+        });
+      set({ messages: sorted, currentConversationId: savedConvId });
+    } catch {
+      // conversation 已被删除或不存在，清除 localStorage
+      writeLS(LS_CONVERSATION_ID, '');
+    }
+  },
+  };
+});
 
 export default useChatStore;

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import type { MessageInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
 import { MarkdownText } from './MarkdownText';
+import { TimelineView } from './TimelineView';
 import styles from './MessageBubble.module.css';
 
 export interface MessageBubbleProps {
@@ -34,6 +35,9 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
         ? '你'
         : message.source;
 
+  // 历史消息的思考/工具事件（streaming=false → 全部折叠）
+  const hasEvents = !isUser && message.events && message.events.length > 0;
+
   return (
     <div className={cx(styles.row, isUser ? styles.rowUser : styles.rowAgent)}>
       <div
@@ -47,9 +51,11 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
           // User messages stay as plain pre-wrapped text — users don't type
           // Markdown and we want newlines/indentation preserved verbatim.
           <div className={styles.text}>{message.content}</div>
+        ) : hasEvents ? (
+          // 有时间线事件时，正文也作为 text 事件穿插渲染
+          <TimelineView events={message.events!} streaming={false} />
         ) : (
-          // Assistant messages are rendered as GitHub-flavoured Markdown with
-          // syntax-highlighted code blocks.
+          // 无事件的历史消息：直接渲染 Markdown
           <MarkdownText content={message.content} />
         )}
       </div>
