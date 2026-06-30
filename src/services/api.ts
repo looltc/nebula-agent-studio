@@ -52,7 +52,11 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
   if (ct.includes('application/json')) {
     return (await res.json()) as T;
   }
-  return (await res.text()) as unknown as T;
+  // 非 JSON 响应（典型场景：后端未启动时 SPA fallback 返回 index.html）
+  // 不应作为合法数据返回，否则 store 会把字符串当对象解构出 undefined 字段
+  throw new ApiError(res.status, {
+    error: `Expected JSON response but got ${ct || 'unknown content-type'} (${res.status} ${res.statusText})`,
+  });
 }
 
 export const apiClient = {

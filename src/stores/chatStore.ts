@@ -160,7 +160,7 @@ export const useChatStore = create<ChatState>((set, get) => {
   loadAgents: async () => {
     try {
       const res = await apiClient.listAgents();
-      set({ agents: res.agents });
+      set({ agents: Array.isArray(res.agents) ? res.agents : [] });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
     }
@@ -189,7 +189,7 @@ export const useChatStore = create<ChatState>((set, get) => {
     try {
       const res = await apiClient.listConversations(currentAgentId);
       // Newest first: sort by started_at descending.
-      const sorted = [...res.conversations].sort((a, b) => {
+      const sorted = [...(Array.isArray(res.conversations) ? res.conversations : [])].sort((a, b) => {
         const ta = Date.parse(a.started_at);
         const tb = Date.parse(b.started_at);
         if (Number.isNaN(ta) && Number.isNaN(tb)) return 0;
@@ -209,7 +209,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       const res = await apiClient.getConversationMessages(convId, 100);
       // Sort by timestamp ascending to fix jumbled order; also strip leading
       // newlines from assistant messages so loaded history stays tidy.
-      const sorted = [...res.messages]
+      const sorted = [...(Array.isArray(res.messages) ? res.messages : [])]
         .map((m) =>
           m.role === 'assistant' ? { ...m, content: trimLeadingNewlines(m.content) } : m,
         )
@@ -458,7 +458,7 @@ export const useChatStore = create<ChatState>((set, get) => {
     try {
       // 拉取该 conversation 的消息列表，恢复到 store
       const res = await apiClient.getConversationMessages(savedConvId, 100);
-      const sorted = [...res.messages]
+      const sorted = [...(Array.isArray(res.messages) ? res.messages : [])]
         .map((m) =>
           m.role === 'assistant' ? { ...m, content: trimLeadingNewlines(m.content) } : m,
         )

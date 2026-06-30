@@ -171,7 +171,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ loading: true });
     try {
       const res = await apiClient.listAgents();
-      set({ agents: res.agents });
+      set({ agents: Array.isArray(res.agents) ? res.agents : [] });
     } catch (e) {
       console.error('Failed to load agents:', e);
     } finally {
@@ -182,7 +182,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   loadTools: async () => {
     try {
       const res = await apiClient.listTools();
-      set({ tools: res.tools });
+      set({ tools: Array.isArray(res.tools) ? res.tools : [] });
     } catch (e) {
       console.error('Failed to load tools:', e);
     }
@@ -191,7 +191,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   loadSkills: async () => {
     try {
       const res = await apiClient.listSkills();
-      set({ skills: res.skills });
+      set({ skills: Array.isArray(res.skills) ? res.skills : [] });
     } catch (e) {
       console.error('Failed to load skills:', e);
     }
