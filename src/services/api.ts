@@ -21,6 +21,10 @@ import type {
   ProviderTestResponse,
   ProviderSummary,
   RelationGraphResponse,
+  SkillDetail,
+  SkillInstallResult,
+  SkillListResponse,
+  SkillToggleResult,
   ToolListResponse,
   WorldStateResponse,
 } from '@/types/api';
@@ -129,6 +133,31 @@ export const apiClient = {
 
   /* Tools */
   listTools: () => api<ToolListResponse>('/tools'),
+
+  /* Skills */
+  listSkills: () => api<SkillListResponse>('/skills'),
+  getSkill: (name: string) =>
+    api<SkillDetail>(`/skills/${encodeURIComponent(name)}`),
+  uploadSkill: async (file: File): Promise<SkillInstallResult> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch(`${BASE}/skills/upload`, { method: 'POST', body: fd });
+    if (!r.ok) {
+      let body: ApiErrorBody = {};
+      try { body = await r.json(); } catch { body = { error: r.statusText }; }
+      throw new ApiError(r.status, body);
+    }
+    return r.json();
+  },
+  installSkillFromGithub: (url: string, subdirectory?: string) =>
+    api<SkillInstallResult>('/skills/install/github', {
+      method: 'POST',
+      body: JSON.stringify({ url, subdirectory: subdirectory ?? null }),
+    }),
+  deleteSkill: (name: string) =>
+    api<{ status: string }>(`/skills/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+  toggleSkill: (name: string) =>
+    api<SkillToggleResult>(`/skills/${encodeURIComponent(name)}/toggle`, { method: 'PUT' }),
 
   /* Group chats */
   listGroupChats: () => api<GroupChatListResponse>('/group-chats'),

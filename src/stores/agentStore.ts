@@ -6,6 +6,7 @@ import type {
   AgentSummary,
   AgentUpdateRequest,
   LLMSpecRequest,
+  SkillInfo,
   ToolInfo,
 } from '@/types/api';
 
@@ -23,6 +24,8 @@ export interface AgentFormState {
   goals: string[];
   constraints: string[];
   tools: string[];
+  /** 绑定的 Skill 名称列表 */
+  skills: string[];
   provider: string;
   model: string;
   temperature: number;
@@ -38,6 +41,9 @@ export interface AgentState {
   detailLoading: boolean;
   tools: ToolInfo[];
   selectedToolIds: string[];
+  /** 已安装的 Skill 列表（供 Agent 配置选择） */
+  skills: SkillInfo[];
+  selectedSkillIds: string[];
   createOpen: boolean;
   editingId: string | null; // null = create mode, string = edit mode
   setCreateOpen: (open: boolean) => void;
@@ -46,10 +52,12 @@ export interface AgentState {
 
   loadAgents: () => Promise<void>;
   loadTools: () => Promise<void>;
+  loadSkills: () => Promise<void>;
   selectAgent: (id: string) => void;
   loadAgentDetail: (id: string) => Promise<void>;
   updateForm: (partial: Partial<AgentFormState>) => void;
   toggleTool: (name: string) => void;
+  toggleSkill: (name: string) => void;
   addGoal: () => void;
   addConstraint: () => void;
   updateGoal: (index: number, value: string) => void;
@@ -78,6 +86,7 @@ function defaultForm(): AgentFormState {
     goals: [],
     constraints: [],
     tools: [],
+    skills: [],
     // Provider/Model must be explicitly chosen — no defaults, so the user is
     // forced to pick from configured providers instead of silently inheriting
     // an empty "openai" entry.
@@ -116,6 +125,7 @@ function buildCreateBody(form: AgentFormState): AgentCreateRequest {
     tools: form.tools,
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
+    skills: form.skills,
   };
 }
 
@@ -137,6 +147,7 @@ function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
     tools: form.tools,
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
+    skills: form.skills,
   };
 }
 
@@ -148,6 +159,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   detailLoading: false,
   tools: [],
   selectedToolIds: [],
+  skills: [],
+  selectedSkillIds: [],
   createOpen: false,
   editingId: null,
   setCreateOpen: (open) => set({ createOpen: open }),
@@ -172,6 +185,15 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       set({ tools: res.tools });
     } catch (e) {
       console.error('Failed to load tools:', e);
+    }
+  },
+
+  loadSkills: async () => {
+    try {
+      const res = await apiClient.listSkills();
+      set({ skills: res.skills });
+    } catch (e) {
+      console.error('Failed to load skills:', e);
     }
   },
 
@@ -203,6 +225,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         ? s.selectedToolIds.filter((t) => t !== name)
         : [...s.selectedToolIds, name];
       return { selectedToolIds: next, form: { ...s.form, tools: next } };
+    });
+  },
+
+  toggleSkill: (name) => {
+    set((s) => {
+      const has = s.selectedSkillIds.includes(name);
+      const next = has
+        ? s.selectedSkillIds.filter((t) => t !== name)
+        : [...s.selectedSkillIds, name];
+      return { selectedSkillIds: next, form: { ...s.form, skills: next } };
     });
   },
 
@@ -345,7 +377,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   resetForm: () => {
-    set({ form: defaultForm(), errors: {}, selectedToolIds: [], editingId: null });
+    set({ form: defaultForm(), errors: {}, selectedToolIds: [], selectedSkillIds: [], editingId: null });
   },
 
   duplicateAgent: (id) => {
@@ -382,12 +414,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         goals: detail.goals,
         constraints: detail.constraints,
         tools: detail.tools,
+        skills: detail.skills,
         provider: detail.llm.provider,
         model: detail.llm.model,
         temperature: detail.llm.temperature,
         avatar: detail.avatar ?? '',
       },
       selectedToolIds: detail.tools,
+      selectedSkillIds: detail.skills,
       errors: {},
     });
   },

@@ -5,6 +5,7 @@ import { useAgentStore } from '@/stores/agentStore';
 import { useConfigStore } from '@/stores/configStore';
 import { cx } from '@/lib/cx';
 import { ToolAuthorization } from './ToolAuthorization';
+import { SkillAuthorization } from '@/components/skills';
 import { ThinkingModelConfig } from './ThinkingModelConfig';
 import styles from './AgentCreateModal.module.css';
 
@@ -54,6 +55,10 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
   const tools = useAgentStore((s) => s.tools);
   const selectedToolIds = useAgentStore((s) => s.selectedToolIds);
   const toggleTool = useAgentStore((s) => s.toggleTool);
+  const skills = useAgentStore((s) => s.skills);
+  const selectedSkillIds = useAgentStore((s) => s.selectedSkillIds);
+  const toggleSkill = useAgentStore((s) => s.toggleSkill);
+  const loadSkills = useAgentStore((s) => s.loadSkills);
   const addGoal = useAgentStore((s) => s.addGoal);
   const addConstraint = useAgentStore((s) => s.addConstraint);
   const updateGoal = useAgentStore((s) => s.updateGoal);
@@ -78,8 +83,9 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
   useEffect(() => {
     if (createOpen) {
       loadProviders();
+      loadSkills();
     }
-  }, [createOpen, loadProviders]);
+  }, [createOpen, loadProviders, loadSkills]);
 
   // Auto-load models for the currently selected provider (if not loaded yet).
   useEffect(() => {
@@ -353,6 +359,21 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
             tools={tools}
             selectedIds={selectedToolIds}
             onToggle={toggleTool}
+          />
+        </section>
+
+        {/* ===== Skills ===== */}
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>
+            Skills
+            <span className={styles.sectionCount}>
+              {selectedSkillIds.length}/{skills.length} 已选
+            </span>
+          </h3>
+          <SkillAuthorization
+            skills={skills}
+            selectedIds={selectedSkillIds}
+            onToggle={toggleSkill}
           />
         </section>
 

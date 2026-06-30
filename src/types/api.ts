@@ -59,6 +59,8 @@ export interface AgentCreateRequest {
   llm: LLMSpecRequest | null;
   /** 头像文件名（如 "cat.jpg"），可空 */
   avatar?: string | null;
+  /** 绑定的 Skill 名称列表 */
+  skills: string[];
 }
 
 export interface AgentCreateResponse {
@@ -90,6 +92,8 @@ export interface AgentDetailResponse {
   };
   /** 头像文件名（位于 /avatars/ 目录下，如 "cat.jpg"），可空 */
   avatar?: string | null;
+  /** 绑定的 Skill 名称列表 */
+  skills: string[];
 }
 
 export interface AgentUpdateRequest {
@@ -110,6 +114,8 @@ export interface AgentUpdateRequest {
   llm: LLMSpecRequest | null;
   /** 头像文件名（如 "cat.jpg"），可空 */
   avatar?: string | null;
+  /** 绑定的 Skill 名称列表 */
+  skills: string[];
 }
 
 /* ---------- LLM Providers ---------- */
@@ -275,6 +281,44 @@ export interface ToolInfo {
 export interface ToolListResponse {
   tools: ToolInfo[];
   count: number;
+}
+
+/* ---------- Skills ---------- */
+export interface SkillInfo {
+  name: string;
+  description: string;
+  version: string;
+  source: 'local' | 'upload' | 'github';
+  source_url: string | null;
+  license: string | null;
+  compatibility: string | null;
+  enabled: boolean;
+  has_scripts: boolean;
+  has_references: boolean;
+  has_assets: boolean;
+  installed_at: string | null;
+}
+
+export interface SkillListResponse {
+  skills: SkillInfo[];
+}
+
+export interface SkillDetail extends SkillInfo {
+  body: string;
+  scripts: string[];
+  references: string[];
+  assets: string[];
+}
+
+export interface SkillInstallResult {
+  status: string;
+  count: number;
+  skills: { name: string; description: string }[];
+}
+
+export interface SkillToggleResult {
+  status: string;
+  enabled: boolean;
 }
 
 /* ---------- Group Chats ---------- */

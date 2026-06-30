@@ -10,6 +10,7 @@ const AgentsPage = lazy(() => import('@/pages/AgentsPage'));
 const OrchestrationPage = lazy(() => import('@/pages/OrchestrationPage'));
 const ObservePage = lazy(() => import('@/pages/ObservePage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const SkillHubPage = lazy(() => import('@/pages/SkillHubPage'));
 
 function PageFallback() {
   return (
@@ -60,6 +61,14 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <AgentsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/skills"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <SkillHubPage />
             </Suspense>
           }
         />

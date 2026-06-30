@@ -11,6 +11,7 @@ import {
   Cpu,
   Database,
   User,
+  Puzzle,
 } from 'lucide-react';
 import {
   Card,
@@ -284,6 +285,22 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
                   <p className={styles.emptyText}>该 Agent 未授权任何工具。</p>
                 )}
               </Card>
+
+              {currentDetail.skills.length > 0 && (
+                <Card className={styles.section}>
+                  <SectionTitle icon={<Puzzle size={14} />}>
+                    Skills
+                    <span className={styles.sectionCount}>{currentDetail.skills.length}</span>
+                  </SectionTitle>
+                  <div className={styles.toolList}>
+                    {currentDetail.skills.map((name) => (
+                      <div key={name} className={styles.toolRow}>
+                        <span className={styles.toolName}>{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
 
               <Card className={styles.section}>
                 <SectionTitle icon={<Database size={14} />}>记忆</SectionTitle>
