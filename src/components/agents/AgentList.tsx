@@ -13,14 +13,13 @@ import {
   useToast,
 } from '@/components/ui';
 import { useAgentStore } from '@/stores/agentStore';
-import type { AgentSummary, ToolInfo } from '@/types/api';
+import type { AgentSummary } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './AgentList.module.css';
 
 export interface AgentListProps {
   agents: AgentSummary[];
   loading: boolean;
-  tools: ToolInfo[];
   /** Toggle local pause/resume. Parent owns the override state. */
   onTogglePause: (id: string) => void;
   className?: string;
@@ -33,7 +32,6 @@ export interface AgentListProps {
 export function AgentList({
   agents,
   loading,
-  tools,
   onTogglePause,
   className,
 }: AgentListProps) {
@@ -103,16 +101,20 @@ export function AgentList({
     );
   }
 
-  const toolNames = tools.map((t) => t.name);
+  // 按修改时间倒序：最近修改的 Agent 排在最前。无 updated_at 的排到末尾。
+  const sortedAgents = [...agents].sort((a, b) => {
+    const ta = a.updated_at ? Date.parse(a.updated_at) : 0;
+    const tb = b.updated_at ? Date.parse(b.updated_at) : 0;
+    return tb - ta;
+  });
 
   return (
     <>
       <div className={cx(styles.grid, className)}>
-        {agents.map((agent) => (
+        {sortedAgents.map((agent) => (
           <AgentCardItem
             key={agent.id}
             agent={agent}
-            toolNames={toolNames}
             onOpen={open}
             onEdit={() => startEdit(agent.id)}
             onDuplicate={handleDuplicate}
@@ -153,7 +155,6 @@ export function AgentList({
 
 interface AgentCardItemProps {
   agent: AgentSummary;
-  toolNames: string[];
   onOpen: (id: string) => void;
   onEdit: () => void;
   onDuplicate: (agent: AgentSummary) => void;
@@ -163,7 +164,6 @@ interface AgentCardItemProps {
 
 function AgentCardItem({
   agent,
-  toolNames,
   onOpen,
   onEdit,
   onDuplicate,
@@ -197,8 +197,12 @@ function AgentCardItem({
     toast.info(isActive ? 'Agent 已暂停' : 'Agent 已恢复', agent.name);
   };
 
-  const previewTools = toolNames.slice(0, 2);
-  const extraTools = Math.max(0, toolNames.length - previewTools.length);
+  const agentTools = agent.tools ?? [];
+  const agentSkills = agent.skills ?? [];
+  const previewTools = agentTools.slice(0, 2);
+  const extraTools = Math.max(0, agentTools.length - previewTools.length);
+  const previewSkills = agentSkills.slice(0, 2);
+  const extraSkills = Math.max(0, agentSkills.length - previewSkills.length);
 
   return (
     <Card className={styles.card} onClick={() => onOpen(agent.id)}>
@@ -292,11 +296,11 @@ function AgentCardItem({
 
       <div className={styles.metaRow}>
         <span className={styles.metaKey}>思维</span>
-        <Badge variant="mono">ReAct</Badge>
+        <Badge variant="mono">{agent.thinking_model || 'react'}</Badge>
       </div>
       <div className={styles.metaRow}>
         <span className={styles.metaKey}>Model</span>
-        <Badge variant="mono">gpt-4o</Badge>
+        <Badge variant="mono">{agent.llm?.model || '—'}</Badge>
       </div>
       <div className={styles.metaRow}>
         <span className={styles.metaKey}>工具</span>
@@ -315,18 +319,22 @@ function AgentCardItem({
           )}
         </div>
       </div>
-
-      <div className={styles.divider} />
-
-      <div className={styles.stats}>
-        <span className={styles.stat}>
-          <span className={styles.statLabel}>消息数</span>
-          <span className={styles.statValue}>0</span>
-        </span>
-        <span className={styles.stat}>
-          <span className={styles.statLabel}>Token</span>
-          <span className={styles.statValue}>0</span>
-        </span>
+      <div className={styles.metaRow}>
+        <span className={styles.metaKey}>Skills</span>
+        <div className={styles.toolBadges}>
+          {previewSkills.length > 0 ? (
+            <>
+              {previewSkills.map((s) => (
+                <Badge key={s} variant="mono">
+                  {s}
+                </Badge>
+              ))}
+              {extraSkills > 0 && <Badge variant="default">+{extraSkills}</Badge>}
+            </>
+          ) : (
+            <span className={styles.metaEmpty}>&mdash;</span>
+          )}
+        </div>
       </div>
     </Card>
   );
@@ -350,11 +358,6 @@ function SkeletonBlock() {
       <div className={styles.skDivider} />
       <Skeleton width="90%" height={12} />
       <Skeleton width="70%" height={12} />
-      <div className={styles.skDivider} />
-      <div className={styles.skStats}>
-        <Skeleton width={70} height={12} />
-        <Skeleton width={70} height={12} />
-      </div>
     </div>
   );
 }

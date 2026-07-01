@@ -23,7 +23,6 @@ export default function AgentsPage() {
 
   const agents = useAgentStore((s) => s.agents);
   const loading = useAgentStore((s) => s.loading);
-  const tools = useAgentStore((s) => s.tools);
   const loadAgents = useAgentStore((s) => s.loadAgents);
   const loadTools = useAgentStore((s) => s.loadTools);
   const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
@@ -156,7 +155,6 @@ export default function AgentsPage() {
           <AgentList
             agents={displayedAgents}
             loading={loading}
-            tools={tools}
             onTogglePause={handleTogglePause}
           />
         </>

@@ -247,7 +247,7 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
               </Card>
 
               <Card className={styles.section}>
-                <SectionTitle icon={<User size={14} />}>身份</SectionTitle>
+                <SectionTitle icon={<User size={14} />}>身份与人设</SectionTitle>
                 <Field label="人设">
                   <p className={styles.persona}>
                     {currentDetail.persona || '（未设置）'}
@@ -263,6 +263,18 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
                   items={currentDetail.constraints}
                   emptyText="（未设置约束）"
                 />
+                <Field label="System Prompt">
+                  <details className={styles.promptDetails}>
+                    <summary className={styles.promptSummary}>
+                      <span>点击展开</span>
+                    </summary>
+                    <pre className={styles.promptCode}>
+                      <code>
+                        {currentDetail.system_prompt || '（未设置 System Prompt）'}
+                      </code>
+                    </pre>
+                  </details>
+                </Field>
               </Card>
 
               <Card className={styles.section}>
@@ -308,20 +320,6 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
                   <KV label="类型" value="Buffer" />
                   <KV label="容量" value={`${currentDetail.max_messages}`} mono />
                 </div>
-              </Card>
-
-              <Card className={styles.section}>
-                <SectionTitle>System Prompt</SectionTitle>
-                <details className={styles.promptDetails}>
-                  <summary className={styles.promptSummary}>
-                    <span>点击展开</span>
-                  </summary>
-                  <pre className={styles.promptCode}>
-                    <code>
-                      {currentDetail.system_prompt || '（未设置 System Prompt）'}
-                    </code>
-                  </pre>
-                </details>
               </Card>
             </>
           ) : (

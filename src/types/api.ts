@@ -28,6 +28,19 @@ export interface AgentSummary {
   enabled: boolean;
   /** 头像文件名（位于 /avatars/ 目录下，如 "cat.jpg"）；未配置时由 UI fallback 到首字母 */
   avatar?: string | null;
+  /** 思维模式类型：react / plan_execute / reflexion */
+  thinking_model?: string;
+  /** LLM 摘要信息（用于卡片展示） */
+  llm?: {
+    provider: string;
+    model: string;
+  };
+  /** Agent 授权的工具名称列表 */
+  tools?: string[];
+  /** Agent 绑定的 Skill 名称列表 */
+  skills?: string[];
+  /** 修改时间（ISO 8601 字符串，UTC），用于按修改时间倒序排序 */
+  updated_at?: string | null;
 }
 
 export interface AgentListResponse {

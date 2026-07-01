@@ -120,34 +120,6 @@
   color: var(--text-muted);
 }
 
-/* ===== Stats ===== */
-.stats {
-  display: flex;
-  gap: var(--space-6);
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.statLabel {
-  font-size: var(--text-xs);
-  line-height: var(--line-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.statValue {
-  font-size: var(--text-sm);
-  line-height: var(--line-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-}
-
 /* ===== Operation menu ===== */
 .menuWrap {
   position: relative;
@@ -282,9 +254,4 @@
 .skDivider {
   height: 1px;
   background: var(--border-divider);
-}
-
-.skStats {
-  display: flex;
-  gap: var(--space-6);
 }

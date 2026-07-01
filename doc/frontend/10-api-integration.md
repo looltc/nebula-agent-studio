@@ -2,7 +2,16 @@
 
 定义前端与后端 API 的对接方式、WebSocket 协议、错误处理和状态管理。
 
-> **设计参考**：后端 API 端点定义见 `src/nebula/api/server.py`
+> **设计参考**：后端 API 已按领域分离，端点定义分布在 `src/nebula/api/routes/` 下的 7 个领域 router：
+> - `routes/agents.py` — Agent CRUD
+> - `routes/skills.py` — Skill 管理
+> - `routes/providers.py` — LLM Provider 管理
+> - `routes/chat.py` — 对话 + SSE
+> - `routes/world.py` — 世界状态 + 工具 + 健康
+> - `routes/group_chats.py` — 群聊
+> - `routes/streaming.py` — WebSocket 流式
+>
+> 请求模型见 `src/nebula/api/schemas.py`，状态加载见 `src/nebula/api/persistence.py`，全局状态见 `src/nebula/api/deps.py`。
 
 ## 模块清单
 
@@ -29,21 +38,41 @@
 
 ### 端点清单
 
-| 方法 | 端点 | 前端用途 | 参数 |
-|------|------|---------|------|
-| GET | `/api/health` | 连接检测 | 无 |
-| GET | `/api/world` | 世界状态 | 无 |
-| GET | `/api/agents` | Agent 列表 | 无 |
-| POST | `/api/agents` | 创建 Agent | `AgentCreateRequest` |
-| POST | `/api/chat` | HTTP 模式聊天 | `ChatRequest` |
-| GET | `/api/conversations` | 对话列表 | 无 |
-| GET | `/api/conversations/{id}/messages` | 对话消息 | `limit` |
-| GET | `/api/events` | 事件列表 | `from_tick`, `limit` |
-| GET | `/api/relations` | 关系图 | 无 |
-| GET | `/api/tools` | 工具列表 | 无 |
-| POST | `/api/group-chats` | 创建群聊 | body |
-| GET | `/api/group-chats` | 群聊列表 | 无 |
-| GET | `/metrics` | Prometheus 指标 | 无 |
+| 方法 | 端点 | 前端用途 | 参数 | 路由文件 |
+|------|------|---------|------|---------|
+| GET | `/api/health` | 连接检测 | 无 | `world.py` |
+| GET | `/api/world` | 世界状态 | 无 | `world.py` |
+| GET | `/api/agents` | Agent 列表（含 thinking_model/llm/tools/skills/updated_at） | 无 | `agents.py` |
+| POST | `/api/agents` | 创建 Agent | `AgentCreateRequest` | `agents.py` |
+| GET | `/api/agents/{id}` | Agent 详情 | 无 | `agents.py` |
+| PUT | `/api/agents/{id}` | 更新 Agent | `AgentCreateRequest` | `agents.py` |
+| DELETE | `/api/agents/{id}` | 删除 Agent | 无 | `agents.py` |
+| GET | `/api/skills` | Skill 列表 | 无 | `skills.py` |
+| GET | `/api/skills/{name}` | Skill 详情 | 无 | `skills.py` |
+| DELETE | `/api/skills/{name}` | 删除 Skill | 无 | `skills.py` |
+| POST | `/api/skills/upload` | 上传 Skill | multipart | `skills.py` |
+| POST | `/api/skills/install/github` | 从 GitHub 安装 Skill | `GithubInstallRequest` | `skills.py` |
+| PUT | `/api/skills/{name}/toggle` | 启用/禁用 Skill | 无 | `skills.py` |
+| GET | `/api/llm/providers` | Provider 列表 | 无 | `providers.py` |
+| POST | `/api/llm/providers` | 创建 Provider | `ProviderCreateRequest` | `providers.py` |
+| PUT | `/api/llm/providers/{id}` | 更新 Provider | `ProviderCreateRequest` | `providers.py` |
+| DELETE | `/api/llm/providers/{id}` | 删除 Provider | 无 | `providers.py` |
+| POST | `/api/llm/providers/{id}/test` | 测试 Provider 连通性 | 无 | `providers.py` |
+| GET | `/api/llm/providers/{id}/models` | 拉取 Provider 模型列表 | 无 | `providers.py` |
+| POST | `/api/chat` | HTTP 模式聊天 | `ChatRequest` | `chat.py` |
+| GET | `/api/chat/sse/{id}` | SSE 流式聊天 | `message` query | `chat.py` |
+| GET | `/api/conversations` | 对话列表 | 无 | `chat.py` |
+| GET | `/api/conversations/{id}/messages` | 对话消息 | `limit` | `chat.py` |
+| DELETE | `/api/conversations/{id}` | 删除对话 | 无 | `chat.py` |
+| GET | `/api/events` | 事件列表 | `from_tick`, `limit` | `chat.py` |
+| GET | `/api/relations` | 关系图 | 无 | `world.py` |
+| GET | `/api/tools` | 工具列表 | 无 | `world.py` |
+| POST | `/api/group-chats` | 创建群聊 | body | `group_chats.py` |
+| GET | `/api/group-chats` | 群聊列表 | 无 | `group_chats.py` |
+| GET | `/api/observability/status` | 追踪状态 | 无 | `world.py` |
+| GET | `/metrics` | Prometheus 指标 | 无 | `world.py` |
+| WS | `/ws/chat/{id}` | 双向聊天 | 无 | `streaming.py` |
+| WS | `/ws/chat/stream/{id}` | 流式聊天 | 无 | `streaming.py` |
 
 ### 前端调用封装
 
@@ -320,6 +349,9 @@ src/
 
 ## 相关文档
 
-- 后端 `src/nebula/api/server.py`
+- 后端 `src/nebula/api/routes/` （7 个领域 router）
+- 后端 `src/nebula/api/schemas.py`（请求模型）
+- 后端 `src/nebula/api/deps.py`（全局状态 + 服务）
+- 后端 `src/nebula/api/persistence.py`（状态加载 + 配置构建）
 - [05-chat-interface.md](./05-chat-interface.md)
 - [01-overview.md](./01-overview.md)

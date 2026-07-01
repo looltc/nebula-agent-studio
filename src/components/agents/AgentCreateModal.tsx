@@ -255,6 +255,19 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
             placeholder="不得编造事实"
             addLabel="添加约束"
           />
+
+          <Field label="System Prompt" error={errors.systemPrompt}>
+            <TextArea
+              rows={5}
+              value={form.systemPrompt}
+              maxLength={SYSTEM_PROMPT_MAX}
+              placeholder="你是一个乐于助人的助手。参与对话、回答问题并提供协助。"
+              onChange={(e) => updateForm({ systemPrompt: e.target.value })}
+            />
+          </Field>
+          <div className={cx(styles.charCount, promptOver && styles.charOver)}>
+            {form.systemPrompt.length} / {SYSTEM_PROMPT_MAX}
+          </div>
         </section>
 
         {/* ===== 思维模型 (Thinking Model) ===== */}
@@ -409,23 +422,6 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
                 onChange={(e) => updateForm({ maxMessages: Number(e.target.value) })}
               />
             </Field>
-          </div>
-        </section>
-
-        {/* ===== System Prompt ===== */}
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>System Prompt</h3>
-          <Field error={errors.systemPrompt}>
-            <TextArea
-              rows={5}
-              value={form.systemPrompt}
-              maxLength={SYSTEM_PROMPT_MAX}
-              placeholder="你是一个乐于助人的助手。参与对话、回答问题并提供协助。"
-              onChange={(e) => updateForm({ systemPrompt: e.target.value })}
-            />
-          </Field>
-          <div className={cx(styles.charCount, promptOver && styles.charOver)}>
-            {form.systemPrompt.length} / {SYSTEM_PROMPT_MAX}
           </div>
         </section>
       </div>

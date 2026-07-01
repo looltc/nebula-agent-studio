@@ -1,5 +1,5 @@
 import { Puzzle } from 'lucide-react';
-import { Checkbox, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import type { SkillInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './SkillAuthorization.module.css';
@@ -18,10 +18,8 @@ const SOURCE_VARIANT: Record<SkillInfo['source'], 'mono' | 'primary' | 'success'
 };
 
 /**
- * Skill authorization list. Each row exposes a checkbox bound to the parent
- * store, the skill name, a source badge and a description. Used in the Agent
- * create/edit modal to pick which Skills an Agent may invoke. Skills carry no
- * safety tier, so there is no dangerous indicator here.
+ * Skill authorization grid. Each card is a clickable label that toggles the
+ * embedded checkbox. Compact grid layout matching ToolAuthorization.
  */
 export function SkillAuthorization({
   skills,
@@ -39,27 +37,30 @@ export function SkillAuthorization({
   }
 
   return (
-    <div className={cx(styles.list, className)}>
+    <div className={cx(styles.grid, className)}>
       {skills.map((skill) => {
         const checked = selectedIds.includes(skill.name);
         return (
-          <div
+          <label
             key={skill.name}
-            className={cx(styles.row, checked && styles.rowChecked)}
+            className={cx(styles.card, checked && styles.cardChecked)}
           >
-            <div className={styles.rowMain}>
-              <Checkbox checked={checked} onChange={() => onToggle(skill.name)} />
-              <div className={styles.rowBody}>
-                <div className={styles.rowHead}>
-                  <span className={styles.toolName}>{skill.name}</span>
-                  <Badge variant={SOURCE_VARIANT[skill.source]}>{skill.source}</Badge>
-                </div>
-                {skill.description && (
-                  <p className={styles.toolDesc}>{skill.description}</p>
-                )}
+            <input
+              type="checkbox"
+              className={styles.checkbox}
+              checked={checked}
+              onChange={() => onToggle(skill.name)}
+            />
+            <div className={styles.cardBody}>
+              <div className={styles.cardHead}>
+                <span className={styles.skillName}>{skill.name}</span>
+                <Badge variant={SOURCE_VARIANT[skill.source]}>{skill.source}</Badge>
               </div>
+              {skill.description && (
+                <p className={styles.skillDesc}>{skill.description}</p>
+              )}
             </div>
-          </div>
+          </label>
         );
       })}
     </div>

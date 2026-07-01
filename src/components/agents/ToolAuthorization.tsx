@@ -1,5 +1,5 @@
 import { AlertTriangle, ChevronDown, Wrench } from 'lucide-react';
-import { Checkbox, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import type { ToolInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './ToolAuthorization.module.css';
@@ -22,10 +22,9 @@ function formatSchema(schema: unknown): string {
 }
 
 /**
- * Tool authorization list. Each row exposes a checkbox bound to the parent
- * store, a SAFE/DANGEROUS badge, timeout + description, and a collapsible
- * JSON parameter schema. Selecting a dangerous tool surfaces an inline HITL
- * approval warning.
+ * Tool authorization grid. Each card is a clickable label that toggles the
+ * embedded checkbox. Compact grid layout (2-3 columns) instead of a vertical
+ * list. Selecting a dangerous tool surfaces an inline HITL approval warning.
  */
 export function ToolAuthorization({
   tools,
@@ -43,51 +42,51 @@ export function ToolAuthorization({
   }
 
   return (
-    <div className={cx(styles.list, className)}>
+    <div className={cx(styles.grid, className)}>
       {tools.map((tool) => {
         const checked = selectedIds.includes(tool.name);
         const dangerous = Boolean(tool.dangerous);
         const showDanger = dangerous && checked;
         return (
-          <div
+          <label
             key={tool.name}
-            className={cx(styles.row, checked && styles.rowChecked, dangerous && styles.rowDanger)}
+            className={cx(styles.card, checked && styles.cardChecked, dangerous && styles.cardDanger)}
           >
-            <div className={styles.rowMain}>
-              <Checkbox checked={checked} onChange={() => onToggle(tool.name)} />
-              <div className={styles.rowBody}>
-                <div className={styles.rowHead}>
-                  <span className={styles.toolName}>{tool.name}</span>
-                  <Badge variant={dangerous ? 'danger' : 'success'}>
-                    {dangerous ? 'dangerous' : 'safe'}
-                  </Badge>
-                  {tool.timeout_s !== null && tool.timeout_s !== undefined && (
-                    <span className={styles.timeout}>timeout: {tool.timeout_s}s</span>
-                  )}
-                </div>
-                {tool.description && (
-                  <p className={styles.toolDesc}>{tool.description}</p>
-                )}
-                {showDanger && (
-                  <div className={styles.warn} role="note">
-                    <AlertTriangle size={13} className={styles.warnIcon} />
-                    <span>This tool requires HITL approval</span>
-                  </div>
-                )}
-                {tool.schema && (
-                  <details className={styles.schema}>
-                    <summary className={styles.schemaSummary}>
-                      <span>Parameters</span>
-                      <ChevronDown size={13} className={styles.schemaChevron} />
-                    </summary>
-                    <pre className={styles.schemaCode}>
-                      <code>{formatSchema(tool.schema)}</code>
-                    </pre>
-                  </details>
-                )}
+            <input
+              type="checkbox"
+              className={styles.checkbox}
+              checked={checked}
+              onChange={() => onToggle(tool.name)}
+            />
+            <div className={styles.cardBody}>
+              <div className={styles.cardHead}>
+                <span className={styles.toolName}>{tool.name}</span>
+                <Badge variant={dangerous ? 'danger' : 'success'}>
+                  {dangerous ? 'dangerous' : 'safe'}
+                </Badge>
               </div>
+              {tool.description && (
+                <p className={styles.toolDesc}>{tool.description}</p>
+              )}
+              {showDanger && (
+                <div className={styles.warn} role="note">
+                  <AlertTriangle size={12} className={styles.warnIcon} />
+                  <span>需要 HITL 审批</span>
+                </div>
+              )}
+              {tool.schema && (
+                <details className={styles.schema} onClick={(e) => e.stopPropagation()}>
+                  <summary className={styles.schemaSummary}>
+                    <span>参数</span>
+                    <ChevronDown size={12} className={styles.schemaChevron} />
+                  </summary>
+                  <pre className={styles.schemaCode}>
+                    <code>{formatSchema(tool.schema)}</code>
+                  </pre>
+                </details>
+              )}
             </div>
-          </div>
+          </label>
         );
       })}
     </div>
