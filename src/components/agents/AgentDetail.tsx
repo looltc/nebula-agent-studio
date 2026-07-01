@@ -27,6 +27,7 @@ import {
 import { useAgentStore } from '@/stores/agentStore';
 import type { AgentSummary } from '@/types/api';
 import { cx } from '@/lib/cx';
+import { MemoryPanel } from './MemoryPanel';
 import styles from './AgentDetail.module.css';
 
 export interface AgentDetailProps {
@@ -317,8 +318,15 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
               <Card className={styles.section}>
                 <SectionTitle icon={<Database size={14} />}>记忆</SectionTitle>
                 <div className={styles.kvGrid}>
-                  <KV label="类型" value="Buffer" />
-                  <KV label="容量" value={`${currentDetail.max_messages}`} mono />
+                  <KV label="L2 类型" value="Buffer" />
+                  <KV label="L2 容量" value={`${currentDetail.max_messages}`} mono />
+                </div>
+                {/* L3 长期记忆可视化：统计 + 列表 + 过滤 + 遗忘 + 梦境整理 */}
+                <div className={styles.memoryPanelWrap}>
+                  <MemoryPanel
+                    agentId={agent.id}
+                    bufferCapacity={currentDetail.max_messages}
+                  />
                 </div>
               </Card>
             </>

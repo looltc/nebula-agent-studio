@@ -7,6 +7,7 @@ import type {
   ApiErrorBody,
   ChatRequest,
   ChatResponse,
+  ConsolidateResponse,
   ConversationListResponse,
   ConversationMessagesResponse,
   EventListResponse,
@@ -14,6 +15,8 @@ import type {
   GroupChatCreateResponse,
   GroupChatListResponse,
   HealthResponse,
+  MemoryListResponse,
+  MemoryStats,
   MetricsText,
   ProviderCreateRequest,
   ProviderListResponse,
@@ -170,6 +173,27 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+
+  /* Memory (L3 long-term) */
+  listMemory: (agentId: string, memoryType?: string, limit = 50) => {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (memoryType) params.set('memory_type', memoryType);
+    return api<MemoryListResponse>(
+      `/agents/${encodeURIComponent(agentId)}/memory?${params.toString()}`,
+    );
+  },
+  forgetMemory: (agentId: string, memoryId: string) =>
+    api<{ status: string; id: string }>(
+      `/agents/${encodeURIComponent(agentId)}/memory/${encodeURIComponent(memoryId)}`,
+      { method: 'DELETE' },
+    ),
+  consolidateMemory: (agentId: string) =>
+    api<ConsolidateResponse>(
+      `/agents/${encodeURIComponent(agentId)}/memory/consolidate`,
+      { method: 'POST' },
+    ),
+  memoryStats: (agentId: string) =>
+    api<MemoryStats>(`/agents/${encodeURIComponent(agentId)}/memory/stats`),
 
   /* Metrics (Prometheus text) — root path, not under /api */
   metrics: async (): Promise<MetricsText> => {

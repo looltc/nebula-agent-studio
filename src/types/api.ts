@@ -74,6 +74,32 @@ export interface AgentCreateRequest {
   avatar?: string | null;
   /** 绑定的 Skill 名称列表 */
   skills: string[];
+  /** 记忆配置（L2 短期 + L3 长期）；后端有默认值，旧前端不传也兼容 */
+  memory?: MemoryConfigRequest;
+}
+
+export type MemoryModuleType = 'semantic' | 'episodic' | 'preference' | 'procedural';
+
+export interface ConsolidationConfig {
+  enabled: boolean;
+  idle_timeout_s: number;
+}
+
+export interface EmbeddingConfig {
+  provider: string;
+  model: string;
+}
+
+export interface LongTermMemoryConfig {
+  enabled: boolean;
+  modules: MemoryModuleType[];
+  consolidation: ConsolidationConfig;
+  embedding: EmbeddingConfig;
+}
+
+export interface MemoryConfigRequest {
+  max_messages: number;
+  long_term: LongTermMemoryConfig;
 }
 
 export interface AgentCreateResponse {
@@ -107,6 +133,8 @@ export interface AgentDetailResponse {
   avatar?: string | null;
   /** 绑定的 Skill 名称列表 */
   skills: string[];
+  /** 记忆配置（后端始终返回，旧 Agent 也含默认 long_term.enabled=false） */
+  memory?: MemoryConfigRequest;
 }
 
 export interface AgentUpdateRequest {
@@ -129,6 +157,8 @@ export interface AgentUpdateRequest {
   avatar?: string | null;
   /** 绑定的 Skill 名称列表 */
   skills: string[];
+  /** 记忆配置（L2 短期 + L3 长期） */
+  memory?: MemoryConfigRequest;
 }
 
 /* ---------- LLM Providers ---------- */
@@ -332,6 +362,55 @@ export interface SkillInstallResult {
 export interface SkillToggleResult {
   status: string;
   enabled: boolean;
+}
+
+/* ---------- Memory (L3 long-term) ---------- */
+export type MemoryType = 'semantic' | 'episodic' | 'preference' | 'procedural';
+
+export interface MemoryItem {
+  id: string;
+  agent_id: string;
+  memory_type: string;
+  content: string;
+  tags: string[];
+  entities: string[];
+  importance: number;
+  access_count: number;
+  last_access_at: string | null;
+  ttl: number | null;
+  metadata: Record<string, unknown>;
+  ts: string;
+}
+
+export interface MemoryListResponse {
+  agent_id: string;
+  count: number;
+  memories: MemoryItem[];
+}
+
+export interface MemoryStats {
+  agent_id: string;
+  total_count: number;
+  by_type: Record<string, number>;
+  avg_importance: number;
+  total_access_count: number;
+}
+
+export interface DreamReport {
+  started_at: string;
+  duration_s: number;
+  extracted: number;
+  deep_encoded: number;
+  re_encoded: number;
+  merged: number;
+  reinforced: number;
+  forgotten: number;
+  errors: string[];
+}
+
+export interface ConsolidateResponse {
+  agent_id: string;
+  report: DreamReport;
 }
 
 /* ---------- Group Chats ---------- */

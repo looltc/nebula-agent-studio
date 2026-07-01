@@ -543,3 +543,10 @@
   font-family: var(--font-mono);
   word-break: break-all;
 }
+
+/* ===== Memory panel wrapper ===== */
+.memoryPanelWrap {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-divider);
+}

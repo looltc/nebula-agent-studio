@@ -6,6 +6,8 @@ import type {
   AgentSummary,
   AgentUpdateRequest,
   LLMSpecRequest,
+  LongTermMemoryConfig,
+  MemoryModuleType,
   SkillInfo,
   ToolInfo,
 } from '@/types/api';
@@ -31,6 +33,8 @@ export interface AgentFormState {
   temperature: number;
   /** 头像文件名（如 "cat.jpg"）；空字符串表示未选择 */
   avatar: string;
+  /** L3 长期记忆配置 */
+  longTerm: LongTermMemoryConfig;
 }
 
 export interface AgentState {
@@ -58,6 +62,8 @@ export interface AgentState {
   updateForm: (partial: Partial<AgentFormState>) => void;
   toggleTool: (name: string) => void;
   toggleSkill: (name: string) => void;
+  toggleMemoryModule: (module: MemoryModuleType) => void;
+  updateLongTerm: (partial: Partial<LongTermMemoryConfig>) => void;
   addGoal: () => void;
   addConstraint: () => void;
   updateGoal: (index: number, value: string) => void;
@@ -95,6 +101,13 @@ function defaultForm(): AgentFormState {
     temperature: 0.7,
     // Avatar: empty = not chosen, UI will fallback to first-letter avatar.
     avatar: '',
+    // L3 长期记忆默认关闭；启用后默认装配 semantic + episodic 模组
+    longTerm: {
+      enabled: false,
+      modules: ['semantic', 'episodic'],
+      consolidation: { enabled: false, idle_timeout_s: 300 },
+      embedding: { provider: 'openai', model: 'text-embedding-3-small' },
+    },
   };
 }
 
@@ -126,6 +139,10 @@ function buildCreateBody(form: AgentFormState): AgentCreateRequest {
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
     skills: form.skills,
+    memory: {
+      max_messages: form.maxMessages,
+      long_term: form.longTerm,
+    },
   };
 }
 
@@ -148,6 +165,10 @@ function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
     skills: form.skills,
+    memory: {
+      max_messages: form.maxMessages,
+      long_term: form.longTerm,
+    },
   };
 }
 
@@ -236,6 +257,30 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         : [...s.selectedSkillIds, name];
       return { selectedSkillIds: next, form: { ...s.form, skills: next } };
     });
+  },
+
+  toggleMemoryModule: (module) => {
+    set((s) => {
+      const has = s.form.longTerm.modules.includes(module);
+      const modules = has
+        ? s.form.longTerm.modules.filter((m) => m !== module)
+        : [...s.form.longTerm.modules, module];
+      return {
+        form: {
+          ...s.form,
+          longTerm: { ...s.form.longTerm, modules },
+        },
+      };
+    });
+  },
+
+  updateLongTerm: (partial) => {
+    set((s) => ({
+      form: {
+        ...s.form,
+        longTerm: { ...s.form.longTerm, ...partial },
+      },
+    }));
   },
 
   addGoal: () => {
@@ -401,6 +446,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     await get().loadAgentDetail(id);
     const detail = get().currentDetail;
     if (!detail) return;
+    // 回填长期记忆配置：后端始终返回 memory.long_term，旧 Agent 默认 enabled=false
+    const lt = detail.memory?.long_term ?? {
+      enabled: false,
+      modules: ['semantic', 'episodic'],
+      consolidation: { enabled: false, idle_timeout_s: 300 },
+      embedding: { provider: 'openai', model: 'text-embedding-3-small' },
+    };
     set({
       form: {
         id: detail.id,
@@ -419,6 +471,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         model: detail.llm.model,
         temperature: detail.llm.temperature,
         avatar: detail.avatar ?? '',
+        longTerm: lt,
       },
       selectedToolIds: detail.tools,
       selectedSkillIds: detail.skills,

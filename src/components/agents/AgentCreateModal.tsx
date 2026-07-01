@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { Modal, Button, Field, TextInput, Select, TextArea, Radio, useToast } from '@/components/ui';
+import { Modal, Button, Field, TextInput, Select, TextArea, useToast } from '@/components/ui';
 import { useAgentStore } from '@/stores/agentStore';
 import { useConfigStore } from '@/stores/configStore';
 import { cx } from '@/lib/cx';
 import { ToolAuthorization } from './ToolAuthorization';
 import { SkillAuthorization } from '@/components/skills';
 import { ThinkingModelConfig } from './ThinkingModelConfig';
+import { MemoryConfig } from './MemoryConfig';
 import styles from './AgentCreateModal.module.css';
 
 const SYSTEM_PROMPT_MAX = 4096;
@@ -34,8 +35,6 @@ const AVATAR_FILES = [
   'llama.svg', 'redpanda.svg', 'shiba.svg', 'hamster.svg',
 ];
 
-type MemoryType = 'buffer' | 'summary';
-
 export interface AgentCreateModalProps {
   className?: string;
 }
@@ -58,6 +57,8 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
   const skills = useAgentStore((s) => s.skills);
   const selectedSkillIds = useAgentStore((s) => s.selectedSkillIds);
   const toggleSkill = useAgentStore((s) => s.toggleSkill);
+  const toggleMemoryModule = useAgentStore((s) => s.toggleMemoryModule);
+  const updateLongTerm = useAgentStore((s) => s.updateLongTerm);
   const loadSkills = useAgentStore((s) => s.loadSkills);
   const addGoal = useAgentStore((s) => s.addGoal);
   const addConstraint = useAgentStore((s) => s.addConstraint);
@@ -75,7 +76,6 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
 
   const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [memoryType, setMemoryType] = useState<MemoryType>('buffer');
 
   const isEditMode = Boolean(editingId);
 
@@ -95,11 +95,6 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
       loadProviderModels(form.provider);
     }
   }, [createOpen, form.provider, providerModels, loadProviderModels]);
-
-  // Reset transient memory-type whenever the modal closes.
-  useEffect(() => {
-    if (!createOpen) setMemoryType('buffer');
-  }, [createOpen]);
 
   const close = () => setCreateOpen(false);
 
@@ -393,36 +388,28 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
         {/* ===== 记忆 (Memory) ===== */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>记忆</h3>
-          <div className={styles.grid2}>
-            <Field label="类型">
-              <div className={styles.radioRow}>
-                <Radio
-                  checked={memoryType === 'buffer'}
-                  onChange={() => setMemoryType('buffer')}
-                  name="memory-type"
-                  value="buffer"
-                  label="Buffer"
-                />
-                <Radio
-                  checked={memoryType === 'summary'}
-                  onChange={() => setMemoryType('summary')}
-                  name="memory-type"
-                  value="summary"
-                  label="Summary"
-                />
-              </div>
-            </Field>
-            <Field label="最大消息数" error={errors.maxMessages} helper="1 – 200">
-              <TextInput
-                type="number"
-                min={1}
-                max={200}
-                value={form.maxMessages}
-                error={Boolean(errors.maxMessages)}
-                onChange={(e) => updateForm({ maxMessages: Number(e.target.value) })}
-              />
-            </Field>
-          </div>
+          <Field
+            label="L2 短期容量"
+            error={errors.maxMessages}
+            helper="Buffer 滑动窗口大小，1 – 200"
+          >
+            <TextInput
+              type="number"
+              min={1}
+              max={200}
+              value={form.maxMessages}
+              error={Boolean(errors.maxMessages)}
+              onChange={(e) => updateForm({ maxMessages: Number(e.target.value) })}
+            />
+          </Field>
+          {/* L3 长期记忆配置：启用开关 + 模组多选 + 梦境整理 */}
+          <MemoryConfig
+            value={form.longTerm}
+            bufferCapacity={form.maxMessages}
+            onToggleModule={toggleMemoryModule}
+            onUpdate={updateLongTerm}
+            providers={providers}
+          />
         </section>
       </div>
     </Modal>

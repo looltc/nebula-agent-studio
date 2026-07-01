@@ -1,0 +1,484 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ===== 头部 ===== */
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.title svg {
+  color: var(--accent-primary);
+}
+
+.count {
+  margin-left: var(--space-1);
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: 0;
+}
+
+.headActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== 统计行 ===== */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  font-family: var(--font-mono);
+}
+
+.statValueMuted {
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+/* ===== 类型分布条 ===== */
+.distBar {
+  display: flex;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-muted);
+}
+
+.distSeg {
+  height: 100%;
+  transition: width var(--duration-base) var(--ease-default);
+}
+
+.dist_semantic {
+  background: var(--accent-primary);
+}
+
+.dist_episodic {
+  background: var(--status-success, #22c55e);
+}
+
+.dist_preference {
+  background: var(--status-warning, #f59e0b);
+}
+
+.dist_procedural {
+  background: var(--text-muted);
+}
+
+/* ===== 过滤栏 ===== */
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filterIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px 10px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.chip:hover {
+  border-color: var(--accent-ring);
+  color: var(--text-foreground);
+}
+
+.chipActive {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+.chipActive:hover {
+  color: #fff;
+}
+
+.chipCount {
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+}
+
+/* ===== 加载行 ===== */
+.loadingRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.emptyText {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+  color: var(--text-muted);
+  margin: 0;
+  padding: var(--space-3) 0;
+}
+
+/* ===== 记忆列表 ===== */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.row:hover {
+  border-color: var(--border-default);
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* 重要性条 */
+.importanceWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.importanceBar {
+  width: 48px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border-divider);
+  overflow: hidden;
+}
+
+.importanceFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--text-muted);
+  transition: width var(--duration-base) var(--ease-default);
+}
+
+/* 重要性等级：父级 .imp_* 控制填充色（后代选择器优先级更高） */
+.imp_high .importanceFill {
+  background: var(--status-success, #22c55e);
+}
+
+.imp_mid .importanceFill {
+  background: var(--status-warning, #f59e0b);
+}
+
+.imp_low .importanceFill {
+  background: var(--text-muted);
+}
+
+.importanceVal {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  min-width: 22px;
+  text-align: right;
+}
+
+/* 遗忘按钮 */
+.forgetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.forgetBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-destructive) 12%, transparent);
+  color: var(--status-destructive);
+}
+
+.forgetBtn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+.forgetBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* 内容 */
+.content {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-foreground);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* 行 meta */
+.rowMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.metaItem svg {
+  opacity: 0.7;
+}
+
+.metaEntities {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.entity {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.entityMore {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.ttlBadge {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-warning) 16%, transparent);
+  color: var(--status-warning, #f59e0b);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* subject 认知对象徽章 — 轻量彩色文字，无背景 */
+.subjectBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  border: 1px solid transparent;
+  line-height: var(--line-xs);
+}
+
+.subjectBadge svg {
+  flex-shrink: 0;
+}
+
+/* 自我认知 — 紫色 */
+.subj_self {
+  color: #8b5cf6;
+  border-color: color-mix(in srgb, #8b5cf6 30%, transparent);
+}
+
+/* 用户 — 蓝色 */
+.subj_user {
+  color: var(--accent-primary);
+  border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
+}
+
+/* 其他 Agent — 橙色 */
+.subj_agent {
+  color: #f97316;
+  border-color: color-mix(in srgb, #f97316 30%, transparent);
+}
+
+/* 世界 — 灰色 */
+.subj_world {
+  color: var(--text-muted);
+  border-color: var(--border-default);
+}
+
+/* 已整理徽章 — 青色 */
+.reEncodedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  color: #14b8a6;
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  border: 1px solid color-mix(in srgb, #14b8a6 30%, transparent);
+  line-height: var(--line-xs);
+}
+
+.reEncodedBadge svg {
+  flex-shrink: 0;
+}
+
+/* tags chips 列表 */
+.metaTags {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 10px;
+  border: 1px solid var(--border-default);
+}
+
+.tagMore {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+@media (max-width: 560px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
