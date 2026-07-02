@@ -6,6 +6,8 @@ import {
   Trash2,
   Download,
   Sparkles,
+  Cpu,
+  Brain,
 } from 'lucide-react';
 import { useChatStore, type ChatMode } from '@/stores/chatStore';
 import type { MessageInfo } from '@/types/api';
@@ -178,39 +180,57 @@ export default function ChatPage() {
             )}
             title={currentAgent ? `${agentName} (${currentAgent.id})` : '未选择 Agent'}
           >
-            <div className={styles.agentAvatar}>
-              {agentAvatar ? (
-                <img
-                  src={`/avatars/${agentAvatar}`}
-                  alt={agentName}
-                  className={styles.agentAvatarImg}
-                />
-              ) : currentAgent ? (
-                <span className={styles.agentAvatarFallback}>
-                  {agentName.charAt(0).toUpperCase()}
-                </span>
-              ) : (
-                <Sparkles size={20} className={styles.agentAvatarIcon} />
-              )}
-            </div>
-            <div className={styles.agentInfo}>
-              <div className={styles.agentCardName}>{agentName}</div>
-              <div className={styles.agentCardRole}>
-                {currentAgent ? currentAgent.role : '未选择'}
+            <div className={styles.agentCardHeader}>
+              <div className={styles.agentAvatar}>
+                {agentAvatar ? (
+                  <img
+                    src={`/avatars/${agentAvatar}`}
+                    alt={agentName}
+                    className={styles.agentAvatarImg}
+                  />
+                ) : currentAgent ? (
+                  <span className={styles.agentAvatarFallback}>
+                    {agentName.charAt(0).toUpperCase()}
+                  </span>
+                ) : (
+                  <Sparkles size={20} className={styles.agentAvatarIcon} />
+                )}
               </div>
+              <div className={styles.agentInfo}>
+                <div className={styles.agentCardName}>{agentName}</div>
+                <div className={styles.agentCardRole}>
+                  {currentAgent ? currentAgent.role : '未选择'}
+                </div>
+              </div>
+              {/* 新聊天 —— 与头像同行靠右，方块加铅笔粗线条图标，
+                  默认仅图标，hover 时展开显示文字 */}
+              <button
+                type="button"
+                className={styles.newChatFab}
+                onClick={handleNewChat}
+                aria-label="新聊天"
+                title="新聊天"
+              >
+                <NewChatIcon size={20} />
+                <span className={styles.newChatFabLabel}>新聊天</span>
+              </button>
             </div>
-            {/* 新聊天 —— 与头像同行靠右，方块加铅笔粗线条图标，
-                默认仅图标，hover 时展开显示文字 */}
-            <button
-              type="button"
-              className={styles.newChatFab}
-              onClick={handleNewChat}
-              aria-label="新聊天"
-              title="新聊天"
-            >
-              <NewChatIcon size={20} />
-              <span className={styles.newChatFabLabel}>新聊天</span>
-            </button>
+            {currentAgent && (
+              <div className={styles.agentCardTags}>
+                <span className={styles.agentTag}>
+                  <Cpu size={10} className={styles.agentTagIcon} />
+                  <span className={styles.agentTagText}>
+                    {currentAgent.llm?.model || '—'}
+                  </span>
+                </span>
+                <span className={styles.agentTag}>
+                  <Brain size={10} className={styles.agentTagIcon} />
+                  <span className={styles.agentTagText}>
+                    {currentAgent.thinking_model || 'react'}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

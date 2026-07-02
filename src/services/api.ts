@@ -29,6 +29,8 @@ import type {
   SkillListResponse,
   SkillToggleResult,
   ToolListResponse,
+  UserResponse,
+  UserUpdateRequest,
   WorldStateResponse,
 } from '@/types/api';
 import { ApiError } from '@/types/api';
@@ -201,6 +203,14 @@ export const apiClient = {
     if (!r.ok) throw new ApiError(r.status, { error: r.statusText });
     return r.text();
   },
+
+  /* User (本地模式，user_id 从 OS home 目录推导) */
+  getUser: () => api<UserResponse>('/user'),
+  updateUser: (body: UserUpdateRequest) =>
+    api<UserResponse>('/user', {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
 };
 
 export { api };

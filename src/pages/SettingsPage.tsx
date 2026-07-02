@@ -12,6 +12,7 @@ import {
   Moon,
   PanelLeft,
   Check,
+  User,
 } from 'lucide-react';
 import { ContentHeader, PageContainer } from '@/components/layout';
 import {
@@ -28,6 +29,7 @@ import {
 } from '@/components/ui';
 import { useConfigStore } from '@/stores/configStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useUserStore } from '@/stores/userStore';
 import type { ProviderSummary } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './SettingsPage.module.css';
@@ -66,6 +68,12 @@ export default function SettingsPage() {
   const sidebarCollapsedShowAgents = useUIStore((s) => s.sidebarCollapsedShowAgents);
   const setSidebarCollapsedShowAgents = useUIStore((s) => s.setSidebarCollapsedShowAgents);
 
+  const user = useUserStore((s) => s.user);
+  const loadUser = useUserStore((s) => s.loadUser);
+  const updateDisplayName = useUserStore((s) => s.updateDisplayName);
+  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
+
   const toast = useToast();
 
   // Provider modal state
@@ -97,7 +105,15 @@ export default function SettingsPage() {
   useEffect(() => {
     loadProviders();
     loadTools();
-  }, [loadProviders, loadTools]);
+    loadUser();
+  }, [loadProviders, loadTools, loadUser]);
+
+  // 用户档案加载后，把 display_name 填到输入框
+  useEffect(() => {
+    if (user) {
+      setDisplayNameInput(user.display_name);
+    }
+  }, [user]);
 
   const openCreateProvider = () => {
     setEditingProvider(null);
@@ -223,6 +239,28 @@ export default function SettingsPage() {
     toast.success('预算已保存', '成本预算已持久化');
   };
 
+  const saveDisplayName = async () => {
+    const trimmed = displayNameInput.trim();
+    if (!trimmed) {
+      toast.error('昵称不能为空', '请填写昵称');
+      return;
+    }
+    if (trimmed === user?.display_name) {
+      return; // 无变化
+    }
+    setSavingName(true);
+    try {
+      const ok = await updateDisplayName(trimmed);
+      if (ok) {
+        toast.success('昵称已更新', trimmed);
+      } else {
+        toast.error('保存失败', '请检查后端连接或重试');
+      }
+    } finally {
+      setSavingName(false);
+    }
+  };
+
   const usageExample = budget.dailyCap * 0.24;
 
   return (
@@ -233,6 +271,52 @@ export default function SettingsPage() {
       />
 
       <div className={styles.sections}>
+        {/* ===== User Profile ===== */}
+        <Card className={styles.section}>
+          <SectionTitle icon={<User size={14} />}>用户信息</SectionTitle>
+          <div className={styles.appearanceGroup}>
+            <div className={styles.themeRow}>
+              <div className={styles.themeMeta}>
+                <span className={styles.themeLabel}>
+                  <User size={16} />
+                  <span>昵称</span>
+                </span>
+                <p className={styles.themeHint}>
+                  本地模式下，用户 ID 从操作系统目录名推导（不可改）。昵称用于记忆系统区分不同用户，改后立即生效。
+                </p>
+              </div>
+            </div>
+            <div className={styles.budgetGrid}>
+              <Field label="用户 ID" helper="自动从 OS 目录推导">
+                <TextInput
+                  value={user?.user_id ?? '加载中…'}
+                  disabled
+                  readOnly
+                />
+              </Field>
+              <Field label="昵称" helper="用于记忆系统的 subject 推断">
+                <TextInput
+                  value={displayNameInput}
+                  placeholder="输入你的昵称"
+                  onChange={(e) => setDisplayNameInput(e.target.value)}
+                  maxLength={128}
+                />
+              </Field>
+            </div>
+            <div className={styles.budgetFooter}>
+              <Button
+                variant="primary"
+                icon={<Check size={16} />}
+                onClick={saveDisplayName}
+                loading={savingName}
+                disabled={!displayNameInput.trim() || displayNameInput.trim() === user?.display_name}
+              >
+                保存昵称
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         {/* ===== Appearance ===== */}
         <Card className={styles.section}>
           <SectionTitle icon={<Sun size={14} />}>外观</SectionTitle>

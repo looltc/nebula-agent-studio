@@ -132,8 +132,14 @@ export function AgentDetail({ agent, className }: AgentDetailProps) {
     }
   };
 
+  const THINKING_MODEL_LABELS: Record<string, string> = {
+    react: 'ReAct',
+    plan_execute: 'Plan-Execute',
+    reflexion: 'Reflexion',
+    rewoo: 'ReWOO',
+  };
   const thinkingModelLabel =
-    currentDetail?.thinking_model === 'plan_execute' ? 'Plan-Execute' : 'ReAct';
+    THINKING_MODEL_LABELS[currentDetail?.thinking_model ?? 'react'] ?? currentDetail?.thinking_model ?? 'ReAct';
 
   // Build a map of tool name -> dangerous for badge rendering.
   const toolDangerMap = new Map(tools.map((t) => [t.name, t.dangerous]));

@@ -74,3 +74,43 @@
 .iterField {
   max-width: 220px;
 }
+
+/* === PlanExecute 优化开关 === */
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.toggleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toggleLabel {
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+}
+
+.toggleDesc {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  margin: 0;
+}

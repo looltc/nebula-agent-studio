@@ -27,23 +27,42 @@
   border-bottom: 1px solid var(--border-default);
 }
 
-/* ===== Agent name card (above 新聊天 button) ===== */
+/* ===== Agent name card (above 新聊天 button) =====
+   常态无阴影，hover 时浮起；dark 模式下阴影改为微白光 */
 .agentCard {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--bg-muted);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
   border: 1px solid var(--border-default);
   min-width: 0;
-  transition: background-color var(--duration-fast) var(--ease-default);
+  transition: box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.agentCard:hover {
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* dark 模式：hover 改为微白光，避免黑色阴影在深背景上发糊 */
+:global([data-theme='dark']) .agentCard:hover {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 6px 20px -4px rgba(255, 255, 255, 0.08);
+}
+
+/* 第一行：头像 + 名称/role + 新聊天按钮 */
+.agentCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .agentCardEmpty {
-  /* 未选 Agent 时 —— 弱化，呈现空态提示 */
   background: transparent;
   border-style: dashed;
+  box-shadow: none;
   opacity: 0.7;
 }
 
@@ -158,6 +177,43 @@
 .agentCardRole {
   font-size: var(--text-xs);
   line-height: var(--line-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === Agent 卡片第二行：model + 思维模式标签 ===
+   不缩进对齐头像，与第一行拉开距离 */
+.agentCardTags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+
+.agentTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.agentTagIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.agentTagText {
+  font-size: 10px;
+  line-height: 14px;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;

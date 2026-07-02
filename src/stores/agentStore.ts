@@ -12,7 +12,7 @@ import type {
   ToolInfo,
 } from '@/types/api';
 
-export type ThinkingModel = 'react' | 'plan_execute';
+export type ThinkingModel = 'react' | 'plan_execute' | 'reflexion' | 'rewoo';
 
 export interface AgentFormState {
   id: string;
@@ -35,6 +35,9 @@ export interface AgentFormState {
   avatar: string;
   /** L3 长期记忆配置 */
   longTerm: LongTermMemoryConfig;
+  /** PlanExecute 优化开关 */
+  enableFactExtraction: boolean;
+  enableStepEvaluate: boolean;
 }
 
 export interface AgentState {
@@ -108,6 +111,9 @@ function defaultForm(): AgentFormState {
       consolidation: { enabled: false, idle_timeout_s: 300 },
       embedding: { provider: 'openai', model: 'text-embedding-3-small' },
     },
+    // PlanExecute 优化开关默认关闭（每步省 1 次 LLM 调用）
+    enableFactExtraction: false,
+    enableStepEvaluate: false,
   };
 }
 
@@ -139,6 +145,8 @@ function buildCreateBody(form: AgentFormState): AgentCreateRequest {
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
     skills: form.skills,
+    enable_fact_extraction: form.enableFactExtraction,
+    enable_step_evaluate: form.enableStepEvaluate,
     memory: {
       max_messages: form.maxMessages,
       long_term: form.longTerm,
@@ -165,6 +173,8 @@ function buildUpdateBody(form: AgentFormState): AgentUpdateRequest {
     llm: buildLLMSpec(form),
     avatar: form.avatar || null,
     skills: form.skills,
+    enable_fact_extraction: form.enableFactExtraction,
+    enable_step_evaluate: form.enableStepEvaluate,
     memory: {
       max_messages: form.maxMessages,
       long_term: form.longTerm,
@@ -459,7 +469,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         name: detail.name,
         role: detail.role,
         persona: detail.persona,
-        thinkingModel: (detail.thinking_model === 'plan_execute' ? 'plan_execute' : 'react'),
+        thinkingModel: detail.thinking_model,
         maxIterations: detail.max_iterations,
         maxMessages: detail.max_messages,
         systemPrompt: detail.system_prompt,
@@ -472,6 +482,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         temperature: detail.llm.temperature,
         avatar: detail.avatar ?? '',
         longTerm: lt,
+        enableFactExtraction: detail.enable_fact_extraction ?? false,
+        enableStepEvaluate: detail.enable_step_evaluate ?? false,
       },
       selectedToolIds: detail.tools,
       selectedSkillIds: detail.skills,

@@ -271,6 +271,8 @@ export function AgentCreateModal({ className }: AgentCreateModalProps) {
           <ThinkingModelConfig
             value={form.thinkingModel}
             maxIterations={form.maxIterations}
+            enableFactExtraction={form.enableFactExtraction}
+            enableStepEvaluate={form.enableStepEvaluate}
             onChange={updateForm}
           />
           {errors.maxIterations && (

@@ -57,12 +57,15 @@ export interface LLMSpecRequest {
   api_format?: string;
 }
 
+/** 思维模型类型（与后端 ThinkingModelSpec.type 枚举对齐） */
+export type ThinkingModelType = 'react' | 'plan_execute' | 'reflexion' | 'rewoo';
+
 export interface AgentCreateRequest {
   id: string;
   name: string;
   role: string;
   persona: string;
-  thinking_model: string;
+  thinking_model: ThinkingModelType;
   max_iterations: number;
   max_messages: number;
   system_prompt: string;
@@ -74,6 +77,10 @@ export interface AgentCreateRequest {
   avatar?: string | null;
   /** 绑定的 Skill 名称列表 */
   skills: string[];
+  /** PlanExecute 优化开关：每步 execute 后是否提取已确认事实（默认关，省 1 次 LLM/步） */
+  enable_fact_extraction?: boolean;
+  /** PlanExecute 优化开关：每步 execute 后是否评估结果质量（默认关，省 1 次 LLM/步） */
+  enable_step_evaluate?: boolean;
   /** 记忆配置（L2 短期 + L3 长期）；后端有默认值，旧前端不传也兼容 */
   memory?: MemoryConfigRequest;
 }
@@ -114,8 +121,11 @@ export interface AgentDetailResponse {
   role: string;
   persona: string;
   enabled: boolean;
-  thinking_model: string;
+  thinking_model: ThinkingModelType;
   max_iterations: number;
+  /** PlanExecute 优化开关（仅 plan_execute 模式有意义） */
+  enable_fact_extraction: boolean;
+  enable_step_evaluate: boolean;
   max_messages: number;
   system_prompt: string;
   goals: string[];
@@ -145,7 +155,7 @@ export interface AgentUpdateRequest {
   name: string;
   role: string;
   persona: string;
-  thinking_model: string;
+  thinking_model: ThinkingModelType;
   max_iterations: number;
   max_messages: number;
   system_prompt: string;
@@ -157,6 +167,9 @@ export interface AgentUpdateRequest {
   avatar?: string | null;
   /** 绑定的 Skill 名称列表 */
   skills: string[];
+  /** PlanExecute 优化开关 */
+  enable_fact_extraction?: boolean;
+  enable_step_evaluate?: boolean;
   /** 记忆配置（L2 短期 + L3 长期） */
   memory?: MemoryConfigRequest;
 }
@@ -529,6 +542,22 @@ export type SSEEvent =
 
 /* ---------- Metrics ---------- */
 export type MetricsText = string;
+
+/* ---------- User ---------- */
+export interface UserProfile {
+  user_id: string;
+  display_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserResponse {
+  user: UserProfile;
+}
+
+export interface UserUpdateRequest {
+  display_name: string;
+}
 
 /* ---------- Error ---------- */
 export interface ApiErrorBody {
