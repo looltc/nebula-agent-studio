@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Search,
   Puzzle,
+  Users,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useChatStore } from '@/stores/chatStore';
@@ -35,6 +36,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { key: 'chat', label: '聊天', icon: MessageCircleMore, path: '/chat', accordion: true },
+  { key: 'group-chats', label: '群聊', icon: Users, path: '/group-chats' },
   { key: 'agents', label: 'Agents', icon: Bot, path: '/agents' },
   { key: 'skills', label: 'Skills', icon: Puzzle, path: '/skills' },
   { key: 'orchestration', label: '编排', icon: GitBranch, path: '/orchestration' },

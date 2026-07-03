@@ -1,3 +1,7 @@
+.pageTabs {
+  margin-bottom: var(--space-3);
+}
+
 .pills {
   display: inline-flex;
   align-items: center;

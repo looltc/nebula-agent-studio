@@ -432,18 +432,32 @@ export interface Participant {
   name?: string;
   kind: string;
   role: string;
+  permissions?: string[];
+  attention?: string[];
 }
 
 export interface FloorPolicy {
   type: 'round_robin' | 'moderator' | 'free_for_all';
+  moderator_id?: string | null;
+  max_messages_per_turn?: number;
   [key: string]: unknown;
 }
 
+export interface ContextPolicy {
+  mode: 'full' | 'summary' | 'last_n' | 'topic_window';
+  max_messages?: number;
+  summary_every?: number;
+  topic_depth?: number;
+}
+
+/** 群聊摘要（列表项） */
 export interface GroupChatSummary {
   id: string;
-  participant_count: number;
-  current_floor: string | null;
+  participants: Participant[];
   floor_policy: FloorPolicy;
+  context_policy: ContextPolicy;
+  current_floor: string | null;
+  message_count: number;
 }
 
 export interface GroupChatListResponse {
@@ -454,11 +468,71 @@ export interface GroupChatCreateRequest {
   id?: string;
   participants: Participant[];
   floor_policy?: FloorPolicy;
+  context_policy?: ContextPolicy;
 }
 
 export interface GroupChatCreateResponse {
   id: string;
   participants: Participant[];
+}
+
+export interface GroupChatUpdateRequest {
+  floor_policy?: FloorPolicy;
+  context_policy?: ContextPolicy;
+  participants?: Participant[];
+}
+
+/** 群聊消息 */
+export interface GroupMessage {
+  id: string;
+  conversation_id: string;
+  source: string;
+  target: string;
+  role: string;
+  content: string;
+  addressing: {
+    mode: 'broadcast' | 'mention' | 'dm' | 'reply';
+    targets: string[];
+    reply_to: string | null;
+  };
+  ts: string;
+  metadata: {
+    sender_name?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface GroupMessageListResponse {
+  group_id: string;
+  messages: GroupMessage[];
+}
+
+export interface GroupMessageRequest {
+  source: string;
+  content: string;
+  mode?: 'broadcast' | 'mention' | 'dm' | 'reply';
+  targets?: string[];
+  reply_to?: string | null;
+}
+
+export interface GroupMessageResponse {
+  message_id: string;
+  source: string;
+  sender_name: string;
+  recipients: string[];
+  skipped: string[];
+  routing_mode: string;
+}
+
+/** SSE 流式事件 */
+export interface GroupStreamEvent {
+  type: 'message' | 'chunk' | 'thinking' | 'tool_start' | 'tool_end' | 'error' | 'end';
+  message?: GroupMessage;
+  sender_name?: string;
+  agent_id?: string;
+  text?: string;
+  payload?: Record<string, unknown>;
+  error?: string;
 }
 
 /* ---------- WebSocket Messages ---------- */

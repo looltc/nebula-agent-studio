@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui';
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
 const AgentsPage = lazy(() => import('@/pages/AgentsPage'));
 const OrchestrationPage = lazy(() => import('@/pages/OrchestrationPage'));
+const GroupChatPage = lazy(() => import('@/pages/GroupChatPage'));
 const ObservePage = lazy(() => import('@/pages/ObservePage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const SkillHubPage = lazy(() => import('@/pages/SkillHubPage'));
@@ -77,6 +78,22 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <OrchestrationPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/group-chats"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <GroupChatPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/group-chats/:id"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <GroupChatPage />
             </Suspense>
           }
         />

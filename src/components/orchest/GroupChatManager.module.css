@@ -64,6 +64,38 @@
   flex-direction: column;
 }
 
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.listItem .row {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowAction {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.rowAction:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-ring);
+  background: var(--accent-bg);
+}
+
 .row {
   display: flex;
   align-items: center;

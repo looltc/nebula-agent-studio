@@ -5,10 +5,29 @@ import styles from './MermaidDiagram.module.css';
 interface MermaidDiagramProps {
   /** Raw mermaid source (without the surrounding ``` fences). */
   code: string;
+  /** 流式输出中：代码可能不完整，跳过渲染只显示源码，避免 mermaid.render
+   *  失败后在 DOM 留下大量报错 SVG（aria-roledescription="error"）。 */
+  streaming?: boolean;
 }
 
 // Module-level cache so repeated identical diagrams reuse the result.
 const renderCache = new Map<string, string>();
+
+/**
+ * 清理 mermaid 11.x render 失败时在 document.body 留下的报错 SVG。
+ *
+ * mermaid.render 失败时除了抛异常，还会往 DOM 插入一个带错误信息的 SVG：
+ * <svg id="mmd-..." role="graphics-document document" aria-roledescription="error">
+ *   ...<text>Syntax error in text</text>...
+ * </svg>
+ * 这些 SVG 不会自动清除，累积在页面上就是用户看到的"非常多的报错图片"。
+ */
+function cleanupMermaidErrorSvgs(): void {
+  const errorSvgs = document.querySelectorAll(
+    'svg[aria-roledescription="error"]'
+  );
+  errorSvgs.forEach((el) => el.remove());
+}
 
 /**
  * Renders mermaid diagrams with lazy loading and a header toolbar.
@@ -21,7 +40,7 @@ const renderCache = new Map<string, string>();
  * is encountered, then cache the module + rendered SVG to avoid re-parsing.
  * Default view is preview; user can toggle to see/edit the source code.
  */
-function MermaidDiagramBase({ code }: MermaidDiagramProps) {
+function MermaidDiagramBase({ code, streaming }: MermaidDiagramProps) {
   const [svg, setSvg] = useState<string>(() => renderCache.get(code) ?? '');
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'preview' | 'source'>('preview');
@@ -30,6 +49,8 @@ function MermaidDiagramBase({ code }: MermaidDiagramProps) {
   const copyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // 流式输出时代码不完整，跳过渲染（避免 mermaid.render 失败留下报错 SVG）
+    if (streaming) return;
     if (svg) return;
     let cancelled = false;
 
@@ -50,13 +71,17 @@ function MermaidDiagramBase({ code }: MermaidDiagramProps) {
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
+        // mermaid 11.x render 失败时会在 document.body 留下报错 SVG
+        // （<svg id="mmd-..." role="graphics-document document" aria-roledescription="error">）
+        // 清理这些残留元素，避免页面上堆积大量报错图片
+        cleanupMermaidErrorSvgs();
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [code, svg]);
+  }, [code, svg, streaming]);
 
   useEffect(() => {
     return () => {
@@ -82,7 +107,7 @@ function MermaidDiagramBase({ code }: MermaidDiagramProps) {
     setView((v) => (v === 'preview' ? 'source' : 'preview'));
   };
 
-  const showPreview = view === 'preview' && !error;
+  const showPreview = view === 'preview' && !error && !streaming;
   const showError = view === 'preview' && error;
 
   return (
@@ -132,9 +157,16 @@ function MermaidDiagramBase({ code }: MermaidDiagramProps) {
         </pre>
       )}
 
-      {/* Loading state shown only while preview is active and svg not ready. */}
-      {!svg && !error && view === 'preview' && (
+      {/* Loading state shown only while preview is active, non-streaming, and svg not ready. */}
+      {!svg && !error && view === 'preview' && !streaming && (
         <div className={styles.loading}>渲染图表中…</div>
+      )}
+
+      {/* 流式输出中：代码不完整，显示源码占位 + 提示 */}
+      {streaming && (
+        <pre className={styles.source}>
+          <code>{code}</code>
+        </pre>
       )}
     </div>
   );

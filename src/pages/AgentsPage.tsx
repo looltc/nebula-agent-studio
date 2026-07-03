@@ -1,21 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Bot, Users } from 'lucide-react';
 import { ContentHeader, PageContainer } from '@/components/layout';
-import { Button, Select, TextInput } from '@/components/ui';
+import { Button, Select, Tabs, TextInput, type TabItem } from '@/components/ui';
 import { AgentList, AgentDetail, AgentCreateModal } from '@/components/agents';
+import { GroupChatManager } from '@/components/orchest';
 import { useAgentStore } from '@/stores/agentStore';
+import { useOrchestStore } from '@/stores/orchestStore';
 import type { AgentSummary } from '@/types/api';
 import { cx } from '@/lib/cx';
 import styles from './AgentsPage.module.css';
 
 type FilterTab = 'all' | 'active' | 'idle' | 'error';
+type PageTab = 'agent' | 'group';
 
 const FILTERS: { key: FilterTab; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'active', label: '运行中' },
   { key: 'idle', label: '空闲' },
   { key: 'error', label: '错误' },
+];
+
+const PAGE_TABS: TabItem[] = [
+  { key: 'agent', label: 'Agent', icon: <Bot size={14} /> },
+  { key: 'group', label: 'Group', icon: <Users size={14} /> },
 ];
 
 export default function AgentsPage() {
@@ -28,15 +36,20 @@ export default function AgentsPage() {
   const setCreateOpen = useAgentStore((s) => s.setCreateOpen);
   const resetForm = useAgentStore((s) => s.resetForm);
 
+  const loadGroupChats = useOrchestStore((s) => s.loadGroupChats);
+
+  const [pageTab, setPageTab] = useState<PageTab>('agent');
   const [filterTab, setFilterTab] = useState<FilterTab>('all');
   const [sortKey, setSortKey] = useState<'name'>('name');
   const [query, setQuery] = useState('');
   const [pausedIds, setPausedIds] = useState<string[]>([]);
+  const [groupCreateOpen, setGroupCreateOpen] = useState(false);
 
   useEffect(() => {
     loadAgents();
     loadTools();
-  }, [loadAgents, loadTools]);
+    loadGroupChats();
+  }, [loadAgents, loadTools, loadGroupChats]);
 
   const handleTogglePause = (id: string) => {
     setPausedIds((prev) =>
@@ -140,11 +153,27 @@ export default function AgentsPage() {
     </>
   );
 
+  // 查看 Agent 详情时不显示 Tabs
+  if (agentId) {
+    return (
+      <PageContainer>
+        <AgentDetail agent={detailAgent} />
+        <AgentCreateModal />
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
-      {agentId ? (
-        <AgentDetail agent={detailAgent} />
-      ) : (
+      <Tabs
+        tabs={PAGE_TABS}
+        active={pageTab}
+        onChange={(k) => setPageTab(k as PageTab)}
+        variant="pill"
+        className={styles.pageTabs}
+      />
+
+      {pageTab === 'agent' ? (
         <>
           <ContentHeader
             title="Agent 管理"
@@ -158,6 +187,11 @@ export default function AgentsPage() {
             onTogglePause={handleTogglePause}
           />
         </>
+      ) : (
+        <GroupChatManager
+          createOpen={groupCreateOpen}
+          onCreateOpenChange={setGroupCreateOpen}
+        />
       )}
 
       <AgentCreateModal />

@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Plus, Network, GitBranch } from 'lucide-react';
+import { Network, GitBranch } from 'lucide-react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ContentHeader, PageContainer, ErrorBoundary } from '@/components/layout';
-import { Button, Tabs, type TabItem } from '@/components/ui';
+import { Tabs, type TabItem } from '@/components/ui';
 import {
   TopologyView,
   RelationGraphView,
   WorldPanel,
-  GroupChatManager,
   OrchestrationDetail,
 } from '@/components/orchest';
 import { useOrchestStore } from '@/stores/orchestStore';
@@ -29,21 +28,18 @@ export default function OrchestrationPage() {
   const loadWorld = useOrchestStore((s) => s.loadWorld);
   const loadEvents = useOrchestStore((s) => s.loadEvents);
   const loadRelations = useOrchestStore((s) => s.loadRelations);
-  const loadGroupChats = useOrchestStore((s) => s.loadGroupChats);
 
   const loadAgents = useChatStore((s) => s.loadAgents);
 
   const [tab, setTab] = useState<LeftTab>('topology');
-  const [createOpen, setCreateOpen] = useState(false);
 
   // Initial load of all orchestration data + chat agents (for the picker).
   useEffect(() => {
     void loadWorld();
     void loadEvents();
     void loadRelations();
-    void loadGroupChats();
     void loadAgents();
-  }, [loadWorld, loadEvents, loadRelations, loadGroupChats, loadAgents]);
+  }, [loadWorld, loadEvents, loadRelations, loadAgents]);
 
   // Poll for world state + events while the world loop is running.
   useEffect(() => {
@@ -58,22 +54,11 @@ export default function OrchestrationPage() {
     return () => window.clearInterval(interval);
   }, [worldRunning, worldSpeed, loadWorld, loadEvents]);
 
-  const newGroupAction = (
-    <Button
-      variant="primary"
-      icon={<Plus size={16} />}
-      onClick={() => setCreateOpen(true)}
-    >
-      New Group
-    </Button>
-  );
-
   return (
     <PageContainer>
       <ContentHeader
         title="Orchestration"
-        subtitle="Visualize agent topology, world state, and group chats."
-        actions={newGroupAction}
+        subtitle="Visualize agent topology, world state, and relations."
       />
 
       <ErrorBoundary>
@@ -98,10 +83,6 @@ export default function OrchestrationPage() {
 
           <div className={styles.column}>
             <WorldPanel />
-            <GroupChatManager
-              createOpen={createOpen}
-              onCreateOpenChange={setCreateOpen}
-            />
           </div>
         </div>
       </ErrorBoundary>

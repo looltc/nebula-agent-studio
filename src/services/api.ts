@@ -14,6 +14,11 @@ import type {
   GroupChatCreateRequest,
   GroupChatCreateResponse,
   GroupChatListResponse,
+  GroupChatSummary,
+  GroupChatUpdateRequest,
+  GroupMessageListResponse,
+  GroupMessageRequest,
+  GroupMessageResponse,
   HealthResponse,
   MemoryListResponse,
   MemoryStats,
@@ -175,6 +180,56 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  getGroupChat: (id: string) =>
+    api<GroupChatSummary>(`/group-chats/${encodeURIComponent(id)}`),
+  updateGroupChat: (id: string, body: GroupChatUpdateRequest) =>
+    api<GroupChatSummary>(`/group-chats/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteGroupChat: (id: string) =>
+    api<{ id: string; status: string }>(
+      `/group-chats/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
+    ),
+  getGroupChatMessages: (id: string, limit = 100) =>
+    api<GroupMessageListResponse>(
+      `/group-chats/${encodeURIComponent(id)}/messages?limit=${limit}`,
+    ),
+  sendGroupMessage: (id: string, body: GroupMessageRequest) =>
+    api<GroupMessageResponse>(
+      `/group-chats/${encodeURIComponent(id)}/messages`,
+      { method: 'POST', body: JSON.stringify(body) },
+    ),
+  /**
+   * 群聊 SSE 流式端点。返回 EventSource，用于接收多 agent 流式回复。
+   * 调用方负责 close()。
+   */
+  streamGroupChat: (
+    id: string,
+    params: { source: string; content: string; mode?: string; targets?: string[] },
+  ): EventSource => {
+    const search = new URLSearchParams({
+      source: params.source,
+      content: params.content,
+      mode: params.mode ?? 'broadcast',
+    });
+    if (params.targets && params.targets.length > 0) {
+      search.set('targets', params.targets.join(','));
+    }
+    return new EventSource(
+      `/api/group-chats/${encodeURIComponent(id)}/stream?${search.toString()}`,
+    );
+  },
+  /**
+   * 停止群聊自动接话链路。
+   * 调用后端 dispatcher.stop()，当前层 agent 完成后退出，不再递归接话。
+   */
+  stopGroupChat: (id: string) =>
+    api<{ ok: boolean; stopped: boolean; reason?: string }>(
+      `/group-chats/${encodeURIComponent(id)}/stop`,
+      { method: 'POST' },
+    ),
 
   /* Memory (L3 long-term) */
   listMemory: (agentId: string, memoryType?: string, limit = 50) => {

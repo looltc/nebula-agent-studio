@@ -234,7 +234,9 @@ function MarkdownTextBase({ content, streaming = false }: MarkdownTextProps) {
               || (typeof children === 'string' ? children : '');
 
             if (language === 'mermaid') {
-              return <MermaidDiagram code={raw.replace(/\n$/, '')} />;
+              // 流式输出时代码不完整，mermaid.render 会失败并在 DOM 留下报错 SVG。
+              // 流式时只显示源码占位，非流式时才真正渲染图表。
+              return <MermaidDiagram code={raw.replace(/\n$/, '')} streaming={streaming} />;
             }
 
             // markdown/md 代码块：highlight.js 的 markdown 解析器会重新解析

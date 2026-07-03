@@ -1,4 +1,5 @@
-import { Users, Plus, Pause, Edit, Archive } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Plus, MessageSquare, Trash2 } from 'lucide-react';
 import {
   Card,
   Button,
@@ -46,12 +47,25 @@ export default function GroupChatManager({
   onCreateOpenChange,
   className,
 }: GroupChatManagerProps) {
+  const navigate = useNavigate();
   const groupChats = useOrchestStore((s) => s.groupChats);
   const selectedId = useOrchestStore((s) => s.selectedGroupChatId);
   const selectGroupChat = useOrchestStore((s) => s.selectGroupChat);
+  const deleteGroupChat = useOrchestStore((s) => s.deleteGroupChat);
   const toast = useToast();
 
   const selected = groupChats.find((g) => g.id === selectedId) ?? null;
+
+  const openGroupChat = (id: string) => {
+    selectGroupChat(id);
+    navigate(`/group-chats/${encodeURIComponent(id)}`);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(`确定删除群聊 "${id}" 吗？`)) return;
+    await deleteGroupChat(id);
+    toast.success('群聊已删除', id);
+  };
 
   return (
     <div className={cx(styles.wrap, className)}>
@@ -95,7 +109,7 @@ export default function GroupChatManager({
             {groupChats.map((gc) => {
               const isActive = gc.id === selectedId;
               return (
-                <li key={gc.id}>
+                <li key={gc.id} className={styles.listItem}>
                   <button
                     type="button"
                     className={cx(styles.row, isActive && styles.rowActive)}
@@ -107,7 +121,7 @@ export default function GroupChatManager({
                         {gc.id}
                       </span>
                       <span className={styles.rowMeta}>
-                        {gc.participant_count} participants ·{' '}
+                        {gc.participants.length} participants ·{' '}
                         <span className={styles.policy}>
                           {gc.floor_policy.type}
                         </span>
@@ -116,6 +130,18 @@ export default function GroupChatManager({
                     <Badge variant={statusBadgeVariant(gc)}>
                       {statusLabel(gc)}
                     </Badge>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.rowAction}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openGroupChat(gc.id);
+                    }}
+                    title="打开群聊"
+                    aria-label={`打开群聊 ${gc.id}`}
+                  >
+                    <MessageSquare size={14} />
                   </button>
                 </li>
               );
@@ -148,7 +174,7 @@ export default function GroupChatManager({
               </div>
               <div className={styles.detailItem}>
                 <dt>Participants</dt>
-                <dd>{selected.participant_count}</dd>
+                <dd>{selected.participants.length}</dd>
               </div>
               <div className={styles.detailItem}>
                 <dt>Current Floor</dt>
@@ -160,37 +186,20 @@ export default function GroupChatManager({
 
             <div className={styles.detailActions}>
               <Button
-                variant="outline"
+                variant="primary"
                 size="sm"
-                icon={<Pause size={14} />}
-                onClick={() =>
-                  toast.info(
-                    'Chat paused (demo)',
-                    `Floor policy "${selected.floor_policy.type}" would be suspended.`,
-                  )
-                }
+                icon={<MessageSquare size={14} />}
+                onClick={() => openGroupChat(selected.id)}
               >
-                Pause
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Edit size={14} />}
-                onClick={() =>
-                  toast.info('Edit (demo)', 'Editing group chat configuration is not wired to the API yet.')
-                }
-              >
-                Edit
+                打开群聊
               </Button>
               <Button
                 variant="danger"
                 size="sm"
-                icon={<Archive size={14} />}
-                onClick={() =>
-                  toast.warning('Archive (demo)', `Archiving "${selected.id}" is a placeholder action.`)
-                }
+                icon={<Trash2 size={14} />}
+                onClick={() => handleDelete(selected.id)}
               >
-                Archive
+                删除
               </Button>
             </div>
           </div>
