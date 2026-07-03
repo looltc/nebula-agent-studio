@@ -251,6 +251,14 @@ export const apiClient = {
     ),
   memoryStats: (agentId: string) =>
     api<MemoryStats>(`/agents/${encodeURIComponent(agentId)}/memory/stats`),
+  clearAllMemory: (agentId: string) =>
+    api<{
+      status: string;
+      agent_id: string;
+      l2_deleted: number;
+      l3_deleted: number;
+      vector_collections_deleted: string[];
+    }>(`/agents/${encodeURIComponent(agentId)}/memory`, { method: 'DELETE' }),
 
   /* Metrics (Prometheus text) — root path, not under /api */
   metrics: async (): Promise<MetricsText> => {

@@ -9,8 +9,16 @@ import type {
   GroupMessageRequest,
   GroupStreamEvent,
   RelationGraphResponse,
+  TimelineEvent,
   WorldStateResponse,
 } from '@/types/api';
+
+/** 单个 agent 的流式聚合状态：文本 + 思考/工具事件 */
+export interface StreamingReply {
+  text: string;
+  events: TimelineEvent[];
+  seq: number;
+}
 
 export interface OrchestState {
   world: WorldStateResponse | null;
@@ -22,8 +30,8 @@ export interface OrchestState {
   currentGroupChat: GroupChatSummary | null;
   /** 当前群聊的消息列表 */
   groupMessages: GroupMessage[];
-  /** 流式事件接收中的 agent 回复临时聚合（agent_id → 正在生成的文本） */
-  streamingReplies: Record<string, string>;
+  /** 流式事件接收中的 agent 回复临时聚合（agent_id → {text, events}） */
+  streamingReplies: Record<string, StreamingReply>;
   /** 是否正在流式接收 */
   groupStreaming: boolean;
   worldRunning: boolean;
@@ -69,12 +77,34 @@ function maxTickOf(events: EventInfo[], fallback: number): number {
   return events.reduce((m, ev) => Math.max(m, ev.tick), fallback);
 }
 
+// 模块级变量持有 SSE 连接与当前 gcId（不放入 state，避免触发渲染）
+let groupStreamSource: EventSource | null = null;
+let groupStreamId: string | null = null;
+
+// lastGroupChatId 持久化（刷新后恢复上次群聊）
+const LAST_GC_KEY = 'nebula:lastGroupChatId';
+function loadLastGroupChatId(): string | null {
+  try {
+    return localStorage.getItem(LAST_GC_KEY);
+  } catch {
+    return null;
+  }
+}
+function saveLastGroupChatId(id: string | null): void {
+  try {
+    if (id) localStorage.setItem(LAST_GC_KEY, id);
+    else localStorage.removeItem(LAST_GC_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export const useOrchestStore = create<OrchestState>((set, get) => ({
   world: null,
   events: [],
   relations: null,
   groupChats: [],
-  selectedGroupChatId: null,
+  selectedGroupChatId: loadLastGroupChatId(),
   currentGroupChat: null,
   groupMessages: [],
   streamingReplies: {},
@@ -83,9 +113,6 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
   worldSpeed: 1,
   loading: false,
   lastTick: 0,
-
-  // 当前 SSE 连接（不放入 state，避免渲染）
-  _groupStreamSource: null as EventSource | null,
 
   loadWorld: async () => {
     set({ loading: true });
@@ -130,7 +157,10 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
     }
   },
 
-  selectGroupChat: (id) => set({ selectedGroupChatId: id }),
+  selectGroupChat: (id) => {
+    set({ selectedGroupChatId: id });
+    saveLastGroupChatId(id);
+  },
 
   createGroupChat: async (body) => {
     try {
@@ -153,9 +183,11 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
         streamingReplies: {},
         groupStreaming: false,
       });
+      saveLastGroupChatId(id);
     } catch (e) {
       console.error('Failed to load group chat detail:', e);
       set({ currentGroupChat: null, groupMessages: [] });
+      saveLastGroupChatId(null);
     }
   },
 
@@ -178,6 +210,7 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
       await get().loadGroupChats();
       if (get().currentGroupChat?.id === id) {
         set({ currentGroupChat: null, groupMessages: [] });
+        saveLastGroupChatId(null);
       }
     } catch (e) {
       console.error('Failed to delete group chat:', e);
@@ -195,40 +228,119 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
       mode: body.mode,
       targets: body.targets,
     });
-    // 用闭包变量持有，避免放进 state 触发渲染
-    (get() as { _groupStreamSource?: EventSource | null })._groupStreamSource = source;
-    // 记录当前 gcId，stopGroupStream 调后端 stop 端点用
-    (get() as { _groupStreamId?: string | null })._groupStreamId = id;
+    groupStreamSource = source;
+    groupStreamId = id;
 
     source.onmessage = (ev) => {
       try {
         const event: GroupStreamEvent = JSON.parse(ev.data);
-        // 处理 chunk：累积到 streamingReplies
-        if (event.type === 'chunk' && event.agent_id && event.payload?.text) {
-          set((s) => ({
-            streamingReplies: {
-              ...s.streamingReplies,
-              [event.agent_id!]: (s.streamingReplies[event.agent_id!] || '') + (event.payload!.text as string),
-            },
-          }));
-        }
-        // 处理 message：追加到 groupMessages
+
+        // message 事件：用户消息 + agent 回复消息（不带 agent_id，用 message.source 清理 streamingReply）
         if (event.type === 'message' && event.message) {
-          set((s) => ({
-            groupMessages: [...s.groupMessages, event.message!],
-            // 若该 agent 有 streamingReplies，清掉（已转为正式消息）
-            streamingReplies:
-              event.message!.source in (s.streamingReplies)
-                ? Object.fromEntries(Object.entries(s.streamingReplies).filter(([k]) => k !== event.message!.source))
-                : s.streamingReplies,
-          }));
+          set((s) => {
+            const replies = { ...s.streamingReplies };
+            // 用消息 source 清理对应的流式聚合（agent 回复转正）
+            const src = event.message!.source;
+            if (src in replies) delete replies[src];
+            return { groupMessages: [...s.groupMessages, event.message!], streamingReplies: replies };
+          });
+          onEvent?.(event);
+          return;
         }
+
         // end / error → 结束流式
         if (event.type === 'end' || event.type === 'error') {
           set({ groupStreaming: false, streamingReplies: {} });
           source.close();
-          (get() as { _groupStreamSource?: EventSource | null })._groupStreamSource = null;
-          (get() as { _groupStreamId?: string | null })._groupStreamId = null;
+          groupStreamSource = null;
+          groupStreamId = null;
+          onEvent?.(event);
+          return;
+        }
+
+        // skip 事件：Agent 自主决定不回复，清理该 agent 的流式聚合
+        if (event.type === 'skip' && event.agent_id) {
+          const skipAid = event.agent_id;
+          set((s) => {
+            const replies = { ...s.streamingReplies };
+            delete replies[skipAid];
+            return { streamingReplies: replies };
+          });
+          onEvent?.(event);
+          return;
+        }
+
+        // chunk/thinking/tool 事件需要 agent_id
+        const aid = event.agent_id;
+        if (!aid) {
+          onEvent?.(event);
+          return;
+        }
+
+        if (event.type === 'chunk' && event.payload?.text) {
+          // 文本片段：累积到 streamingReplies[aid].text
+          set((s) => {
+            const prev = s.streamingReplies[aid] || { text: '', events: [], seq: 0 };
+            return {
+              streamingReplies: {
+                ...s.streamingReplies,
+                [aid]: { ...prev, text: prev.text + (event.payload!.text as string) },
+              },
+            };
+          });
+        } else if (event.type === 'thinking') {
+          // 思考事件：合并连续相同 step 的片段
+          const step = (event.payload?.step as string) || '思考';
+          const content = (event.payload?.content as string) || '';
+          set((s) => {
+            const prev = s.streamingReplies[aid] || { text: '', events: [], seq: 0 };
+            const events = [...prev.events];
+            const last = events[events.length - 1];
+            if (last && last.kind === 'thinking' && last.step === step) {
+              events[events.length - 1] = { ...last, content: last.content + content };
+            } else {
+              events.push({ kind: 'thinking', seq: ++prev.seq, step, content });
+            }
+            return {
+              streamingReplies: { ...s.streamingReplies, [aid]: { ...prev, events } },
+            };
+          });
+        } else if (event.type === 'tool_start') {
+          const tool = (event.payload?.tool as string) || 'tool';
+          const args = event.payload?.args as Record<string, unknown> | undefined;
+          set((s) => {
+            const prev = s.streamingReplies[aid] || { text: '', events: [], seq: 0 };
+            const events = [...prev.events];
+            events.push({
+              kind: 'tool',
+              seq: ++prev.seq,
+              id: `${aid}-${prev.seq}`,
+              tool,
+              args,
+              status: 'loading',
+            });
+            return {
+              streamingReplies: { ...s.streamingReplies, [aid]: { ...prev, events } },
+            };
+          });
+        } else if (event.type === 'tool_end') {
+          const tool = (event.payload?.tool as string) || 'tool';
+          const result = event.payload?.result;
+          set((s) => {
+            const prev = s.streamingReplies[aid] || { text: '', events: [], seq: 0 };
+            const events = [...prev.events];
+            // 从后向前找第一个同名且 loading 的工具事件，更新为 done
+            for (let i = events.length - 1; i >= 0; i--) {
+              const e = events[i];
+              if (e.kind === 'tool' && e.tool === tool && e.status === 'loading') {
+                events[i] = { ...e, status: 'done', result };
+                break;
+              }
+            }
+            return {
+              streamingReplies: { ...s.streamingReplies, [aid]: { ...prev, events } },
+            };
+          });
         }
         onEvent?.(event);
       } catch (err) {
@@ -239,24 +351,22 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
     source.onerror = () => {
       set({ groupStreaming: false, streamingReplies: {} });
       source.close();
-      (get() as { _groupStreamSource?: EventSource | null })._groupStreamSource = null;
-      (get() as { _groupStreamId?: string | null })._groupStreamId = null;
+      groupStreamSource = null;
+      groupStreamId = null;
     };
   },
 
   stopGroupStream: () => {
-    const src = (get() as { _groupStreamSource?: EventSource | null })._groupStreamSource;
-    const gid = (get() as { _groupStreamId?: string | null })._groupStreamId;
-    if (src) {
-      src.close();
-      (get() as { _groupStreamSource?: EventSource | null })._groupStreamSource = null;
+    if (groupStreamSource) {
+      groupStreamSource.close();
+      groupStreamSource = null;
     }
-    if (gid) {
+    if (groupStreamId) {
       // fire-and-forget 调后端 stop，让 dispatcher 停止后续接话递归
-      apiClient.stopGroupChat(gid).catch((e) => {
+      apiClient.stopGroupChat(groupStreamId).catch((e) => {
         console.warn('stopGroupChat 调用失败:', e);
       });
-      (get() as { _groupStreamId?: string | null })._groupStreamId = null;
+      groupStreamId = null;
     }
     set({ groupStreaming: false, streamingReplies: {} });
   },

@@ -22,7 +22,7 @@ nebula-agent-studio/
 │   ├── types/             # TypeScript 类型定义
 │   ├── App.tsx
 │   └── main.tsx
-├── doc/frontend/          # 10 份前端设计文档
+├── doc/frontend/          # 11 份前端设计文档（index + 01-10）
 ├── AGENTS.md
 ├── FEATURES.md
 ├── package.json
@@ -52,5 +52,5 @@ React 18 · TypeScript · Vite · React Router v6 · Zustand · CSS Modules + De
 ## 后端参考
 
 - 仓库：`D:\AIWorkspace\nebula-agent-os`
-- API 定义：`src/nebula/api/server.py`
-- 设计文档：`doc/design/`（17 份）+ `AGENTS.md` + `FEATURES.md`
+- API 定义：`src/nebula/api/routes/`（按领域拆分为 7 个 router，server.py 仅作入口）
+- 设计文档：`doc/design/`（21 份）+ `doc/skill/`（8 份）+ `AGENTS.md` + `FEATURES.md`

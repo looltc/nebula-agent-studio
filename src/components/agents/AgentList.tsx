@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MoreVertical, Edit, Copy, Pause, Play, Trash2, Plus } from 'lucide-react';
 import {
@@ -23,7 +23,63 @@ export interface AgentListProps {
   /** Toggle local pause/resume. Parent owns the override state. */
   onTogglePause: (id: string) => void;
   className?: string;
+  /** 索引条 sticky top（对齐 header 底部） */
+  stickyTop?: number;
 }
+
+/**
+ * 拼音声母边界字（按 A-Z 顺序，在 localeCompare('zh-Hans-CN') 下递增）。
+ * 用于中文首字母分组：目标字 >= 某边界字 则归到该字母。
+ * 注：I/U/V 无对应拼音声母，不设边界，英文名仍可归入。
+ */
+const PINYIN_BOUNDS: { letter: string; char: string }[] = [
+  { letter: 'A', char: '阿' },
+  { letter: 'B', char: '八' },
+  { letter: 'C', char: '擦' },
+  { letter: 'D', char: '搭' },
+  { letter: 'E', char: '蛾' },
+  { letter: 'F', char: '发' },
+  { letter: 'G', char: '噶' },
+  { letter: 'H', char: '哈' },
+  { letter: 'J', char: '及' },
+  { letter: 'K', char: '喀' },
+  { letter: 'L', char: '垃' },
+  { letter: 'M', char: '妈' },
+  { letter: 'N', char: '拿' },
+  { letter: 'O', char: '哦' },
+  { letter: 'P', char: '趴' },
+  { letter: 'Q', char: '七' },
+  { letter: 'R', char: '然' },
+  { letter: 'S', char: '萨' },
+  { letter: 'T', char: '塌' },
+  { letter: 'W', char: '挖' },
+  { letter: 'X', char: '西' },
+  { letter: 'Y', char: '呀' },
+  { letter: 'Z', char: '杂' },
+];
+
+/** 取 name 首字母（支持中文拼音首字母），无法识别归到 "#" */
+function getLetter(name: string): string {
+  const ch = name.trim().charAt(0);
+  const upper = ch.toUpperCase();
+  if (upper >= 'A' && upper <= 'Z') return upper;
+  // 中文字符：用 localeCompare(zh-Hans-CN) 找拼音区间
+  if (/[\u4e00-\u9fff]/.test(ch)) {
+    for (let i = PINYIN_BOUNDS.length - 1; i >= 0; i--) {
+      if (ch.localeCompare(PINYIN_BOUNDS[i].char, 'zh-Hans-CN') >= 0) {
+        return PINYIN_BOUNDS[i].letter;
+      }
+    }
+    return 'A'; // 拼音在"阿"之前的字（极少）
+  }
+  return '#';
+}
+
+/** 26 个字母 + # */
+const ALL_LETTERS: string[] = [
+  ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)),
+  '#',
+];
 
 /**
  * Responsive card grid of agents. Handles loading (skeletons), empty state,
@@ -34,6 +90,7 @@ export function AgentList({
   loading,
   onTogglePause,
   className,
+  stickyTop = 0,
 }: AgentListProps) {
   const navigate = useNavigate();
   const startEdit = useAgentStore((s) => s.startEdit);
@@ -44,6 +101,7 @@ export function AgentList({
   const toast = useToast();
   const [deleteTarget, setDeleteTarget] = useState<AgentSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const open = (id: string) => navigate(`/agents/${id}`);
 
@@ -71,6 +129,35 @@ export function AgentList({
     } finally {
       setDeleting(false);
     }
+  };
+
+  // 按首字母分组（agents 已由父组件按 name 字母序排好）
+  const grouped = useMemo(() => {
+    const map = new Map<string, AgentSummary[]>();
+    for (const a of agents) {
+      const letter = getLetter(a.name);
+      if (!map.has(letter)) map.set(letter, []);
+      map.get(letter)!.push(a);
+    }
+    // 按 A-Z → # 顺序输出
+    return ALL_LETTERS
+      .filter((l) => map.has(l))
+      .map((letter) => ({ letter, items: map.get(letter)! }));
+  }, [agents]);
+
+  // 出现过的字母集合（用于索引条置灰判断）
+  const availableLetters = useMemo(
+    () => new Set(grouped.map((g) => g.letter)),
+    [grouped],
+  );
+
+  // 跳转到指定字母分组
+  const jumpToLetter = (letter: string) => {
+    if (!availableLetters.has(letter)) return;
+    const el = containerRef.current?.querySelector(
+      `[data-letter="${letter}"]`,
+    ) as HTMLElement | null;
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   if (loading) {
@@ -101,27 +188,60 @@ export function AgentList({
     );
   }
 
-  // 按修改时间倒序：最近修改的 Agent 排在最前。无 updated_at 的排到末尾。
-  const sortedAgents = [...agents].sort((a, b) => {
-    const ta = a.updated_at ? Date.parse(a.updated_at) : 0;
-    const tb = b.updated_at ? Date.parse(b.updated_at) : 0;
-    return tb - ta;
-  });
-
   return (
     <>
-      <div className={cx(styles.grid, className)}>
-        {sortedAgents.map((agent) => (
-          <AgentCardItem
-            key={agent.id}
-            agent={agent}
-            onOpen={open}
-            onEdit={() => startEdit(agent.id)}
-            onDuplicate={handleDuplicate}
-            onTogglePause={onTogglePause}
-            onDeleteRequest={() => setDeleteTarget(agent)}
-          />
-        ))}
+      <div className={cx(styles.listWrap, className)}>
+        <div className={styles.gridContainer} ref={containerRef}>
+          {grouped.map(({ letter, items }) => (
+            <section key={letter} className={styles.groupSection} data-letter={letter}>
+              <div className={styles.groupHeader}>
+                <span className={styles.groupLetter}>{letter}</span>
+                {letter === '#' && <span className={styles.groupLabel}>其他</span>}
+                <span className={styles.groupCount}>{items.length}</span>
+              </div>
+              <div className={styles.grid}>
+                {items.map((agent) => (
+                  <AgentCardItem
+                    key={agent.id}
+                    agent={agent}
+                    onOpen={open}
+                    onEdit={() => startEdit(agent.id)}
+                    onDuplicate={handleDuplicate}
+                    onTogglePause={onTogglePause}
+                    onDeleteRequest={() => setDeleteTarget(agent)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        {/* 右侧字母索引条（浮动，不占布局空间） */}
+        <div
+          className={styles.indexRail}
+          style={{ top: stickyTop }}
+          aria-label="字母索引"
+        >
+          {ALL_LETTERS.map((letter) => {
+            const available = availableLetters.has(letter);
+            return (
+              <button
+                key={letter}
+                type="button"
+                className={cx(
+                  styles.indexLetter,
+                  available ? styles.indexLetterActive : styles.indexLetterDisabled,
+                )}
+                onClick={() => jumpToLetter(letter)}
+                disabled={!available}
+                aria-label={`跳转到 ${letter}`}
+                title={available ? `跳转到 ${letter}` : `${letter} 暂无 Agent`}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Modal

@@ -102,6 +102,7 @@ export function MemoryPanel({ agentId, bufferCapacity }: MemoryPanelProps) {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [forgettingId, setForgettingId] = useState<string | null>(null);
   const [enabled, setEnabled] = useState(true);
+  const [clearing, setClearing] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -163,6 +164,34 @@ export function MemoryPanel({ agentId, bufferCapacity }: MemoryPanelProps) {
     }
   };
 
+  const handleClearAll = async () => {
+    const confirmed = window.confirm(
+      `确定要清空 Agent "${agentId}" 的所有记忆吗？\n\n` +
+      `将清空：\n` +
+      `• L2 对话记忆（所有会话）\n` +
+      `• L3 长期记忆（SQLite + 向量库）\n\n` +
+      `此操作不可恢复！`,
+    );
+    if (!confirmed) return;
+
+    setClearing(true);
+    try {
+      const res = await apiClient.clearAllMemory(agentId);
+      const summary =
+        `L2 对话 ${res.l2_deleted} 条 · L3 长期 ${res.l3_deleted} 条` +
+        (res.vector_collections_deleted.length > 0
+          ? ` · 向量库 ${res.vector_collections_deleted.length} 个 collection`
+          : '');
+      toast.success('记忆已清空', summary);
+      await reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '请重试';
+      toast.error('清空失败', msg);
+    } finally {
+      setClearing(false);
+    }
+  };
+
   // 未启用长期记忆：降级提示
   if (!enabled) {
     return (
@@ -209,6 +238,15 @@ export function MemoryPanel({ agentId, bufferCapacity }: MemoryPanelProps) {
             onClick={handleConsolidate}
           >
             梦境整理
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            icon={<Trash2 size={14} />}
+            loading={clearing}
+            onClick={handleClearAll}
+          >
+            清空记忆
           </Button>
         </div>
       </div>

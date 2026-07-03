@@ -1,7 +1,3 @@
-.pageTabs {
-  margin-bottom: var(--space-3);
-}
-
 .pills {
   display: inline-flex;
   align-items: center;
@@ -10,6 +6,22 @@
   background: var(--bg-muted);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
+}
+
+/* Header 钉在滚动容器顶部，索引条对齐它底部 */
+.headerSticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-background);
+}
+
+/* 页面内边距：顶部 0 让 header 紧贴顶部，其余方向保持 space-6 */
+.pageInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 var(--space-6) var(--space-6);
 }
 
 .pill {

@@ -526,7 +526,7 @@ export interface GroupMessageResponse {
 
 /** SSE 流式事件 */
 export interface GroupStreamEvent {
-  type: 'message' | 'chunk' | 'thinking' | 'tool_start' | 'tool_end' | 'error' | 'end';
+  type: 'message' | 'chunk' | 'thinking' | 'tool_start' | 'tool_end' | 'skip' | 'error' | 'end';
   message?: GroupMessage;
   sender_name?: string;
   agent_id?: string;

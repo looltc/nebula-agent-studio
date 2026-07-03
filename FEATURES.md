@@ -86,7 +86,10 @@
 | MessageList | ✅ | 滚动/自动定位/按时间戳升序排序 |
 | MessageBubble | ✅ | 用户/Agent/系统 气泡，"你" 中文标签；时间显示北京时间(Asia/Shanghai, 24h)；助手消息走 Markdown 渲染(react-markdown + remark-gfm + rehype-highlight)，用户消息保持 pre-wrap 纯文本；LLM 回答前导换行符自动 trim；字号 text-base；Agent 气泡无边框；同一瀑布流布局（容器 880px，agent 气泡左对齐、user 气泡右对齐，两者各占容器全宽） |
 | StreamingMessage | ✅ | 光标动画+chunk 合并；流式文本同样走 Markdown 渲染；后端 WS/SSE 已接入 LangChain astream() 真 token 流式（绕过 ReAct 循环，首字延迟显著降低） |
-| MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色；启用 remark-breaks 把单换行渲染为 <br>；`.codeBlock code` 显式 `white-space: pre` 覆盖 `.md :global(*)` 的 normal，修复嵌套代码块换行被折叠 |
+| MarkdownText | ✅ | GFM(表格/删除线/任务列表)+highlight.js 语法高亮+inline code chip+链接新开 tab+设计令牌配色；启用 remark-breaks 把单换行渲染为 <br>；`.codeBlock code` 显式 `white-space: pre` 覆盖 `.md :global(*)` 的 normal，修复嵌套代码块换行被折叠；repairNestedFences 栈匹配算法修复未闭合/嵌套 fence；流式时关闭 remarkGfm 避免表格半成品闪烁 |
+| MermaidDiagram | ✅ | 独立组件渲染 mermaid 代码块；streaming prop 流式时跳过 mermaid.render 避免代码不完整生成报错 SVG；cleanupMermaidErrorSvgs() 清理残留 `aria-roledescription="error"` 节点；流式时显示源码占位 + 完成后再渲染；preview/source 双视图切换 |
+| TimelineView | ✅ | 思考/工具事件时间线；thinking 事件按 step 合并（reasoning/plan/replan/evaluator/reflector 中文标签）；autoOpen 机制（streaming 时最后一项展开、完成后自动折叠，用户手动 toggle 后脱离自动控制） |
+| GroupMessageBubble | ✅ | 群聊消息气泡共享组件；发言者颜色编码（hsl 哈希 agent id → 左边框+名字同色）；StreamingBubble 思考视窗在气泡上方（活跃时 max-height 220px 滚动+自动滚底，结束后折叠为「💭 思考过程（N 步·M 工具）」可点击展开）；is_closing 标记显示「无需回复」徽标（对应后端 `<no-reply/>` 标签） |
 | ToolCallBlock | ✅ | Loading/完成/失败态 |
 | ChatInput | ✅ | Enter 发送/Shift+Enter 换行/Stop，底部右对齐按钮行，中文占位符；带边框 + focus 时呼吸感双色流光动画（蓝紫双色 3.2s ease-in-out 脉冲）；max-width 880px 与消息列表对齐 |
 | HITLApproval | ✅ | 审批卡片+倒计时 |
@@ -111,6 +114,9 @@
 | TopologyView | ✅ | React Flow 拓扑图；Relation 字段对齐后端(from/to/kind) |
 | WorldPanel | ✅ | Stats+Agent 状态+WorldLoop 控制 |
 | GroupChatManager | ✅ | 列表+详情+创建 Modal |
+| GroupChatPage | ✅ | /group-chats/:id 独立路由；左侧群列表 + 右侧聊天区；URL 参数恢复会话；@mention 输入检测（光标位置解析 + 键盘导航 + 候选过滤 + 选中插入 `@id `）；流式回复 streamingReplies 聚合（agent_id → {text, events}）；displayItems 合并正式消息+流式回复+时间分隔线（>5min 间隔）+消息分组（同 sender 连续隐藏 header）；GroupMessageBubble 共享组件（发言者颜色编码 hsl 哈希 + 思考视窗）；lastGroupChatId 持久化到 localStorage |
+| CreateGroupChatModal | ✅ | 6 预设模板（Panel Discussion/Standup/Brainstorm/Code Review/Interview/Custom）+ 5 角色（member/moderator/advocate/critic/scribe）+ 3 Floor Policy（round_robin/moderator/free_for_all）+ 参与者去重候选 |
+| 群聊 SSE 流式 | ✅ | EventSource 接 GET /stream；处理 chunk/message/thinking/tool_start/tool_end/end/error 七种事件；streamingReplies 实时累积文本+事件；message 事件落盘 groupMessages 并清除对应 streamingReply；thinking/tool 事件复用 chatStore 的合并逻辑（连续 step 合并、tool_start→tool_end 状态更新） |
 | RelationGraphView | ✅ | 关系图可视化；从 relations 派生 nodes |
 | OrchestrationDetail | ✅ | GraphSpec 可读视图 |
 | 编排错误兜底 | ✅ | ErrorBoundary 包裹 + ReactFlowProvider + buildEdge 默认分支 |

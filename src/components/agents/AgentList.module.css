@@ -4,6 +4,108 @@
   gap: var(--space-4);
 }
 
+/* ===== 字母分组 + 索引条 ===== */
+.listWrap {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.gridContainer {
+  flex: 1;
+  min-width: 0;
+}
+
+.groupSection {
+  margin-bottom: var(--space-5);
+}
+
+.groupSection:last-child {
+  margin-bottom: 0;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.groupLetter {
+  font-size: var(--text-lg);
+  line-height: 1;
+  font-weight: var(--font-bold);
+  color: var(--text-foreground);
+  font-family: var(--font-mono);
+}
+
+.groupLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.groupCount {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+  margin-left: auto;
+}
+
+/* 右侧字母索引条：sticky 钉在 header 底部（top 由 inline style 传入） */
+.indexRail {
+  position: sticky;
+  flex-shrink: 0;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: var(--space-1) 2px;
+  z-index: 8;
+  max-height: calc(100vh - var(--space-6));
+  overflow: hidden;
+}
+
+.indexLetter {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  line-height: 1;
+  font-family: var(--font-mono);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+.indexLetterActive {
+  color: var(--text-secondary);
+}
+
+.indexLetterActive:hover {
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  transform: scale(1.15);
+}
+
+.indexLetterDisabled {
+  color: var(--text-muted);
+  opacity: 0.25;
+  cursor: default;
+}
+
 /* ===== Card ===== */
 .card {
   display: flex;
