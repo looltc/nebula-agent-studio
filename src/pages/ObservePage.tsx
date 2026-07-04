@@ -25,13 +25,9 @@ export default function ObservePage() {
   const [observeTab, setObserveTab] = useState<ObserveTab>('events');
 
   const events = useObserveStore((s) => s.events);
-  const lastTick = useObserveStore((s) => s.lastTick);
   const metricsSamples = useObserveStore((s) => s.metricsSamples);
-  const traces = useObserveStore((s) => s.traces);
-  const selectedTraceTick = useObserveStore((s) => s.selectedTraceTick);
   const loadEvents = useObserveStore((s) => s.loadEvents);
   const loadMetrics = useObserveStore((s) => s.loadMetrics);
-  const buildTracesFromTick = useObserveStore((s) => s.buildTracesFromTick);
 
   // Initial load + ongoing polling (5s) for events and metrics.
   useEffect(() => {
@@ -41,18 +37,6 @@ export default function ObservePage() {
 
   usePolling(loadEvents, 5000);
   usePolling(loadMetrics, 5000);
-
-  // Build an initial trace tree from the latest tick once events arrive.
-  useEffect(() => {
-    if (
-      traces.length === 0 &&
-      selectedTraceTick === null &&
-      lastTick > 0 &&
-      events.length > 0
-    ) {
-      buildTracesFromTick(lastTick);
-    }
-  }, [traces.length, selectedTraceTick, lastTick, events.length, buildTracesFromTick]);
 
   // ===== Shared stats row =====
   const tokenTotal = useMemo(

@@ -1,0 +1,66 @@
+.edge {
+  fill: none;
+  transition: stroke var(--duration-fast) var(--ease-default),
+    stroke-width var(--duration-fast) var(--ease-default);
+}
+
+.edgeHit {
+  fill: none;
+  cursor: pointer;
+}
+
+.labelWrap {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: all;
+  /* 给 labelWrap 加 padding，扩大 hover 持续区域，避免鼠标移到按钮时离开热区 */
+  padding: 6px;
+  margin: -6px;
+}
+
+.condLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-semibold);
+  color: var(--accent-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--accent-ring);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 删除按钮：变大 + padding 扩大点击热区 */
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+  transition: color var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default),
+    background var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+.deleteBtn:hover {
+  color: var(--status-error, #ef4444);
+  border-color: var(--status-error, #ef4444);
+  background: color-mix(in srgb, var(--status-error, #ef4444) 10%, var(--bg-card));
+  transform: scale(1.1);
+}

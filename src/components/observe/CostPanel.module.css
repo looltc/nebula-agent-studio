@@ -176,3 +176,36 @@
     gap: var(--space-3);
   }
 }
+
+/* ===== Token usage row ===== */
+.tokenRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-muted);
+}
+
+.tokenCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tokenLabel {
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--font-medium);
+}
+
+.tokenValue {
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}

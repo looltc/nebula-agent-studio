@@ -1,0 +1,431 @@
+/* ============================================================================
+ * CanvasNode v3 — 清新卡片风格（参考 n8n / ComfyUI）
+ *
+ * 设计要点：
+ * - 节点矩形卡片，圆角 8px，轻量阴影
+ * - 顶部 header：图标 + 类型名（图标用 accent 色块包裹）
+ * - 中部 body：label（端口概览已移除）
+ * - 端口在左右两侧，按 PortType 着色
+ * - 端口标签显示在节点外侧（左/右），避免与 body 内容重叠
+ * - 节点高度自适应：由 minHeight（基于端口数）+ body flex:1 共同决定
+ * ============================================================================ */
+
+.node {
+  position: relative;
+  min-width: 260px;
+  max-width: 600px;  /* 与 NodeResizer maxWidth 一致 */
+  /* 不设固定 height，由 minHeight + 内容自适应 + NodeResizer 拖拽 */
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color var(--duration-fast) var(--ease-default),
+    box-shadow var(--duration-fast) var(--ease-default);
+  cursor: grab;
+  overflow: visible;  /* 让 Handle 和端口标签可以溢出节点框 */
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.node:active {
+  cursor: grabbing;
+}
+
+.node:hover {
+  border-color: var(--accent-ring);
+  box-shadow: var(--shadow-md);
+}
+
+.selected {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 22%, transparent),
+    var(--shadow-md);
+}
+
+.entry {
+  border-color: var(--status-success);
+}
+
+.endNode {
+  border-color: var(--status-error, #ef4444);
+}
+
+.running {
+  border-color: var(--status-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-success) 22%, transparent),
+    var(--shadow-md);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-success) 22%, transparent),
+      var(--shadow-md);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-success) 10%, transparent),
+      var(--shadow-md);
+  }
+}
+
+/* ---- Header ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-divider);
+  background: color-mix(in srgb, var(--node-accent, var(--accent-primary)) 6%, var(--bg-card));
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  flex-shrink: 0;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.icon {
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.typeName {
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ---- Body ---- */
+.body {
+  padding: 4px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---- Agent 身份卡（节点卡片内） ---- */
+.agentCard {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  background: var(--bg-popover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.agentAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border-default);
+}
+
+.agentAvatarFallback {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--node-accent, var(--accent-primary)) 15%, transparent);
+  color: var(--node-accent, var(--accent-primary));
+  font-size: 8px;
+  font-weight: var(--font-bold);
+  flex-shrink: 0;
+}
+
+.agentMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.agentName {
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.agentBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 3px;
+  height: 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--node-accent, var(--accent-primary)) 12%, transparent);
+  color: var(--node-accent, var(--accent-primary));
+  font-size: 8px;
+  font-weight: var(--font-bold);
+  width: fit-content;
+  line-height: 1;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: var(--font-semibold);
+  color: var(--text-foreground);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+}
+
+/* ---- 删除按钮 ---- */
+.deleteBtn {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default);
+}
+
+.node:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: var(--status-error, #ef4444);
+  border-color: var(--status-error, #ef4444);
+  background: color-mix(in srgb, var(--status-error, #ef4444) 8%, var(--bg-card));
+}
+
+/* ---- Handle（端口连接点） ---- */
+.handle {
+  width: 9px;
+  height: 9px;
+  background: var(--accent-ring);
+  border: 2px solid var(--bg-card);
+  border-radius: var(--radius-full);
+  opacity: 0.85;
+  transition: opacity var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+.handle:hover {
+  opacity: 1;
+  transform: scale(1.25);
+}
+
+/* 类型化 Handle：保持圆形 + hover 放大 */
+.handleTyped {
+  width: 10px;
+  height: 10px;
+  border-width: 2px;
+  opacity: 0.9;
+}
+
+.handleTyped:hover {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* ---- 端口标签（hover 显示在节点外侧） ---- */
+.portLabel {
+  position: absolute;
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  font-family: var(--font-mono);
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+  background: var(--bg-card);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-divider);
+  box-shadow: var(--shadow-sm);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.node:hover .portLabel {
+  opacity: 1;
+}
+
+/* target（输入）端口标签：显示在节点外侧（左侧） */
+.portLabelTarget {
+  right: 14px;  /* handle 在左边缘，标签右移 14px 即在节点外左侧 */
+}
+
+/* source（输出）端口标签：显示在节点外侧（右侧） */
+.portLabelSource {
+  left: 14px;   /* handle 在右边缘，标签左移 14px 即在节点外右侧 */
+}
+
+/* ---- mode 徽章 ---- */
+.modeBadge {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  border: 1px solid var(--border-default);
+}
+
+.modeAlways {
+  display: none; /* always 不显示徽章 */
+}
+
+.modeNever {
+  background: color-mix(in srgb, var(--status-error, #ef4444) 12%, var(--bg-card));
+  color: var(--status-error, #ef4444);
+  border-color: var(--status-error, #ef4444);
+}
+
+.modeBypass {
+  background: color-mix(in srgb, var(--status-warning, #f59e0b) 12%, var(--bg-card));
+  color: var(--status-warning, #f59e0b);
+  border-color: var(--status-warning, #f59e0b);
+}
+
+/* mode !== always 时节点淡化 */
+.muted {
+  opacity: 0.6;
+}
+
+/* ---- 连接中状态 ---- */
+/* 节点处于连接中时，非起始节点的可连接端口高亮 */
+.connecting .handle {
+  opacity: 0.6;
+}
+
+/* 高亮的端口：放大 + 呼吸动画 */
+.handleConnecting {
+  opacity: 1 !important;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  animation: handlePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes handlePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  }
+}
+
+/* ---- 输出区（撑满 body 剩余空间） ---- */
+.outputArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  word-break: break-word;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+.outputArea[data-running='true'] {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-success) 5%, transparent);
+}
+
+.outputArea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.outputArea::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.outputLine {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.outputPlaceholder {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 10px;
+}
+
+.outputLiveDot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--status-success);
+  animation: livePulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

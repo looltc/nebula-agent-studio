@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
 import { parsePrometheus } from '@/services/ws';
-import type { EventInfo } from '@/types/api';
+import type {
+  CostResponse,
+  EventInfo,
+  MetricsDict,
+  ObservabilityStatus,
+  SpanView,
+  TraceSummary,
+} from '@/types/api';
 
 export interface MetricSample {
   name: string;
@@ -17,16 +24,6 @@ export interface EventFilter {
   search: string;
 }
 
-export interface TraceNode {
-  id: string;
-  name: string;
-  type: string;
-  durationMs: number;
-  status: 'ok' | 'error';
-  tokens?: { in: number; out: number };
-  children: TraceNode[];
-}
-
 export interface ReplayState {
   playing: boolean;
   currentTick: number;
@@ -35,30 +32,46 @@ export interface ReplayState {
   speed: number;
 }
 
-export interface CostState {
-  dailyCap: number;
-  used: number;
-  perAgent: Array<{ agentId: string; used: number; cap: number }>;
-}
-
 export interface ObserveState {
+  // ---------- Events（实时 EventBus，/api/events） ----------
   events: EventInfo[];
   lastTick: number;
   autoScroll: boolean;
   setAutoScroll: (value: boolean) => void;
   eventFilter: EventFilter;
   setEventFilter: (partial: Partial<EventFilter>) => void;
+  loadEvents: () => Promise<void>;
+  appendEvent: (event: EventInfo) => void;
 
+  // ---------- Metrics ----------
+  // Prometheus text（保留兼容现有 UI）
   metricsText: string;
   metricsSamples: MetricSample[];
+  // 结构化 metrics（/api/metrics/json，供图表渲染）
+  metricsDict: MetricsDict | null;
   metricsRange: MetricsRange;
   setMetricsRange: (range: MetricsRange) => void;
+  loadMetrics: () => Promise<void>;
+  loadMetricsJson: () => Promise<void>;
 
-  traces: TraceNode[];
-  buildTracesFromTick: (tick: number) => void;
-  selectedTraceTick: number | null;
-  selectTraceTick: (tick: number) => void;
+  // ---------- Traces（真实 /api/traces） ----------
+  traceList: TraceSummary[];
+  selectedTraceId: string | null;
+  currentTrace: SpanView | null;
+  loadingTrace: boolean;
+  loadTraces: () => Promise<void>;
+  selectTrace: (traceId: string) => Promise<void>;
+  clearSelectedTrace: () => void;
 
+  // ---------- Cost（真实 /api/cost） ----------
+  cost: CostResponse | null;
+  loadCost: () => Promise<void>;
+
+  // ---------- Observability Status（LangSmith / OTel） ----------
+  observabilityStatus: ObservabilityStatus | null;
+  loadObservabilityStatus: () => Promise<void>;
+
+  // ---------- Replay（本地 UI 控制） ----------
   replay: ReplayState;
   setReplayRange: (from: number, to: number) => void;
   playReplay: () => void;
@@ -66,13 +79,6 @@ export interface ObserveState {
   stepReplay: (direction: 1 | -1) => void;
   setReplaySpeed: (n: number) => void;
   setCurrentTick: (tick: number) => void;
-
-  cost: CostState;
-  refreshCost: () => void;
-
-  loadEvents: () => Promise<void>;
-  loadMetrics: () => Promise<void>;
-  appendEvent: (event: EventInfo) => void;
 }
 
 const MAX_EVENTS = 2000;
@@ -90,38 +96,8 @@ function maxTickOf(events: EventInfo[], fallback: number): number {
   return events.reduce((m, ev) => Math.max(m, ev.tick), fallback);
 }
 
-function buildTickTree(tick: number, events: EventInfo[]): TraceNode[] {
-  const tickEvents = events.filter((e) => e.tick === tick);
-  const children: TraceNode[] = tickEvents.map((e) => {
-    const payload = e.payload ?? {};
-    const status: 'ok' | 'error' =
-      typeof payload.error === 'string' || /error/i.test(e.type) ? 'error' : 'ok';
-    const durationMs =
-      typeof payload.duration_ms === 'number'
-        ? payload.duration_ms
-        : typeof payload.durationMs === 'number'
-          ? payload.durationMs
-          : 0;
-    const tokensIn = typeof payload.tokens_in === 'number' ? payload.tokens_in : null;
-    const tokensOut = typeof payload.tokens_out === 'number' ? payload.tokens_out : null;
-    const tokens =
-      tokensIn !== null || tokensOut !== null
-        ? { in: tokensIn ?? 0, out: tokensOut ?? 0 }
-        : undefined;
-    return {
-      id: e.id,
-      name: e.source || e.type,
-      type: e.type,
-      durationMs,
-      status,
-      tokens,
-      children: [],
-    };
-  });
-  return children;
-}
-
 export const useObserveStore = create<ObserveState>((set, get) => ({
+  // ---------- Events ----------
   events: [],
   lastTick: 0,
   autoScroll: true,
@@ -130,29 +106,102 @@ export const useObserveStore = create<ObserveState>((set, get) => ({
   setEventFilter: (partial) => {
     set((s) => ({ eventFilter: { ...s.eventFilter, ...partial } }));
   },
+  loadEvents: async () => {
+    try {
+      const res = await apiClient.listEvents(get().lastTick, 100);
+      set((s) => {
+        let merged = mergeAndSort(s.events, res.events);
+        if (merged.length > MAX_EVENTS) {
+          merged = merged.slice(merged.length - MAX_EVENTS);
+        }
+        return { events: merged, lastTick: maxTickOf(merged, s.lastTick) };
+      });
+    } catch (e) {
+      console.error('Failed to load events:', e);
+    }
+  },
+  appendEvent: (event) => {
+    set((s) => {
+      if (s.events.some((e) => e.id === event.id)) return {};
+      const next = [...s.events, event];
+      next.sort((a, b) => a.tick - b.tick || a.ts.localeCompare(b.ts));
+      return { events: next, lastTick: Math.max(s.lastTick, event.tick) };
+    });
+  },
 
+  // ---------- Metrics ----------
   metricsText: '',
   metricsSamples: [],
+  metricsDict: null,
   metricsRange: '1h',
   setMetricsRange: (range) => set({ metricsRange: range }),
-
-  traces: [],
-  buildTracesFromTick: (tick) => {
-    const { events } = get();
-    const children = buildTickTree(tick, events);
-    const root: TraceNode = {
-      id: `tick-${tick}`,
-      name: `Tick ${tick}`,
-      type: 'tick',
-      durationMs: children.reduce((m, c) => m + c.durationMs, 0),
-      status: children.some((c) => c.status === 'error') ? 'error' : 'ok',
-      children,
-    };
-    set({ traces: [root], selectedTraceTick: tick });
+  loadMetrics: async () => {
+    try {
+      const text = await apiClient.metrics();
+      const samples = parsePrometheus(text);
+      set({ metricsText: text, metricsSamples: samples });
+    } catch (e) {
+      console.error('Failed to load metrics:', e);
+    }
   },
-  selectedTraceTick: null,
-  selectTraceTick: (tick) => set({ selectedTraceTick: tick }),
+  loadMetricsJson: async () => {
+    try {
+      const dict = await apiClient.metricsJson();
+      set({ metricsDict: dict });
+    } catch (e) {
+      console.error('Failed to load metrics json:', e);
+    }
+  },
 
+  // ---------- Traces ----------
+  traceList: [],
+  selectedTraceId: null,
+  currentTrace: null,
+  loadingTrace: false,
+  loadTraces: async () => {
+    try {
+      const res = await apiClient.listTraces(50);
+      set({ traceList: res.traces });
+    } catch (e) {
+      console.error('Failed to load traces:', e);
+    }
+  },
+  selectTrace: async (traceId: string) => {
+    set({ selectedTraceId: traceId, loadingTrace: true, currentTrace: null });
+    try {
+      const span = await apiClient.getTrace(traceId);
+      set({ currentTrace: span, loadingTrace: false });
+    } catch (e) {
+      console.error('Failed to load trace detail:', e);
+      set({ loadingTrace: false });
+    }
+  },
+  clearSelectedTrace: () =>
+    set({ selectedTraceId: null, currentTrace: null, loadingTrace: false }),
+
+  // ---------- Cost ----------
+  cost: null,
+  loadCost: async () => {
+    try {
+      const cost = await apiClient.getCost();
+      set({ cost });
+    } catch (e) {
+      console.error('Failed to load cost:', e);
+    }
+  },
+
+  // ---------- Observability Status ----------
+  observabilityStatus: null,
+  loadObservabilityStatus: async () => {
+    try {
+      const status = await apiClient.observabilityStatus();
+      set({ observabilityStatus: status });
+    } catch (e) {
+      console.error('Failed to load observability status:', e);
+    }
+  },
+
+  // ---------- Replay ----------
   replay: { playing: false, currentTick: 0, fromTick: 0, toTick: 0, speed: 1 },
   setReplayRange: (from, to) => {
     set((s) => ({ replay: { ...s.replay, fromTick: from, toTick: to, currentTick: from } }));
@@ -168,64 +217,6 @@ export const useObserveStore = create<ObserveState>((set, get) => ({
   },
   setReplaySpeed: (n) => set((s) => ({ replay: { ...s.replay, speed: n } })),
   setCurrentTick: (tick) => set((s) => ({ replay: { ...s.replay, currentTick: tick } })),
-
-  cost: { dailyCap: 50, used: 0, perAgent: [] },
-  refreshCost: () => {
-    const { metricsSamples, cost } = get();
-    const costSamples = metricsSamples.filter((s) => /cost|spend|usd/i.test(s.name));
-    if (costSamples.length === 0) {
-      // leave defaults
-      return;
-    }
-    const perAgentMap = new Map<string, number>();
-    let total = 0;
-    for (const s of costSamples) {
-      const agentId = s.labels.agent ?? s.labels.agent_id ?? 'default';
-      perAgentMap.set(agentId, (perAgentMap.get(agentId) ?? 0) + s.value);
-      total += s.value;
-    }
-    const perAgent = Array.from(perAgentMap.entries()).map(([agentId, used]) => ({
-      agentId,
-      used,
-      cap: cost.dailyCap,
-    }));
-    set({ cost: { ...cost, used: total, perAgent } });
-  },
-
-  loadEvents: async () => {
-    try {
-      const res = await apiClient.listEvents(get().lastTick, 100);
-      set((s) => {
-        let merged = mergeAndSort(s.events, res.events);
-        if (merged.length > MAX_EVENTS) {
-          merged = merged.slice(merged.length - MAX_EVENTS);
-        }
-        return { events: merged, lastTick: maxTickOf(merged, s.lastTick) };
-      });
-    } catch (e) {
-      console.error('Failed to load events:', e);
-    }
-  },
-
-  loadMetrics: async () => {
-    try {
-      const text = await apiClient.metrics();
-      const samples = parsePrometheus(text);
-      set({ metricsText: text, metricsSamples: samples });
-      get().refreshCost();
-    } catch (e) {
-      console.error('Failed to load metrics:', e);
-    }
-  },
-
-  appendEvent: (event) => {
-    set((s) => {
-      if (s.events.some((e) => e.id === event.id)) return {};
-      const next = [...s.events, event];
-      next.sort((a, b) => a.tick - b.tick || a.ts.localeCompare(b.ts));
-      return { events: next, lastTick: Math.max(s.lastTick, event.tick) };
-    });
-  },
 }));
 
 export default useObserveStore;

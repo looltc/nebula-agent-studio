@@ -68,13 +68,9 @@ function EventRow({
   event: EventInfo;
   onDrillToTrace?: (tick: number) => void;
 }) {
-  const buildTracesFromTick = useObserveStore((s) => s.buildTracesFromTick);
-  const selectTraceTick = useObserveStore((s) => s.selectTraceTick);
   const [expanded, setExpanded] = useState(false);
 
   const handleDrill = () => {
-    buildTracesFromTick(event.tick);
-    selectTraceTick(event.tick);
     onDrillToTrace?.(event.tick);
   };
 

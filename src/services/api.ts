@@ -7,10 +7,14 @@ import type {
   ApiErrorBody,
   ChatRequest,
   ChatResponse,
+  CompiledGraphView,
   ConsolidateResponse,
   ConversationListResponse,
   ConversationMessagesResponse,
+  CostResponse,
   EventListResponse,
+  GraphSpecDetail,
+  GraphSpecListResponse,
   GroupChatCreateRequest,
   GroupChatCreateResponse,
   GroupChatListResponse,
@@ -20,20 +24,45 @@ import type {
   GroupMessageRequest,
   GroupMessageResponse,
   HealthResponse,
+  InvokeRequest,
+  InvokeResponse,
   MemoryListResponse,
   MemoryStats,
+  MetricsDict,
   MetricsText,
+  GenerateGraphRequest,
+  GenerateGraphResponse,
+  InstantiateTemplateRequest,
+  NodeTypeDef,
+  NodeTypeListResponse,
+  ObservabilityStatus,
+  OrchestrationRuntime,
+  OrchestrationStreamEvent,
+  OrchestrationRun,
+  NodeRun,
+  RunListResponse,
+  PortCompatibleResponse,
+  PortType,
+  TemplateListResponse,
   ProviderCreateRequest,
   ProviderListResponse,
   ProviderModelsResponse,
   ProviderTestResponse,
   ProviderSummary,
   RelationGraphResponse,
+  RouterInfo,
+  RouterListResponse,
+  RuntimeHistoryResponse,
   SkillDetail,
   SkillInstallResult,
   SkillListResponse,
   SkillToggleResult,
+  SpanView,
+  SpecCreateRequest,
+  SpecUpdateRequest,
   ToolListResponse,
+  TraceByTickResponse,
+  TraceListResponse,
   UserResponse,
   UserUpdateRequest,
   WorldStateResponse,
@@ -267,6 +296,32 @@ export const apiClient = {
     return r.text();
   },
 
+  /* Observability — Trace / Metrics / Status / Cost / Event Log */
+  listTraces: (limit = 50) =>
+    api<TraceListResponse>(`/traces?limit=${limit}`),
+  getTrace: (traceId: string) =>
+    api<SpanView>(`/traces/${encodeURIComponent(traceId)}`),
+  getTracesByTick: (tick: number) =>
+    api<TraceByTickResponse>(`/traces/by-tick/${tick}`),
+  metricsJson: () => api<MetricsDict>('/metrics/json'),
+  observabilityStatus: () => api<ObservabilityStatus>('/observability/status'),
+  getCost: () => api<CostResponse>('/cost'),
+  listPersistentEvents: (params: {
+    fromTick?: number;
+    toTick?: number;
+    source?: string;
+    eventType?: string;
+    limit?: number;
+  } = {}) => {
+    const search = new URLSearchParams();
+    if (params.fromTick != null) search.set('from_tick', String(params.fromTick));
+    if (params.toTick != null) search.set('to_tick', String(params.toTick));
+    if (params.source) search.set('source', params.source);
+    if (params.eventType) search.set('event_type', params.eventType);
+    search.set('limit', String(params.limit ?? 100));
+    return api<EventListResponse>(`/events/persistent?${search.toString()}`);
+  },
+
   /* User (本地模式，user_id 从 OS home 目录推导) */
   getUser: () => api<UserResponse>('/user'),
   updateUser: (body: UserUpdateRequest) =>
@@ -274,6 +329,181 @@ export const apiClient = {
       method: 'PATCH',
       body: JSON.stringify(body),
     }),
+
+  /* Orchestration — GraphSpec CRUD + compile + invoke + stream + runtime + routers */
+  listSpecs: () => api<GraphSpecListResponse>('/orchestration/specs'),
+  getSpec: (id: string) =>
+    api<GraphSpecDetail>(`/orchestration/specs/${encodeURIComponent(id)}`),
+  createSpec: (body: SpecCreateRequest) =>
+    api<GraphSpecDetail>('/orchestration/specs', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateSpec: (id: string, body: SpecUpdateRequest) =>
+    api<GraphSpecDetail>(`/orchestration/specs/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteSpec: (id: string) =>
+    api<{ deleted: boolean; id: string }>(
+      `/orchestration/specs/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
+    ),
+  activateSpec: (id: string) =>
+    api<GraphSpecDetail>(
+      `/orchestration/specs/${encodeURIComponent(id)}/activate`,
+      { method: 'POST' },
+    ),
+  compileSpec: (id: string) =>
+    api<CompiledGraphView>(
+      `/orchestration/specs/${encodeURIComponent(id)}/compile`,
+      { method: 'POST' },
+    ),
+  invokeSpec: (id: string, body: InvokeRequest) =>
+    api<InvokeResponse>(
+      `/orchestration/specs/${encodeURIComponent(id)}/invoke`,
+      { method: 'POST', body: JSON.stringify(body) },
+    ),
+  /**
+   * 流式执行编排图（SSE）。
+   *
+   * 与群聊 streamGroupChat 不同，这里用 POST + fetch ReadableStream，
+   * 因为后端 /specs/{id}/stream 是 POST 端点（携带 task body），
+   * EventSource 不支持 POST。返回一个可消费的异步迭代器。
+   *
+   * 调用方用法：
+   *   const iter = apiClient.streamSpec(id, { task });
+   *   for await (const ev of iter) { ... }
+   */
+  streamSpec: (
+    id: string,
+    body: InvokeRequest,
+  ): AsyncIterable<OrchestrationStreamEvent> => {
+    // 用 AbortController 暴露取消能力
+    const controller = new AbortController();
+
+    async function* gen(): AsyncIterable<OrchestrationStreamEvent> {
+      const res = await fetch(
+        `${BASE}/orchestration/specs/${encodeURIComponent(id)}/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        },
+      );
+      if (!res.ok || !res.body) {
+        let errBody: ApiErrorBody = {};
+        try { errBody = await res.json(); } catch { errBody = { error: res.statusText }; }
+        throw new ApiError(res.status, errBody);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          // SSE 事件之间以空行分隔；解析完整的事件块
+          let sepIdx: number;
+          while ((sepIdx = buffer.indexOf('\n\n')) >= 0) {
+            const block = buffer.slice(0, sepIdx);
+            buffer = buffer.slice(sepIdx + 2);
+
+            let eventType = 'message';
+            let dataStr = '';
+            for (const line of block.split('\n')) {
+              if (line.startsWith('event:')) {
+                eventType = line.slice(6).trim();
+              } else if (line.startsWith('data:')) {
+                dataStr += line.slice(5).trim();
+              }
+            }
+            if (!dataStr) continue;
+
+            let data: unknown = {};
+            try { data = JSON.parse(dataStr); } catch { data = { raw: dataStr }; }
+            yield { event: eventType, data } as OrchestrationStreamEvent;
+          }
+        }
+      } finally {
+        reader.cancel().catch(() => {});
+        reader.releaseLock();
+      }
+    }
+
+    // 把 controller.abort 挂到生成器上，方便调用方取消
+    const iterable = gen();
+    (iterable as AsyncIterable<OrchestrationStreamEvent> & { abort: () => void }).abort =
+      () => controller.abort();
+    return iterable;
+  },
+  getRuntime: (id: string) =>
+    api<OrchestrationRuntime>(`/orchestration/runtime/${encodeURIComponent(id)}`),
+  getRuntimeHistory: (id: string) =>
+    api<RuntimeHistoryResponse>(
+      `/orchestration/runtime/${encodeURIComponent(id)}/history`,
+    ),
+  /* Orchestration — 运行历史 v6 */
+  listRuns: (specId: string, limit = 20, offset = 0) =>
+    api<RunListResponse>(
+      `/orchestration/specs/${encodeURIComponent(specId)}/runs?limit=${limit}&offset=${offset}`,
+    ),
+  listLatestRuns: (specId: string, limit = 5) =>
+    api<RunListResponse>(
+      `/orchestration/specs/${encodeURIComponent(specId)}/runs/latest?limit=${limit}`,
+    ),
+  getRun: (runId: string) =>
+    api<OrchestrationRun>(`/orchestration/runs/${encodeURIComponent(runId)}`),
+  deleteRun: (runId: string) =>
+    api<{ deleted: boolean }>(`/orchestration/runs/${encodeURIComponent(runId)}`, {
+      method: 'DELETE',
+    }),
+  getNodeRun: (runId: string, nodeId: string) =>
+    api<NodeRun>(
+      `/orchestration/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}`,
+    ),
+  listRouters: () => api<RouterListResponse>('/orchestration/routers'),
+  getRouterInfo: (name: string) =>
+    api<RouterInfo>(`/orchestration/routers/${encodeURIComponent(name)}`),
+
+  /* Orchestration — v2 节点类型 / 端口类型（设计文档 26-node-system-v2.md） */
+  /** 列出所有已注册的节点类型定义（NodeTypeDef） */
+  listNodeTypes: () =>
+    api<NodeTypeListResponse>('/orchestration/node-types'),
+  /** 获取单个节点类型定义 */
+  getNodeTypeDef: (nodeType: string) =>
+    api<NodeTypeDef>(
+      `/orchestration/node-types/${encodeURIComponent(nodeType)}`,
+    ),
+  /** 校验源端口类型是否能连接到目标端口类型 */
+  isPortCompatible: (src: PortType, dst: PortType) =>
+    api<PortCompatibleResponse>(
+      `/orchestration/port-types/compatible?src=${encodeURIComponent(src)}&dst=${encodeURIComponent(dst)}`,
+    ),
+
+  /* Orchestration — Phase C：Agent 自动生成图 + 模板库（设计文档 26-node-system-v2.md §八） */
+  /** 用 LLM 根据任务描述生成编排图 spec（不持久化，调用方可继续 createSpec 保存） */
+  generateGraph: (body: GenerateGraphRequest) =>
+    api<GenerateGraphResponse>('/orchestration/generate-graph', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  /** 列出编排图模板（3 种典型模式：串行链 / 并行 fan-out / 自反思循环） */
+  listTemplates: () => api<TemplateListResponse>('/orchestration/templates'),
+  /** 从模板实例化新编排图（直接创建 spec + positions） */
+  instantiateTemplate: (key: string, body: InstantiateTemplateRequest) =>
+    api<GraphSpecDetail>(
+      `/orchestration/templates/${encodeURIComponent(key)}/instantiate`,
+      { method: 'POST', body: JSON.stringify(body) },
+    ),
 };
 
 export { api };
