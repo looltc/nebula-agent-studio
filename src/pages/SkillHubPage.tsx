@@ -110,7 +110,7 @@ export default function SkillHubPage() {
   );
 
   return (
-    <PageContainer>
+    <PageContainer flushTop>
       <ContentHeader
         title="Skill Hub"
         subtitle="管理已安装的 Agent Skill，支持上传 zip 包或从 GitHub 安装。"

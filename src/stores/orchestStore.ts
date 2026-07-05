@@ -13,6 +13,7 @@ import type {
   GroupMessage,
   GroupMessageRequest,
   GroupStreamEvent,
+  InputParam,
   InvokeRequest,
   NodeTypeDef,
   OrchestrationRuntime,
@@ -171,6 +172,10 @@ export interface OrchestState {
   removeRun: (runId: string) => Promise<void>;
   /** 设置最近一次 run_id（执行后调用） */
   setLastRunId: (runId: string | null) => void;
+
+  /* ---------- v3 全局变量管理 ---------- */
+  /** 更新当前编排图的 inputs_schema（本地更新 + debounced 保存） */
+  updateInputsSchema: (inputs: InputParam[]) => void;
 }
 
 function mergeEvents(existing: EventInfo[], incoming: EventInfo[]): EventInfo[] {
@@ -832,6 +837,26 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
   },
 
   setLastRunId: (runId) => set({ lastRunId: runId }),
+
+  /* ---------- v3 全局变量管理 ---------- */
+  updateInputsSchema: (inputs) => {
+    const cur = get().currentSpec;
+    if (!cur) return;
+    // 本地更新 currentSpec.spec.inputs_schema
+    const nextSpec = { ...cur.spec, inputs_schema: inputs };
+    const nextDetail: GraphSpecDetail = { ...cur, spec: nextSpec };
+    set({ currentSpec: nextDetail });
+    // debounced 保存到后端
+    if (inputsSchemaSaveTimer) clearTimeout(inputsSchemaSaveTimer);
+    inputsSchemaSaveTimer = setTimeout(() => {
+      const latest = get().currentSpec;
+      if (!latest) return;
+      void get().saveSpec(latest.id, {
+        spec: latest.spec,
+        positions: latest.positions,
+      });
+    }, 600);
+  },
 }));
 
 // 模块级变量持有当前流式执行的 abort 函数（不放入 state，避免触发渲染）
@@ -839,5 +864,8 @@ let orchestrationStreamAbort: (() => void) | null = null;
 // 流式执行 epoch 计数器：每次启动新流或停止时递增，
 // 旧流的 catch/finally 通过比对 epoch 判断是否已被替换，避免覆盖新流状态（竞态守卫）
 let orchestrationStreamEpoch = 0;
+
+// inputs_schema 更新的 debounced 保存计时器
+let inputsSchemaSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
 export default useOrchestStore;

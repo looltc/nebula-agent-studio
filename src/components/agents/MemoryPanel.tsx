@@ -17,6 +17,7 @@ import { Badge, Button, Spinner, useToast } from '@/components/ui';
 import { apiClient } from '@/services/api';
 import type { MemoryItem, MemoryStats } from '@/types/api';
 import { cx } from '@/lib/cx';
+import { formatRelativeTime as formatTime } from '@/lib/datetime';
 import styles from './MemoryPanel.module.css';
 
 /** 记忆类型 → 中文标签 + Badge 配色 */
@@ -488,23 +489,6 @@ function TypeDistribution({
 
 /* ---------- helpers ---------- */
 
-function formatTime(ts: string): string {
-  try {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return ts;
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return '刚刚';
-    if (diffMin < 60) return `${diffMin} 分钟前`;
-    const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24) return `${diffH} 小时前`;
-    const diffD = Math.floor(diffH / 24);
-    if (diffD < 30) return `${diffD} 天前`;
-    return d.toLocaleDateString('zh-CN');
-  } catch {
-    return ts;
-  }
-}
+/* formatTime 已统一到 @/lib/datetime 的 formatRelativeTime */
 
 export default MemoryPanel;

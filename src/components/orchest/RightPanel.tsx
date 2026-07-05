@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
-import { Play, Square, Activity, Clock, ArrowRight, History, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button, EmptyState, StatusDot, TextArea, type StatusDotStatus } from '@/components/ui';
+import { Play, Square, Activity, Clock, ArrowRight, History, Trash2, ChevronDown, ChevronUp, Plus, Check } from 'lucide-react';
+import { Button, EmptyState, StatusDot, TextArea, TextInput, Select, type StatusDotStatus } from '@/components/ui';
 import { useOrchestStore } from '@/stores/orchestStore';
 import type { Edge } from '@xyflow/react';
-import type { NodeRun } from '@/types/api';
+import type { InputParam, NodeRun } from '@/types/api';
 import NodeInspector from './NodeInspector';
 import type { CanvasNodeData } from './CanvasNode';
 import { cx } from '@/lib/cx';
+import { formatDateTime } from '@/lib/datetime';
 import styles from './RightPanel.module.css';
 
 export interface RightPanelProps {
@@ -62,9 +63,17 @@ export default function RightPanel({
   const runsLoading = useOrchestStore((s) => s.runsLoading);
   const loadRuns = useOrchestStore((s) => s.loadRuns);
   const removeRun = useOrchestStore((s) => s.removeRun);
+  const updateInputsSchema = useOrchestStore((s) => s.updateInputsSchema);
 
   const [task, setTask] = useState('');
   const [historyOpen, setHistoryOpen] = useState(false);
+  // 全局变量编辑状态
+  const [varEditing, setVarEditing] = useState<string | null>(null);
+  const [varNameDraft, setVarNameDraft] = useState('');
+  const [varFormOpen, setVarFormOpen] = useState(false);
+  const [newVarName, setNewVarName] = useState('');
+  const [newVarType, setNewVarType] = useState<InputParam['type']>('string');
+  const [newVarDefault, setNewVarDefault] = useState('');
 
   const specId = currentSpec?.id;
   const isRunning = runtime?.is_running ?? streaming;
@@ -146,6 +155,200 @@ export default function RightPanel({
               <dd>{currentSpec.spec.edges.length}</dd>
             </div>
           </dl>
+        </div>
+
+        {/* ---- 全局变量 ---- */}
+        <div className={styles.section}>
+          <div className={styles.sectionHead}>
+            <Activity size={12} className={styles.sectionIcon} />
+            <span className={styles.sectionTitle}>全局变量</span>
+          </div>
+          {(() => {
+            const inputs = currentSpec.spec.inputs_schema ?? [];
+            if (inputs.length === 0 && !varFormOpen) {
+              return <div className={styles.varEmpty}>暂无全局变量</div>;
+            }
+            return (
+              <div className={styles.varList}>
+                {inputs.map((v) => (
+                  <div key={v.name} className={styles.varRow}>
+                    {varEditing === v.name ? (
+                      <>
+                        <TextInput
+                          className={styles.varNameEditing}
+                          value={varNameDraft}
+                          onChange={(e) => setVarNameDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const trimmed = varNameDraft.trim();
+                              if (trimmed && trimmed !== v.name && !inputs.some((x) => x.name === trimmed)) {
+                                const next = inputs.map((x) =>
+                                  x.name === v.name ? { ...x, name: trimmed } : x,
+                                );
+                                updateInputsSchema(next);
+                              }
+                              setVarEditing(null);
+                            }
+                            if (e.key === 'Escape') setVarEditing(null);
+                          }}
+                          autoFocus
+                          placeholder="变量名"
+                        />
+                        <button
+                          type="button"
+                          className={styles.varDelete}
+                          title="确认"
+                          onClick={() => {
+                            const trimmed = varNameDraft.trim();
+                            if (trimmed && trimmed !== v.name && !inputs.some((x) => x.name === trimmed)) {
+                              const next = inputs.map((x) =>
+                                x.name === v.name ? { ...x, name: trimmed } : x,
+                              );
+                              updateInputsSchema(next);
+                            }
+                            setVarEditing(null);
+                          }}
+                        >
+                          <Check size={11} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          className={styles.varName}
+                          title="点击编辑变量名"
+                          onClick={() => {
+                            setVarEditing(v.name);
+                            setVarNameDraft(v.name);
+                          }}
+                        >
+                          {v.name}
+                        </span>
+                        <span className={styles.varType}>{v.type ?? 'string'}</span>
+                        {v.required ? (
+                          <span className={styles.varRequired}>必填</span>
+                        ) : (
+                          <span className={styles.varDefault} title="默认值">
+                            {v.default == null ? '默认: ""' : `默认: ${typeof v.default === 'object' ? JSON.stringify(v.default) : String(v.default)}`}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.varDelete}
+                          title="删除变量"
+                          onClick={() => {
+                            const next = inputs.filter((x) => x.name !== v.name);
+                            updateInputsSchema(next);
+                          }}
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+          {varFormOpen ? (
+            <div className={styles.varForm}>
+              <div className={styles.varFormRow}>
+                <TextInput
+                  className={styles.varFormInput}
+                  value={newVarName}
+                  onChange={(e) => setNewVarName(e.target.value)}
+                  placeholder="变量名（如 task）"
+                  autoFocus
+                />
+              </div>
+              <div className={styles.varFormRow}>
+                <Select
+                  className={styles.varFormSelect}
+                  value={newVarType}
+                  onChange={(e) => setNewVarType(e.target.value as InputParam['type'])}
+                >
+                  <option value="string">string</option>
+                  <option value="number">number</option>
+                  <option value="boolean">boolean</option>
+                  <option value="object">object</option>
+                  <option value="array">array</option>
+                </Select>
+                <TextInput
+                  className={styles.varFormInput}
+                  value={newVarDefault}
+                  onChange={(e) => setNewVarDefault(e.target.value)}
+                  placeholder="默认值（可空）"
+                />
+              </div>
+              <div className={styles.varFormActions}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setVarFormOpen(false);
+                    setNewVarName('');
+                    setNewVarType('string');
+                    setNewVarDefault('');
+                  }}
+                >
+                  取消
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Check size={11} />}
+                  onClick={() => {
+                    const name = newVarName.trim();
+                    if (!name) return;
+                    const inputs = currentSpec.spec.inputs_schema ?? [];
+                    if (inputs.some((x) => x.name === name)) {
+                      return; // 重名不添加
+                    }
+                    let defaultValue: unknown = null;
+                    if (newVarDefault !== '') {
+                      if (newVarType === 'number') {
+                        const n = Number(newVarDefault);
+                        defaultValue = isNaN(n) ? null : n;
+                      } else if (newVarType === 'boolean') {
+                        defaultValue = newVarDefault === 'true';
+                      } else if (newVarType === 'object' || newVarType === 'array') {
+                        try {
+                          defaultValue = JSON.parse(newVarDefault);
+                        } catch {
+                          defaultValue = newVarDefault;
+                        }
+                      } else {
+                        defaultValue = newVarDefault;
+                      }
+                    }
+                    const newVar: InputParam = {
+                      name,
+                      type: newVarType,
+                      default: defaultValue,
+                      required: false,
+                    };
+                    updateInputsSchema([...inputs, newVar]);
+                    setVarFormOpen(false);
+                    setNewVarName('');
+                    setNewVarType('string');
+                    setNewVarDefault('');
+                  }}
+                >
+                  确认
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className={styles.varAddBtn}
+              title="添加全局变量"
+              onClick={() => setVarFormOpen(true)}
+            >
+              <Plus size={11} />
+              <span>添加变量</span>
+            </button>
+          )}
         </div>
 
         {/* ---- 运行时状态 ---- */}
@@ -290,7 +493,7 @@ export default function RightPanel({
                     </div>
                     {run.started_at && (
                       <div className={styles.runTime}>
-                        {new Date(run.started_at).toLocaleString('zh-CN')}
+                        {formatDateTime(run.started_at, true)}
                       </div>
                     )}
                     {run.error && <div className={styles.runError}>{run.error}</div>}

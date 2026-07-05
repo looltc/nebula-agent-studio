@@ -8,6 +8,7 @@ import { useOrchestStore } from '@/stores/orchestStore';
 import { useUserStore } from '@/stores/userStore';
 import { useChatStore } from '@/stores/chatStore';
 import { resolveAvatarSrc } from '@/lib/avatar';
+import { formatChatDivider, parseDate } from '@/lib/datetime';
 import type { GroupMessage, GroupStreamEvent, Participant } from '@/types/api';
 import { cx } from '@/lib/cx';
 import CreateGroupChatModal from '@/components/orchest/CreateGroupChatModal';
@@ -20,22 +21,7 @@ interface MentionState {
 }
 
 /** 格式化用户消息时间戳（用于导航面板显示） */
-function formatUserMsgTime(ts: string): string {
-  if (!ts) return '';
-  try {
-    const normalised = !/[zZ]|[+-]\d{2}:?\d{2}$/.test(ts) ? `${ts}Z` : ts;
-    return new Date(normalised).toLocaleString('zh-CN', {
-      timeZone: 'Asia/Shanghai',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  } catch {
-    return '';
-  }
-}
+const formatUserMsgTime = formatChatDivider;
 
 export default function GroupChatPage() {
   const { id } = useParams<{ id: string }>();
@@ -405,22 +391,10 @@ export default function GroupChatPage() {
 
     for (const msg of groupMessages) {
       // 时间分隔线：相邻消息间隔 > 5 分钟插入
-      let msgTs: number | null = null;
-      try {
-        const tsStr = msg.ts && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(msg.ts) ? `${msg.ts}Z` : msg.ts;
-        msgTs = tsStr ? new Date(tsStr).getTime() : null;
-      } catch {
-        /* ignore */
-      }
+      const msgDate = parseDate(msg.ts);
+      const msgTs = msgDate ? msgDate.getTime() : null;
       if (msgTs !== null && lastTs !== null && msgTs - lastTs > 5 * 60 * 1000) {
-        const label = new Date(msgTs).toLocaleString('zh-CN', {
-          timeZone: 'Asia/Shanghai',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        });
+        const label = formatChatDivider(msg.ts);
         items.push({ kind: 'divider', label, key: `div-${msg.id}` });
         // 分隔线后重置分组（必显示 header）
         lastSource = null;

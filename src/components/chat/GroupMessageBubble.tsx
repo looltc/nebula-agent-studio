@@ -4,6 +4,7 @@ import type { GroupMessage, Participant, TimelineEvent } from '@/types/api';
 import { cx } from '@/lib/cx';
 import { resolveAvatarSrc } from '@/lib/avatar';
 import { speakerStyle } from '@/lib/speakerColor';
+import { formatTime } from '@/lib/datetime';
 import { Avatar, Badge } from '@/components/ui';
 import { MarkdownText } from '@/components/chat/MarkdownText';
 import { ToolCallBlock } from '@/components/chat/ToolCallBlock';
@@ -26,18 +27,6 @@ function countEvents(events: TimelineEvent[]): { steps: number; tools: number } 
     else if (e.kind === 'tool') tools++;
   }
   return { steps, tools };
-}
-
-function formatTime(ts: string): string {
-  try {
-    const normalised = ts && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(ts) ? `${ts}Z` : ts;
-    return new Date(normalised).toLocaleTimeString('zh-CN', {
-      timeZone: 'Asia/Shanghai',
-      hour12: false,
-    });
-  } catch {
-    return '';
-  }
 }
 
 function GroupMessageBubbleBase({

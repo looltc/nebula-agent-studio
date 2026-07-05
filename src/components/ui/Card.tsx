@@ -40,6 +40,10 @@ export interface StatCardProps {
   delta?: string;
   /** Direction of the delta arrow. Defaults to true (up). */
   deltaPositive?: boolean;
+  /** 可选的小图标，显示在标签左侧 */
+  icon?: ReactNode;
+  /** 可选的次要提示文本（如 token 细分、今日花费等） */
+  hint?: string;
   className?: string;
 }
 
@@ -48,12 +52,18 @@ export function StatCard({
   value,
   delta,
   deltaPositive = true,
+  icon,
+  hint,
   className,
 }: StatCardProps) {
   return (
     <div className={cx(styles.card, styles.statCard, className)}>
-      <div className={styles.statLabel}>{label}</div>
+      <div className={styles.statLabel}>
+        {icon ? <span className={styles.statIcon}>{icon}</span> : null}
+        <span>{label}</span>
+      </div>
       <div className={styles.statValue}>{value}</div>
+      {hint ? <div className={styles.statHint}>{hint}</div> : null}
       {delta ? (
         <div
           className={cx(

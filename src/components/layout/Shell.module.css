@@ -20,5 +20,7 @@
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  /* 稳定滚动条槽位，避免内容不够长→够长时滚动条出现挤压 sticky 标题导致"标题滚动一下" */
+  scrollbar-gutter: stable;
   background: var(--bg-background);
 }

@@ -1,11 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Trash2, ArrowRight, X, Pencil, Check, Settings, Activity } from 'lucide-react';
-import { Button, Select, Field, TextInput, TextArea, Tabs, type SelectProps, type TabItem } from '@/components/ui';
-import { useAgentStore } from '@/stores/agentStore';
+import { Trash2, ArrowRight, X, Pencil, Check, Settings, Activity, Plus } from 'lucide-react';
+import { Button, Select, Field, TextInput, TextArea, Tabs, Radio, type SelectProps, type TabItem } from '@/components/ui';
 import { useOrchestStore } from '@/stores/orchestStore';
 import type { Edge } from '@xyflow/react';
 import type {
-  AgentSummary,
   GraphNodeType,
   NodeTypeDef,
   NodeRun,
@@ -13,6 +11,7 @@ import type {
   RouterInfo,
 } from '@/types/api';
 import { PORT_TYPE_COLORS } from '@/types/api';
+import { formatDateTime } from '@/lib/datetime';
 import type { CanvasNodeData } from './CanvasNode';
 import styles from './NodeInspector.module.css';
 
@@ -42,6 +41,18 @@ const TYPE_LABELS: Record<GraphNodeType, string> = {
   custom: '自定义',
   text: '文本',
 };
+
+/** branch 模式 case 结构 */
+interface BranchCase {
+  name: string;
+  expr?: string;
+  is_default?: boolean;
+}
+
+/** parallel 模式 branch 结构 */
+interface ParallelBranch {
+  name: string;
+}
 
 const LOGIC_MODES = [
   { value: 'branch', label: 'branch · 条件分支' },
@@ -132,7 +143,7 @@ function JsonBlock({ data }: { data: unknown }) {
  * - 运行 Tab 展示该节点最近一次运行的输入输出
  * - 高度自适应不留白（body flex:1 + 内容撑开）
  * - 新增 text 节点配置（role/content/output_expr）
- * - Agent 选择器改为头像卡片
+ * - v6：Agent 选择器移至 CanvasNode Header，Inspector 不再渲染 agent 段
  */
 export default function NodeInspector({
   nodeId,
@@ -145,7 +156,6 @@ export default function NodeInspector({
   onDeleteEdge,
   onClose,
 }: NodeInspectorProps) {
-  const agents = useAgentStore((s) => s.agents);
   const routers = useOrchestStore((s) => s.routers);
   const nodeTypeMap = useOrchestStore((s) => s.nodeTypeMap);
 
@@ -159,11 +169,6 @@ export default function NodeInspector({
   );
   const [tab, setTab] = useState<'config' | 'run'>('config');
 
-  const selectedAgent: AgentSummary | undefined = useMemo(
-    () => agents.find((a) => a.id === nodeData.agent_ref),
-    [agents, nodeData.agent_ref],
-  );
-
   const updateConfig = (patch: Record<string, unknown>) => {
     const nextCfg = { ...cfg, ...patch };
     // 合并为单次 onUpdateNode 调用，避免连续 setNodes 时 ref 未更新导致的后调用覆盖前调用
@@ -176,12 +181,6 @@ export default function NodeInspector({
 
   const handleModeChange: SelectProps['onChange'] = (e) => {
     onUpdateNode({ mode: e.target.value as 'always' | 'never' | 'bypass' });
-  };
-
-  const handleAgentChange: SelectProps['onChange'] = (e) => {
-    const val = e.target.value;
-    // updateConfig 已处理 agent_ref 的双向更新（config + nodeData.agent_ref）
-    updateConfig({ agent_ref: val || null });
   };
 
   const handleNameCommit = () => {
@@ -363,52 +362,6 @@ export default function NodeInspector({
               </div>
             )}
 
-            {/* ---- agent 节点 ---- */}
-            {nodeData.type === 'agent' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>智能体</div>
-                <Field label="agent_ref">
-                  <Select value={nodeData.agent_ref ?? ''} onChange={handleAgentChange}>
-                    <option value="">— 未选择 —</option>
-                    {agents
-                      .filter((a) => a.enabled !== false)
-                      .map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.name}（{a.id}）{a.thinking_model ? ` · ${a.thinking_model}` : ''}
-                        </option>
-                      ))}
-                  </Select>
-                </Field>
-                {selectedAgent && (
-                  <div className={styles.agentCard}>
-                    {selectedAgent.avatar ? (
-                      <img
-                        src={`/avatars/${selectedAgent.avatar}`}
-                        className={styles.agentAvatar}
-                        alt={selectedAgent.name}
-                      />
-                    ) : (
-                      <div className={styles.agentAvatarFallback}>
-                        {selectedAgent.name.slice(0, 2)}
-                      </div>
-                    )}
-                    <div className={styles.agentInfo}>
-                      <div className={styles.agentName}>{selectedAgent.name}</div>
-                      <div className={styles.agentRole}>{selectedAgent.role || '—'}</div>
-                      {selectedAgent.thinking_model && (
-                        <span className={styles.agentBadge}>{selectedAgent.thinking_model}</span>
-                      )}
-                      {selectedAgent.llm && (
-                        <span className={styles.agentModelBadge}>
-                          {selectedAgent.llm.provider}/{selectedAgent.llm.model}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* ---- tool 节点 ---- */}
             {nodeData.type === 'tool' && (
               <div className={styles.section}>
@@ -472,6 +425,129 @@ export default function NodeInspector({
                       ))}
                     </Select>
                   </Field>
+                )}
+
+                {/* branch 模式：case 条件编辑 */}
+                {cfgStr(cfg, 'mode') === 'branch' && (
+                  <div className={styles.caseList}>
+                    <div className={styles.sectionTitle}>分支条件</div>
+                    {(() => {
+                      const currentCases = (cfg.cases as BranchCase[] | undefined) ?? [];
+                      if (currentCases.length === 0) {
+                        return <div className={styles.caseEmpty}>暂无分支，点击下方按钮添加</div>;
+                      }
+                      return currentCases.map((c) => (
+                        <div key={c.name} className={styles.caseRow}>
+                          <span className={styles.casePortName} title="端口名（只读）">{c.name}</span>
+                          <TextInput
+                            className={styles.caseExprInput}
+                            value={c.expr ?? ''}
+                            onChange={(e) => {
+                              const nextCases = currentCases.map((cc) =>
+                                cc.name === c.name ? { ...cc, expr: e.target.value } : cc,
+                              );
+                              updateConfig({ cases: nextCases });
+                            }}
+                            placeholder="state.results.x > 10"
+                          />
+                          <label className={styles.caseDefaultRadio} title="设为默认分支">
+                            <Radio
+                              checked={!!c.is_default}
+                              onChange={() => {
+                                const nextCases = currentCases.map((cc) => ({
+                                  ...cc,
+                                  is_default: cc.name === c.name,
+                                }));
+                                updateConfig({ cases: nextCases });
+                              }}
+                            />
+                            <span>默认</span>
+                          </label>
+                          <button
+                            type="button"
+                            className={styles.caseDelete}
+                            title="删除分支"
+                            onClick={() => {
+                              let nextCases = currentCases.filter((cc) => cc.name !== c.name);
+                              // 若删掉的是 default，且还有剩余 case，将最后一个标记为默认
+                              if (c.is_default && nextCases.length > 0) {
+                                nextCases = nextCases.map((cc, i) => ({
+                                  ...cc,
+                                  is_default: i === nextCases.length - 1,
+                                }));
+                              }
+                              updateConfig({ cases: nextCases });
+                            }}
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      ));
+                    })()}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={<Plus size={11} />}
+                      onClick={() => {
+                        const currentCases = (cfg.cases as BranchCase[] | undefined) ?? [];
+                        const nextCases = [...currentCases];
+                        nextCases.push({
+                          name: `case_${nextCases.length}`,
+                          expr: '',
+                          is_default: false,
+                        });
+                        // 若没有显式 default，将最后一个标记为默认
+                        if (!nextCases.some((cc) => cc.is_default)) {
+                          nextCases[nextCases.length - 1].is_default = true;
+                        }
+                        updateConfig({ cases: nextCases });
+                      }}
+                    >
+                      添加分支
+                    </Button>
+                  </div>
+                )}
+
+                {/* parallel 模式：branch 列表 */}
+                {cfgStr(cfg, 'mode') === 'parallel' && (
+                  <div className={styles.branchList}>
+                    <div className={styles.sectionTitle}>并行分支</div>
+                    {(() => {
+                      const currentBranches = (cfg.branches as ParallelBranch[] | undefined) ?? [];
+                      if (currentBranches.length === 0) {
+                        return <div className={styles.branchEmpty}>暂无并行分支，点击下方按钮添加</div>;
+                      }
+                      return currentBranches.map((b) => (
+                        <div key={b.name} className={styles.branchRow}>
+                          <span className={styles.branchPortName} title="端口名（只读）">{b.name}</span>
+                          <button
+                            type="button"
+                            className={styles.branchDelete}
+                            title="删除分支"
+                            onClick={() => {
+                              const nextBranches = currentBranches.filter((bb) => bb.name !== b.name);
+                              updateConfig({ branches: nextBranches });
+                            }}
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      ));
+                    })()}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={<Plus size={11} />}
+                      onClick={() => {
+                        const currentBranches = (cfg.branches as ParallelBranch[] | undefined) ?? [];
+                        const nextBranches = [...currentBranches];
+                        nextBranches.push({ name: `branch_${nextBranches.length}` });
+                        updateConfig({ branches: nextBranches });
+                      }}
+                    >
+                      添加并行分支
+                    </Button>
+                  </div>
                 )}
               </div>
             )}
@@ -641,7 +717,7 @@ export default function NodeInspector({
                 </div>
                 {nodeRun.started_at && (
                   <div className={styles.runTime}>
-                    开始：{new Date(nodeRun.started_at).toLocaleString('zh-CN')}
+                    开始：{formatDateTime(nodeRun.started_at, true)}
                   </div>
                 )}
                 {nodeRun.error && (

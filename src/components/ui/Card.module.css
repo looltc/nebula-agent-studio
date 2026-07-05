@@ -30,12 +30,22 @@
 }
 
 .statLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   font-size: var(--text-xs);
   line-height: var(--line-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: var(--font-medium);
+}
+
+.statIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
 }
 
 .statValue {
@@ -51,6 +61,14 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+
+.statHint {
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .statDelta {

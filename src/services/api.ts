@@ -66,6 +66,10 @@ import type {
   UserResponse,
   UserUpdateRequest,
   WorldStateResponse,
+  AgentObservationListResponse,
+  AgentObservationDetail,
+  AgentTimelineResponse,
+  GlobalTimelineResponse,
 } from '@/types/api';
 import { ApiError } from '@/types/api';
 
@@ -320,6 +324,33 @@ export const apiClient = {
     if (params.eventType) search.set('event_type', params.eventType);
     search.set('limit', String(params.limit ?? 100));
     return api<EventListResponse>(`/events/persistent?${search.toString()}`);
+  },
+
+  /* Observe — Agent-centric observation API */
+  listAgentObservations: () => api<AgentObservationListResponse>('/observe/agents'),
+  getAgentObservation: (agentId: string) =>
+    api<AgentObservationDetail>(`/observe/agents/${encodeURIComponent(agentId)}`),
+  getAgentTimeline: (agentId: string, params: {
+    eventType?: string;
+    limit?: number;
+  } = {}) => {
+    const search = new URLSearchParams();
+    if (params.eventType) search.set('event_type', params.eventType);
+    search.set('limit', String(params.limit ?? 100));
+    return api<AgentTimelineResponse>(
+      `/observe/agents/${encodeURIComponent(agentId)}/timeline?${search.toString()}`,
+    );
+  },
+  getGlobalTimeline: (params: {
+    source?: string;
+    eventType?: string;
+    limit?: number;
+  } = {}) => {
+    const search = new URLSearchParams();
+    if (params.source) search.set('source', params.source);
+    if (params.eventType) search.set('event_type', params.eventType);
+    search.set('limit', String(params.limit ?? 100));
+    return api<GlobalTimelineResponse>(`/observe/timeline?${search.toString()}`);
   },
 
   /* User (本地模式，user_id 从 OS home 目录推导) */

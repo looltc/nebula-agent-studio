@@ -1,0 +1,74 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-secondary);
+  transition: all var(--duration-fast) var(--ease-default);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.chip:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-muted);
+  color: var(--text-foreground);
+}
+
+.selected {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-accent, #fff);
+}
+
+.selected:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-accent, #fff);
+}
+
+.name {
+  font-size: var(--text-xs);
+  line-height: var(--line-sm);
+  font-weight: var(--font-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.allChip {
+  background: var(--bg-muted);
+}
+
+.allIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 0 6px;
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.selected .count {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--text-on-accent, #fff);
+}

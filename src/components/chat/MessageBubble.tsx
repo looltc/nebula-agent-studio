@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { MessageInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
+import { formatTime } from '@/lib/datetime';
 import { MarkdownText } from './MarkdownText';
 import { TimelineView } from './TimelineView';
 import styles from './MessageBubble.module.css';
@@ -8,20 +9,6 @@ import styles from './MessageBubble.module.css';
 export interface MessageBubbleProps {
   message: MessageInfo;
   agentName?: string;
-}
-
-function formatTime(ts: string): string {
-  try {
-    // Backend stores UTC; normalise to ISO with explicit timezone if missing,
-    // then render in Beijing time (Asia/Shanghai).
-    const normalised = ts && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(ts) ? `${ts}Z` : ts;
-    return new Date(normalised).toLocaleTimeString('zh-CN', {
-      timeZone: 'Asia/Shanghai',
-      hour12: false,
-    });
-  } catch {
-    return '';
-  }
 }
 
 function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {

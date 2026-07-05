@@ -3,6 +3,7 @@ import { Plus, Trash2, Star, FileText } from 'lucide-react';
 import { Button, EmptyState, Skeleton } from '@/components/ui';
 import { useOrchestStore } from '@/stores/orchestStore';
 import { cx } from '@/lib/cx';
+import { formatDateTime } from '@/lib/datetime';
 import CreateSpecModal from './CreateSpecModal';
 import styles from './SpecListPanel.module.css';
 
@@ -101,7 +102,7 @@ export default function SpecListPanel({ className }: SpecListPanelProps) {
                     <>
                       <span className={styles.dot}>·</span>
                       <span className={styles.time}>
-                        {new Date(spec.updated_at).toLocaleDateString()}
+                        {formatDateTime(spec.updated_at)}
                       </span>
                     </>
                   )}

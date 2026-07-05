@@ -2,10 +2,15 @@ import { create } from 'zustand';
 import { apiClient } from '@/services/api';
 import { parsePrometheus } from '@/services/ws';
 import type {
+  AgentObservation,
+  AgentObservationDetail,
+  AgentObservationListResponse,
   CostResponse,
   EventInfo,
+  GlobalTimelineResponse,
   MetricsDict,
   ObservabilityStatus,
+  ObserveTimelineEvent,
   SpanView,
   TraceSummary,
 } from '@/types/api';
@@ -79,6 +84,23 @@ export interface ObserveState {
   stepReplay: (direction: 1 | -1) => void;
   setReplaySpeed: (n: number) => void;
   setCurrentTick: (tick: number) => void;
+
+  // ---------- Agent 观测（P1，以 Agent 为核心） ----------
+  agentObservations: AgentObservation[];
+  agentSummary: AgentObservationListResponse['summary'] | null;
+  selectedAgentId: string | null;
+  selectedAgentDetail: AgentObservationDetail | null;
+  loadingAgentDetail: boolean;
+  // 时间线（全局 + 单 Agent 共用一份）
+  timelineEvents: ObserveTimelineEvent[];
+  timelineEventType: string;
+  timelineLimit: number;
+  setTimelineEventType: (type: string) => void;
+  setTimelineLimit: (limit: number) => void;
+  selectAgent: (agentId: string | null) => void;
+  loadAgentObservations: () => Promise<void>;
+  loadSelectedAgentDetail: (agentId: string) => Promise<void>;
+  loadTimeline: () => Promise<void>;
 }
 
 const MAX_EVENTS = 2000;
@@ -217,6 +239,64 @@ export const useObserveStore = create<ObserveState>((set, get) => ({
   },
   setReplaySpeed: (n) => set((s) => ({ replay: { ...s.replay, speed: n } })),
   setCurrentTick: (tick) => set((s) => ({ replay: { ...s.replay, currentTick: tick } })),
+
+  // ---------- Agent 观测（P1，以 Agent 为核心） ----------
+  agentObservations: [],
+  agentSummary: null,
+  selectedAgentId: null,
+  selectedAgentDetail: null,
+  loadingAgentDetail: false,
+  timelineEvents: [],
+  timelineEventType: '',
+  timelineLimit: 100,
+  setTimelineEventType: (type) => set({ timelineEventType: type }),
+  setTimelineLimit: (limit) => set({ timelineLimit: limit }),
+  selectAgent: (agentId) => {
+    set((s) => ({
+      selectedAgentId: agentId,
+      // 切换 Agent 时清空旧详情，避免短暂展示前一个 Agent 的数据
+      selectedAgentDetail: agentId === null ? null : s.selectedAgentDetail,
+    }));
+  },
+  loadAgentObservations: async () => {
+    try {
+      const res = await apiClient.listAgentObservations();
+      set({ agentObservations: res.agents, agentSummary: res.summary });
+    } catch (e) {
+      console.error('Failed to load agent observations:', e);
+    }
+  },
+  loadSelectedAgentDetail: async (agentId: string) => {
+    set({ loadingAgentDetail: true });
+    try {
+      const detail = await apiClient.getAgentObservation(agentId);
+      set({ selectedAgentDetail: detail, loadingAgentDetail: false });
+    } catch (e) {
+      console.error('Failed to load agent detail:', e);
+      set({ loadingAgentDetail: false });
+    }
+  },
+  loadTimeline: async () => {
+    const { selectedAgentId, timelineEventType, timelineLimit } = get();
+    try {
+      // 选中 Agent 时查询该 Agent 的事件，否则查询全局事件流
+      if (selectedAgentId) {
+        const res = await apiClient.getAgentTimeline(selectedAgentId, {
+          eventType: timelineEventType || undefined,
+          limit: timelineLimit,
+        });
+        set({ timelineEvents: res.events });
+      } else {
+        const res: GlobalTimelineResponse = await apiClient.getGlobalTimeline({
+          eventType: timelineEventType || undefined,
+          limit: timelineLimit,
+        });
+        set({ timelineEvents: res.events });
+      }
+    } catch (e) {
+      console.error('Failed to load timeline:', e);
+    }
+  },
 }));
 
 export default useObserveStore;

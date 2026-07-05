@@ -1,30 +1,35 @@
 /* ============================================================================
- * CanvasNode v3 — 清新卡片风格（参考 n8n / ComfyUI）
+ * CanvasNode v4 — 上下分栏布局（参考 n8n / ComfyUI）
  *
  * 设计要点：
- * - 节点矩形卡片，圆角 8px，轻量阴影
- * - 顶部 header：图标 + 类型名（图标用 accent 色块包裹）
- * - 中部 body：label（端口概览已移除）
- * - 端口在左右两侧，按 PortType 着色
- * - 端口标签显示在节点外侧（左/右），避免与 body 内容重叠
- * - 节点高度自适应：由 minHeight（基于端口数）+ body flex:1 共同决定
+ * - 节点矩形卡片，默认宽 320px，可拖拽调整
+ * - Header：图标/Agent 信息 + 标签
+ * - Body 上下分栏：输入区（上）+ 输出区（下），中间分隔线
+ * - 端口行：端口名 + 类型标签，常驻显示
+ * - Handle 在节点左右两侧，垂直对齐端口行（固定行高 28px 计算）
+ * - 输出预览：限高 5 行（约 100px）可滚动
+ *
+ * 布局常量（与 CanvasNode.tsx 的 computeHandleTops 同步）：
+ *   HEADER_H = 34px
+ *   BODY_PT  = 4px
+ *   LABEL_BLOCK = 20px  (sectionLabel 16px + margin-bottom 4px)
+ *   ROW_H    = 28px
+ *   SECTION_DIVIDER_GAP = 12px  (margin-top 4 + border 1 + padding-top 7)
  * ============================================================================ */
 
 .node {
   position: relative;
-  min-width: 260px;
-  max-width: 600px;  /* 与 NodeResizer maxWidth 一致 */
-  /* 不设固定 height，由 minHeight + 内容自适应 + NodeResizer 拖拽 */
+  width: 320px;
+  max-width: 600px;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   box-sizing: border-box;
-  width: 100%;
   transition: border-color var(--duration-fast) var(--ease-default),
     box-shadow var(--duration-fast) var(--ease-default);
   cursor: grab;
-  overflow: visible;  /* 让 Handle 和端口标签可以溢出节点框 */
+  overflow: visible;  /* 让 Handle 和 agent picker 可以溢出节点框 */
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -71,16 +76,19 @@
   }
 }
 
-/* ---- Header ---- */
+/* ---- Header（固定高度 34px，含 border-bottom） ---- */
 .header {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px;
+  height: 34px;
+  padding: 0 8px;
   border-bottom: 1px solid var(--border-divider);
   background: color-mix(in srgb, var(--node-accent, var(--accent-primary)) 6%, var(--bg-card));
   border-radius: var(--radius-md) var(--radius-md) 0 0;
   flex-shrink: 0;
+  box-sizing: border-box;
+  position: relative;  /* agent picker 弹窗定位基准 */
 }
 
 .iconWrap {
@@ -126,27 +134,141 @@
   flex-shrink: 0;
 }
 
-/* ---- Body ---- */
-.body {
-  padding: 4px 8px 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-height: 0;
-}
-
-/* ---- Agent 身份卡（节点卡片内） ---- */
-.agentCard {
+/* ---- Agent Header 按钮 ---- */
+.agentHeaderBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 6px;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-foreground);
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.agentHeaderBtn:hover {
+  color: var(--accent-primary);
+}
+
+.agentName {
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.agentChevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.selectAgentBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--text-muted);
+  flex: 1;
+  min-width: 0;
+  transition: border-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.selectAgentBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ---- Agent Picker 弹窗 ---- */
+.agentPicker {
+  position: absolute;
+  top: 32px;
+  left: 4px;
+  z-index: 10;
+  min-width: 200px;
+  max-width: 280px;
+  max-height: 240px;
+  overflow-y: auto;
   background: var(--bg-popover);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
 }
 
+.agentPicker::-webkit-scrollbar {
+  width: 4px;
+}
+
+.agentPicker::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.agentPickerItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-foreground);
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.agentPickerItem:hover {
+  background: var(--bg-muted);
+}
+
+.agentPickerItemActive {
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+}
+
+.agentPickerAvatar {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border-default);
+}
+
+.agentPickerName {
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentPickerClear {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  flex: 1;
+  text-align: center;
+}
+
+/* ---- Agent Avatar / Badge（header + picker 共用） ---- */
 .agentAvatar {
   width: 20px;
   height: 20px;
@@ -170,47 +292,158 @@
   flex-shrink: 0;
 }
 
-.agentMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  flex: 1;
-}
-
-.agentName {
-  font-size: 10px;
-  font-weight: var(--font-semibold);
-  color: var(--text-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1.2;
-}
-
 .agentBadge {
   display: inline-flex;
   align-items: center;
-  padding: 0 3px;
-  height: 10px;
+  padding: 0 4px;
+  height: 14px;
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--node-accent, var(--accent-primary)) 12%, transparent);
   color: var(--node-accent, var(--accent-primary));
-  font-size: 8px;
+  font-size: 9px;
   font-weight: var(--font-bold);
-  width: fit-content;
   line-height: 1;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.label {
-  font-size: 13px;
+/* ---- Body ---- */
+.body {
+  padding: 4px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---- Section（输入区 / 输出区） ---- */
+.inputsSection,
+.outputsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 输出区与输入区之间的分隔线（margin 4 + border 1 + padding 7 = 12px gap） */
+.outputsSection {
+  margin-top: 4px;
+  border-top: 1px solid var(--border-divider);
+  padding-top: 7px;
+}
+
+/* 无输入区时输出区不需要分隔线 */
+.outputsSection.noDivider {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* ---- Section Label（"输入" / "输出" 小字灰色） ---- */
+.sectionLabel {
+  height: 16px;
+  margin-bottom: 4px;
+  font-size: 9px;
   font-weight: var(--font-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 16px;
+  flex-shrink: 0;
+}
+
+/* ---- Port Row（端口行，固定高度 28px） ---- */
+.portRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.portDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.portName {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-medium);
   color: var(--text-foreground);
-  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-sans);
+}
+
+.portType {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ---- 输出预览（限高 5 行约 100px，可滚动） ---- */
+.outputPreview {
+  margin-top: 4px;
+  max-height: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 6px;
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  word-break: break-word;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+.outputPreview[data-running='true'] {
+  background: color-mix(in srgb, var(--status-success) 5%, var(--bg-muted));
+}
+
+.outputPreview::-webkit-scrollbar {
+  width: 4px;
+}
+
+.outputPreview::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.outputLine {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.outputPlaceholder {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 10px;
+}
+
+.outputLiveDot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--status-success);
+  animation: livePulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 /* ---- 删除按钮 ---- */
@@ -275,40 +508,6 @@
   transform: scale(1.3);
 }
 
-/* ---- 端口标签（hover 显示在节点外侧） ---- */
-.portLabel {
-  position: absolute;
-  font-size: 10px;
-  font-weight: var(--font-semibold);
-  font-family: var(--font-mono);
-  pointer-events: none;
-  white-space: nowrap;
-  line-height: 1;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-default);
-  background: var(--bg-card);
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-divider);
-  box-shadow: var(--shadow-sm);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.node:hover .portLabel {
-  opacity: 1;
-}
-
-/* target（输入）端口标签：显示在节点外侧（左侧） */
-.portLabelTarget {
-  right: 14px;  /* handle 在左边缘，标签右移 14px 即在节点外左侧 */
-}
-
-/* source（输出）端口标签：显示在节点外侧（右侧） */
-.portLabelSource {
-  left: 14px;   /* handle 在右边缘，标签左移 14px 即在节点外右侧 */
-}
-
 /* ---- mode 徽章 ---- */
 .modeBadge {
   position: absolute;
@@ -348,8 +547,64 @@
   opacity: 0.6;
 }
 
+/* ---- 动态端口行删除按钮（hover 显示） ---- */
+.portRowDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    background var(--duration-fast) var(--ease-default);
+}
+
+.portRow:hover .portRowDelete {
+  opacity: 1;
+}
+
+.portRowDelete:hover {
+  color: var(--status-error, #ef4444);
+  background: color-mix(in srgb, var(--status-error, #ef4444) 10%, transparent);
+}
+
+/* ---- 添加动态端口按钮 ---- */
+.addPortBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 22px;
+  margin-top: 4px;
+  padding: 0;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    background var(--duration-fast) var(--ease-default);
+}
+
+.addPortBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 5%, transparent);
+}
+
 /* ---- 连接中状态 ---- */
-/* 节点处于连接中时，非起始节点的可连接端口高亮 */
 .connecting .handle {
   opacity: 0.6;
 }
@@ -369,63 +624,4 @@
   50% {
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-primary) 15%, transparent);
   }
-}
-
-/* ---- 输出区（撑满 body 剩余空间） ---- */
-.outputArea {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 4px 6px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.4;
-  color: var(--text-secondary);
-  word-break: break-word;
-  position: relative;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
-}
-
-.outputArea[data-running='true'] {
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--status-success) 5%, transparent);
-}
-
-.outputArea::-webkit-scrollbar {
-  width: 4px;
-}
-
-.outputArea::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: var(--radius-full);
-}
-
-.outputLine {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.outputPlaceholder {
-  color: var(--text-muted);
-  font-style: italic;
-  font-size: 10px;
-}
-
-.outputLiveDot {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--status-success);
-  animation: livePulse 1s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes livePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
 }

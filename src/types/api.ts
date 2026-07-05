@@ -704,6 +704,73 @@ export interface CostResponse {
   }>;
 }
 
+/* ---------- Observe (Agent-centric) ---------- */
+
+/** 单个 Agent 的观测汇总（用于顶部卡片） */
+export interface AgentObservation {
+  id: string;
+  name: string;
+  avatar: string;
+  thinking_model: string;
+  enabled: boolean;
+  llm_model: string;
+  total_tokens: number;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  daily_cost_usd: number;
+  llm_calls: number;
+  tool_calls: number;
+  tool_calls_by_tool: Record<string, number>;
+  last_active: string | null;
+}
+
+/** Agent 观测列表响应（含全局汇总） */
+export interface AgentObservationListResponse {
+  agents: AgentObservation[];
+  summary: {
+    agent_count: number;
+    total_tokens: number;
+    input_tokens: number;
+    output_tokens: number;
+    total_cost_usd: number;
+    total_llm_calls: number;
+    total_tool_calls: number;
+  };
+}
+
+/** 单 Agent 详情（在汇总字段基础上增加配置信息） */
+export interface AgentObservationDetail extends AgentObservation {
+  llm_provider: string;
+  max_iterations: number;
+  tools: string[];
+  skills: string[];
+  budget_limit_usd: number | null;
+  daily_budget_usd: number | null;
+  updated_at: string | null;
+}
+
+/** 时间线事件条目（与 EventInfo 字段对齐，独立定义便于扩展） */
+export interface ObserveTimelineEvent {
+  id: string;
+  type: string;
+  tick: number;
+  source: string;
+  payload: Record<string, unknown>;
+  ts: string;
+}
+
+export interface AgentTimelineResponse {
+  agent_id: string;
+  events: ObserveTimelineEvent[];
+  total: number;
+}
+
+export interface GlobalTimelineResponse {
+  events: ObserveTimelineEvent[];
+  total: number;
+}
+
 /* ---------- User ---------- */
 export interface UserProfile {
   user_id: string;
@@ -855,6 +922,8 @@ export interface NodeTypeDef {
   outputs: PortSpec[];
   config_schema?: Record<string, unknown>;
   default_config?: Record<string, unknown>;
+  /** v3：是否支持动态输出端口（如 logic 节点的 branch/parallel 模式） */
+  has_dynamic_outputs?: boolean;
 }
 
 /** GET /node-types 返回 */

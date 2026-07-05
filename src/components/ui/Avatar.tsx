@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import styles from './Avatar.module.css';
 import { cx } from '@/lib/cx';
 import { StatusDot } from './StatusDot';
@@ -39,7 +40,8 @@ function initialsOf(name: string): string {
   return parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0);
 }
 
-/** Circular avatar with optional image, fallback to uppercase initials. */
+/** Circular avatar with optional image, fallback to uppercase initials.
+ *  当 src 为空、加载失败时自动回退到首字母。 */
 export function Avatar({
   name,
   size = 'md',
@@ -48,9 +50,17 @@ export function Avatar({
   className,
 }: AvatarProps) {
   const px = SIZE_PX[size];
+  // imgError：一旦图片加载失败就切回首字母；src 变化时重置
+  const [imgError, setImgError] = useState(false);
+  useEffect(() => {
+    setImgError(false);
+  }, [src]);
+
+  const showImg = src && !imgError;
+
   return (
     <span
-      className={cx(styles.avatar, src && styles.hasImage, className)}
+      className={cx(styles.avatar, showImg && styles.hasImage, className)}
       style={{
         width: px,
         height: px,
@@ -60,12 +70,13 @@ export function Avatar({
       aria-label={name}
       title={name}
     >
-      {src ? (
+      {showImg ? (
         <img
           src={src}
           alt={name}
           className={styles.image}
           draggable={false}
+          onError={() => setImgError(true)}
         />
       ) : (
         <span className={styles.initials}>{initialsOf(name).toUpperCase()}</span>
