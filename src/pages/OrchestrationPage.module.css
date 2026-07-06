@@ -82,6 +82,10 @@
 
 .leftCollapsed {
   width: 36px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 /* 面板顶部 header：Tab + 折叠按钮 */

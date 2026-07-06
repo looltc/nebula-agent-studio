@@ -187,10 +187,34 @@ export function TimelineChart({
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  /** hover 展开的堆叠组 id（mouseenter 设置，mouseleave 清除） */
+  /** hover 展开的堆叠组 id（mouseenter 设置，mouseleave 延迟清除） */
   const [hoveredStackId, setHoveredStackId] = useState<string | null>(null);
   /** 点击固定的堆叠组 id（点击聚合圆点切换，避免 hover 离开就收起） */
   const [pinnedStackId, setPinnedStackId] = useState<string | null>(null);
+  /** mouseleave 延迟句柄，给鼠标在子圆点间移动留缓冲 */
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleStackEnter = useCallback((id: string) => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+    setHoveredStackId(id);
+  }, []);
+
+  const handleStackLeave = useCallback(() => {
+    if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+    leaveTimerRef.current = setTimeout(() => {
+      setHoveredStackId(null);
+      leaveTimerRef.current = null;
+    }, 150);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+    };
+  }, []);
 
   // ===== brush 拖动临时状态 =====
   const [dragBrush, setDragBrush] = useState<[number, number] | null>(null);
@@ -383,8 +407,19 @@ export function TimelineChart({
           ['--pulse-color' as string]: color,
           zIndex: isSelected ? 4 : isHovered ? 3 : 2,
         }}
-        onMouseEnter={() => setHoveredId(event.id)}
-        onMouseLeave={() => setHoveredId(null)}
+        onMouseEnter={() => {
+          // 进入子圆点时清除容器的 leave 定时器，防止展开态收起
+          if (leaveTimerRef.current) {
+            clearTimeout(leaveTimerRef.current);
+            leaveTimerRef.current = null;
+          }
+          setHoveredId(event.id);
+        }}
+        onMouseLeave={() => {
+          setHoveredId(null);
+          // 离开子圆点时启动容器 leave 延迟
+          handleStackLeave();
+        }}
         onClick={(e) => {
           e.stopPropagation();
           setSelectedEventId((cur) => (cur === event.id ? null : event.id));
@@ -476,8 +511,8 @@ export function TimelineChart({
                             key={stack.id}
                             className={styles.stackExpanded}
                             style={{ left: `${stack.center}%` }}
-                            onMouseEnter={() => setHoveredStackId(stack.id)}
-                            onMouseLeave={() => setHoveredStackId(null)}
+                            onMouseEnter={() => handleStackEnter(stack.id)}
+                            onMouseLeave={handleStackLeave}
                           >
                             {stack.events.map((placed, i) => {
                               const offsetPx =
@@ -507,8 +542,8 @@ export function TimelineChart({
                             border: 'none',
                             ['--pulse-color' as string]: color,
                           }}
-                          onMouseEnter={() => setHoveredStackId(stack.id)}
-                          onMouseLeave={() => setHoveredStackId(null)}
+                          onMouseEnter={() => handleStackEnter(stack.id)}
+                          onMouseLeave={handleStackLeave}
                           onClick={(e) => {
                             e.stopPropagation();
                             setPinnedStackId((cur) =>

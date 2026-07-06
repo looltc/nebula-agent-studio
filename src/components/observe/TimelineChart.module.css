@@ -191,13 +191,13 @@
 }
 
 /* 堆叠展开容器：相对定位，子圆点相对此容器中心展开。
-   给足够宽高形成可 hover 区域，避免鼠标进入瞬间 leave 抖动 */
+   给足够宽高形成可 hover 区域，避免鼠标在子圆点间移动时 leave 抖动 */
 .stackExpanded {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 160px;
-  height: 40px;
+  width: 180px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
