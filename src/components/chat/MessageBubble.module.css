@@ -58,6 +58,18 @@
   color: var(--status-destructive);
 }
 
+/* 流式中断的部分回复：右上角小徽章 */
+.partialBadge {
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--status-warning, #d97706);
+  background: color-mix(in srgb, var(--status-warning, #d97706) 12%, transparent);
+  border-radius: var(--radius-sm);
+}
+
 /* User message text only — assistant content is rendered by MarkdownText. */
 .text {
   white-space: pre-wrap;

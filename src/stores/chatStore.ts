@@ -379,17 +379,30 @@ export const useChatStore = create<ChatState>((set, get) => {
 
   onStreamError: (error) => {
     // 错误时也保留已发生的思考/工具事件到错误消息上，便于排查
-    const { streamingEvents, currentAgentId } = get();
-    const msg: MessageInfo = {
+    const { streamingEvents, currentAgentId, streamingText } = get();
+    // 若已有部分回复文本，保留为 partial 消息（不丢失用户等待的内容）
+    const partialMsg: MessageInfo | null = streamingText.trim()
+      ? {
+          id: genId(),
+          source: currentAgentId ?? 'assistant',
+          role: 'assistant',
+          content: streamingText,
+          ts: nowIso(),
+          kind: 'partial',
+          events: streamingEvents.length > 0 ? streamingEvents : undefined,
+        }
+      : null;
+    const errorMsg: MessageInfo = {
       id: genId(),
       source: currentAgentId ?? 'assistant',
       role: 'assistant',
       content: `[Error: ${error}]`,
       ts: nowIso(),
-      events: streamingEvents.length > 0 ? streamingEvents : undefined,
+      kind: 'error',
+      events: streamingEvents.length > 0 && !partialMsg ? streamingEvents : undefined,
     };
     set((s) => ({
-      messages: [...s.messages, msg],
+      messages: partialMsg ? [...s.messages, partialMsg, errorMsg] : [...s.messages, errorMsg],
       error,
       streaming: false,
       streamingText: '',

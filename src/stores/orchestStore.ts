@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
+import { useUIStore } from './uiStore';
 import type {
   CompiledGraphView,
   EventInfo,
@@ -215,6 +216,47 @@ function saveLastGroupChatId(id: string | null): void {
     else localStorage.removeItem(LAST_GC_KEY);
   } catch {
     /* ignore */
+  }
+}
+
+/**
+ * 将流式聚合中的在途回复持久化为 GroupMessage（带 metadata.is_partial 标记）。
+ * 在群聊流式中断/停止时调用，避免丢失用户已等待的部分内容。
+ */
+function _persistPartialReplies(
+  get: () => OrchestState,
+  set: (partial: Partial<OrchestState>) => void,
+): void {
+  const { streamingReplies, groupMessages, currentGroupChat } = get();
+  const aidSet = Object.keys(streamingReplies);
+  if (aidSet.length === 0) return;
+
+  const now = new Date().toISOString();
+  const gid = currentGroupChat?.id ?? groupStreamId ?? '';
+  const partialMsgs: GroupMessage[] = [];
+
+  for (const aid of aidSet) {
+    const reply = streamingReplies[aid];
+    if (!reply || !reply.text.trim()) continue;
+    partialMsgs.push({
+      id: `partial-${aid}-${Date.now()}`,
+      conversation_id: gid,
+      source: aid,
+      target: '',
+      role: 'assistant',
+      content: reply.text,
+      addressing: { mode: 'mention', targets: [], reply_to: null },
+      ts: now,
+      metadata: {
+        sender_name: aid,
+        is_partial: true,
+        events: reply.events.length > 0 ? reply.events : undefined,
+      },
+    });
+  }
+
+  if (partialMsgs.length > 0) {
+    set({ groupMessages: [...groupMessages, ...partialMsgs] });
   }
 }
 
@@ -491,6 +533,14 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
     };
 
     source.onerror = () => {
+      // 持久化在途的部分回复（不丢失用户等待的内容）
+      _persistPartialReplies(get, set);
+      // 推送 toast 提示用户（而非静默失败）
+      useUIStore.getState().addToast({
+        variant: 'error',
+        title: '群聊流式连接中断',
+        description: '部分回复已保留，刷新后仍可查看',
+      });
       set({ groupStreaming: false, streamingReplies: {} });
       source.close();
       groupStreamSource = null;
@@ -510,6 +560,8 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
       });
       groupStreamId = null;
     }
+    // 持久化在途的部分回复（用户主动停止时也保留已有内容）
+    _persistPartialReplies(get, set);
     set({ groupStreaming: false, streamingReplies: {} });
   },
 

@@ -245,6 +245,11 @@ export interface MessageInfo {
   content: string;
   ts: string;
   /**
+   * 消息种类：normal=正常 / error=错误 / partial=流式中断后的部分回复。
+   * 用于驱动错误样式渲染，替代脆弱的字符串前缀检测。
+   */
+  kind?: 'normal' | 'error' | 'partial';
+  /**
    * 思考过程与工具调用的时间线事件，按到达顺序排列。
    * 仅在流式期间由 chatStore 写入；历史会话从后端加载时此字段可能为空。
    */

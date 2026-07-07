@@ -13,7 +13,8 @@ export interface MessageBubbleProps {
 
 function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
   const isUser = message.role === 'user';
-  const isError = message.content.startsWith('[Error:');
+  const isError = message.kind === 'error' || message.content.startsWith('[Error:');
+  const isPartial = message.kind === 'partial';
   const time = formatTime(message.ts);
   const metaSource =
     message.role === 'assistant'
@@ -44,6 +45,11 @@ function MessageBubbleBase({ message, agentName }: MessageBubbleProps) {
         ) : (
           // 无事件的历史消息：直接渲染 Markdown
           <MarkdownText content={message.content} />
+        )}
+        {isPartial && (
+          <div className={styles.partialBadge} title="流式中断，仅保留部分回复">
+            已中断
+          </div>
         )}
       </div>
       <div className={styles.meta}>

@@ -43,6 +43,7 @@ function GroupMessageBubbleBase({
   const avatarSrc = resolveAvatarSrc(agentInfo?.avatar);
   const time = formatTime(message.ts);
   const isClosing = message.metadata?.is_closing === true;
+  const isPartial = message.metadata?.is_partial === true;
 
   return (
     <div
@@ -65,6 +66,7 @@ function GroupMessageBubbleBase({
             </Badge>
           )}
           {isClosing && <Badge variant="default">无需回复</Badge>}
+          {isPartial && <Badge variant="warning">已中断</Badge>}
           {time && <span className={styles.time}>{time}</span>}
         </div>
         <div className={styles.text}>
@@ -115,7 +117,7 @@ export function StreamingBubble({ agentId, reply, agents }: StreamingBubbleProps
         {hasText && (
           <div className={cx(styles.text, styles.streamingText)}>
             <MarkdownText content={reply.text} streaming />
-            <span className={styles.cursor}>▌</span>
+            <span className={styles.cursor} aria-hidden="true">▋</span>
           </div>
         )}
       </div>
