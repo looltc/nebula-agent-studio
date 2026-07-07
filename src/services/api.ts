@@ -385,9 +385,11 @@ export const apiClient = {
       `/orchestration/specs/${encodeURIComponent(id)}/activate`,
       { method: 'POST' },
     ),
-  compileSpec: (id: string) =>
+  compileSpec: (id: string, mode?: 'fast' | 'real') =>
     api<CompiledGraphView>(
-      `/orchestration/specs/${encodeURIComponent(id)}/compile`,
+      `/orchestration/specs/${encodeURIComponent(id)}/compile${
+        mode ? `?mode=${mode}` : ''
+      }`,
       { method: 'POST' },
     ),
   invokeSpec: (id: string, body: InvokeRequest) =>

@@ -149,32 +149,36 @@ function layoutNodes(view: CompiledGraphView): CanvasRFNode[] {
 }
 
 function viewToEdges(view: CompiledGraphView): Edge[] {
-  return view.edges.map((e, i) => {
-    const id = `ce-${e.source}-${e.target}-${i}`;
-    return {
-      id,
-      source: e.source,
-      target: e.target,
-      label: e.cond ?? undefined,
-      type: 'smoothstep',
-      animated: e.is_conditional,
-      style: {
-        stroke: e.is_conditional
-          ? 'var(--accent-primary)'
-          : 'var(--text-muted)',
-        strokeWidth: e.is_conditional ? 2 : 1.5,
-      },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: e.is_conditional
-          ? 'var(--accent-primary)'
-          : 'var(--text-muted)',
-        width: 16,
-        height: 16,
-      },
-      data: { cond: e.cond },
-    };
-  });
+  // 过滤掉 __end__ 终止边：real 模式会返回 end → __end__ 的边，
+  // 但 __end__ 不是真实节点（不在 view.nodes 中），渲染会变成悬空边。
+  return view.edges
+    .filter((e) => e.target !== '__end__' && e.source !== '__start__')
+    .map((e, i) => {
+      const id = `ce-${e.source}-${e.target}-${i}`;
+      return {
+        id,
+        source: e.source,
+        target: e.target,
+        label: e.cond ?? undefined,
+        type: 'smoothstep',
+        animated: e.is_conditional,
+        style: {
+          stroke: e.is_conditional
+            ? 'var(--accent-primary)'
+            : 'var(--text-muted)',
+          strokeWidth: e.is_conditional ? 2 : 1.5,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: e.is_conditional
+            ? 'var(--accent-primary)'
+            : 'var(--text-muted)',
+          width: 16,
+          height: 16,
+        },
+        data: { cond: e.cond },
+      };
+    });
 }
 
 /**

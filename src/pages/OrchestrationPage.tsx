@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Network,
-  GitBranch,
   Pencil,
   Eye,
   PanelRight,
@@ -18,8 +16,6 @@ import {
   CompiledGraphPreview,
   SpecListPanel,
   RightPanel,
-  TopologyView,
-  RelationGraphView,
   NodePalette,
   type CreateNodeFn,
   type NodeOps,
@@ -32,14 +28,12 @@ import { apiClient } from '@/services/api';
 import type { GraphSpec, GraphNodeType, NodePosition, NodeRun } from '@/types/api';
 import styles from './OrchestrationPage.module.css';
 
-type MainTab = 'editor' | 'preview' | 'topology' | 'relations';
+type MainTab = 'editor' | 'preview';
 type LeftTab = 'specs' | 'palette';
 
 const MAIN_TABS: TabItem[] = [
   { key: 'editor', label: '编辑器', icon: <Pencil size={14} /> },
   { key: 'preview', label: '编译预览', icon: <Eye size={14} /> },
-  { key: 'topology', label: '拓扑视图', icon: <Network size={14} /> },
-  { key: 'relations', label: '关系图', icon: <GitBranch size={14} /> },
 ];
 
 const LEFT_TABS: TabItem[] = [
@@ -79,13 +73,9 @@ export default function OrchestrationPage() {
   const compiling = useOrchestStore((s) => s.compiling);
   const compileErrors = useOrchestStore((s) => s.compileErrors);
   const runtime = useOrchestStore((s) => s.runtime);
-  const world = useOrchestStore((s) => s.world);
-  const relations = useOrchestStore((s) => s.relations);
   const lastRunId = useOrchestStore((s) => s.lastRunId);
 
   const loadSpecs = useOrchestStore((s) => s.loadSpecs);
-  const loadWorld = useOrchestStore((s) => s.loadWorld);
-  const loadRelations = useOrchestStore((s) => s.loadRelations);
   const loadRouters = useOrchestStore((s) => s.loadRouters);
   const loadNodeTypes = useOrchestStore((s) => s.loadNodeTypes);
   const loadAgents = useAgentStore((s) => s.loadAgents);
@@ -116,11 +106,9 @@ export default function OrchestrationPage() {
   useEffect(() => {
     void loadSpecs();
     void loadAgents();
-    void loadWorld();
-    void loadRelations();
     void loadRouters();
     void loadNodeTypes();
-  }, [loadSpecs, loadAgents, loadWorld, loadRelations, loadRouters, loadNodeTypes]);
+  }, [loadSpecs, loadAgents, loadRouters, loadNodeTypes]);
 
   // 切换编排图时清空选中状态
   useEffect(() => {
@@ -269,14 +257,6 @@ export default function OrchestrationPage() {
               className={styles.fill}
             />
           )}
-
-          {tab === 'topology' && (
-            <ReactFlowProvider>
-              <TopologyView world={world} relations={relations} />
-            </ReactFlowProvider>
-          )}
-
-          {tab === 'relations' && <RelationGraphView relations={relations} />}
         </div>
 
         {/* 顶部浮动：Tab 切换 + 保存/发布 */}

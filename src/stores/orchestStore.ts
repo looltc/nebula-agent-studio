@@ -133,8 +133,13 @@ export interface OrchestState {
   removeSpec: (id: string) => Promise<void>;
   /** 设为激活编排图（同时只有一个 active） */
   activateSpec: (id: string) => Promise<void>;
-  /** 编译当前/指定编排图，更新 compiledView + compileErrors */
-  compileSpec: (id: string) => Promise<void>;
+  /**
+   * 编译当前/指定编排图，更新 compiledView + compileErrors
+   * @param mode fast=字段映射+轻量校验（适合 debounce 实时预览）
+   *             real=调真实 compile()，含 __end__ 终止边 + 条件分支
+   *             不传则由后端默认 real
+   */
+  compileSpec: (id: string, mode?: 'fast' | 'real') => Promise<void>;
   /** 同步执行编排图 */
   invokeSpec: (
     id: string,
@@ -596,10 +601,10 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
     }
   },
 
-  compileSpec: async (id) => {
+  compileSpec: async (id, mode) => {
     set({ compiling: true });
     try {
-      const view = await apiClient.compileSpec(id);
+      const view = await apiClient.compileSpec(id, mode);
       set({ compiledView: view, compileErrors: view.compile_errors ?? [] });
     } catch (e) {
       console.error('Failed to compile spec:', e);
