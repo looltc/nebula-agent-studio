@@ -382,6 +382,19 @@ export interface SkillToggleResult {
   enabled: boolean;
 }
 
+export interface SkillCreateRequest {
+  name: string;
+  description: string;
+  body?: string;
+  license?: string | null;
+  compatibility?: string | null;
+}
+
+export interface SkillCreateResult {
+  status: string;
+  skill: { name: string; description: string };
+}
+
 /* ---------- Memory (L3 long-term) ---------- */
 export type MemoryType = 'semantic' | 'episodic' | 'preference' | 'procedural';
 

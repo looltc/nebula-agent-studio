@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Upload, Github, Search, Puzzle, Trash2 } from 'lucide-react';
+import { Upload, Github, Search, Puzzle, Trash2, Sparkles } from 'lucide-react';
 import { ContentHeader, PageContainer } from '@/components/layout';
 import { Button, TextInput, Skeleton, EmptyState, Modal, useToast } from '@/components/ui';
-import { SkillCard, SkillDetailModal, InstallFromGithubModal } from '@/components/skills';
+import { SkillCard, SkillDetailModal, InstallFromGithubModal, CreateSkillModal } from '@/components/skills';
 import { useAgentStore } from '@/stores/agentStore';
 import { apiClient } from '@/services/api';
 import type { SkillInfo } from '@/types/api';
@@ -20,6 +20,7 @@ export default function SkillHubPage() {
 
   const [query, setQuery] = useState('');
   const [installOpen, setInstallOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<SkillInfo | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [detailName, setDetailName] = useState<string | null>(null);
@@ -89,6 +90,15 @@ export default function SkillHubPage() {
     }
   };
 
+  const handleExport = async (name: string) => {
+    try {
+      await apiClient.exportSkill(name);
+      toast.success('导出成功', `${name}.zip 已开始下载`);
+    } catch (err) {
+      toast.error('导出失败', err instanceof Error ? err.message : String(err));
+    }
+  };
+
   const emptyAction = (
     <>
       <Button
@@ -105,6 +115,13 @@ export default function SkillHubPage() {
         onClick={() => setInstallOpen(true)}
       >
         从 GitHub 安装
+      </Button>
+      <Button
+        variant="outline"
+        icon={<Sparkles size={16} />}
+        onClick={() => setCreateOpen(true)}
+      >
+        新建 Skill
       </Button>
     </>
   );
@@ -137,6 +154,13 @@ export default function SkillHubPage() {
               onClick={() => setInstallOpen(true)}
             >
               从 GitHub 安装
+            </Button>
+            <Button
+              variant="outline"
+              icon={<Sparkles size={16} />}
+              onClick={() => setCreateOpen(true)}
+            >
+              新建 Skill
             </Button>
           </>
         }
@@ -176,6 +200,7 @@ export default function SkillHubPage() {
               onOpenDetail={setDetailName}
               onToggle={handleToggle}
               onDeleteRequest={setDeleteTarget}
+              onExport={handleExport}
             />
           ))}
         </div>
@@ -186,6 +211,11 @@ export default function SkillHubPage() {
         open={installOpen}
         onClose={() => setInstallOpen(false)}
         onInstalled={loadSkills}
+      />
+      <CreateSkillModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={loadSkills}
       />
 
       <Modal

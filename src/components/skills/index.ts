@@ -4,5 +4,7 @@ export { SkillDetailModal } from './SkillDetailModal';
 export type { SkillDetailModalProps } from './SkillDetailModal';
 export { InstallFromGithubModal } from './InstallFromGithubModal';
 export type { InstallFromGithubModalProps } from './InstallFromGithubModal';
+export { CreateSkillModal } from './CreateSkillModal';
+export type { CreateSkillModalProps } from './CreateSkillModal';
 export { SkillAuthorization } from './SkillAuthorization';
 export type { SkillAuthorizationProps } from './SkillAuthorization';

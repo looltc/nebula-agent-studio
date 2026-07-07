@@ -8,6 +8,7 @@ import {
   FileText,
   BookOpen,
   Image,
+  Download,
 } from 'lucide-react';
 import { Card, Badge, StatusDot } from '@/components/ui';
 import type { SkillInfo } from '@/types/api';
@@ -19,6 +20,8 @@ export interface SkillCardProps {
   onOpenDetail: (name: string) => void;
   onToggle: (name: string) => void;
   onDeleteRequest: (skill: SkillInfo) => void;
+  /** 导出 Skill 为 zip（分享）。 */
+  onExport: (name: string) => void;
   className?: string;
 }
 
@@ -38,6 +41,7 @@ export function SkillCard({
   onOpenDetail,
   onToggle,
   onDeleteRequest,
+  onExport,
   className,
 }: SkillCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,6 +110,19 @@ export function SkillCard({
               >
                 {isActive ? <Pause size={14} /> : <Play size={14} />}
                 <span>{isActive ? '禁用' : '启用'}</span>
+              </button>
+              <button
+                type="button"
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={(e) => {
+                  stop(e);
+                  setMenuOpen(false);
+                  onExport(skill.name);
+                }}
+              >
+                <Download size={14} />
+                <span>导出分享</span>
               </button>
               <div className={styles.menuDivider} />
               <button

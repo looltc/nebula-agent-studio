@@ -57,6 +57,8 @@ import type {
   SkillInstallResult,
   SkillListResponse,
   SkillToggleResult,
+  SkillCreateRequest,
+  SkillCreateResult,
   SpanView,
   SpecCreateRequest,
   SpecUpdateRequest,
@@ -205,6 +207,29 @@ export const apiClient = {
     api<{ status: string }>(`/skills/${encodeURIComponent(name)}`, { method: 'DELETE' }),
   toggleSkill: (name: string) =>
     api<SkillToggleResult>(`/skills/${encodeURIComponent(name)}/toggle`, { method: 'PUT' }),
+  createSkill: (body: SkillCreateRequest) =>
+    api<SkillCreateResult>('/skills/create', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  /** 导出 Skill 为 zip 并触发浏览器下载。 */
+  exportSkill: async (name: string): Promise<void> => {
+    const r = await fetch(`${BASE}/skills/${encodeURIComponent(name)}/export`);
+    if (!r.ok) {
+      let errBody: ApiErrorBody = {};
+      try { errBody = await r.json(); } catch { errBody = { error: r.statusText }; }
+      throw new ApiError(r.status, errBody);
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 
   /* Group chats */
   listGroupChats: () => api<GroupChatListResponse>('/group-chats'),
