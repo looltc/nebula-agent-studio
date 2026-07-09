@@ -8,18 +8,12 @@ import { StreamingMessage } from './StreamingMessage';
 import { HITLApproval } from './HITLApproval';
 import styles from './MessageList.module.css';
 
-const DANGEROUS_HINTS = ['write', 'execute', 'delete'];
 const SCROLL_THRESHOLD = 80;
-
-function isDangerousTool(name: string): boolean {
-  const lower = name.toLowerCase();
-  return DANGEROUS_HINTS.some((h) => lower.includes(h));
-}
 
 /**
  * Scrollable message list. Auto-sticks to the bottom while the user is near it,
  * and yields a "jump to latest" button when they scroll up.
- * Renders an inline HITL approval card when a dangerous tool is mid-flight.
+ * Renders inline HITL approval cards when dangerous tools await human approval.
  */
 export function MessageList() {
   const messages = useChatStore((s) => s.messages);
@@ -28,7 +22,8 @@ export function MessageList() {
   const streamingEvents = useChatStore((s) => s.streamingEvents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
   const agents = useChatStore((s) => s.agents);
-  const onStreamToolEnd = useChatStore((s) => s.onStreamToolEnd);
+  const pendingApprovals = useChatStore((s) => s.pendingApprovals);
+  const removePendingApproval = useChatStore((s) => s.removePendingApproval);
   const addToast = useUIStore((s) => s.addToast);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -63,7 +58,7 @@ export function MessageList() {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [orderedMessages, streamingText, streaming, streamingEvents, autoScroll]);
+  }, [orderedMessages, streamingText, streaming, streamingEvents, pendingApprovals, autoScroll]);
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
@@ -71,17 +66,6 @@ export function MessageList() {
     el.scrollTop = el.scrollHeight;
     setAutoScroll(true);
   };
-
-  // HITL: 从 streamingEvents 中找 loading 态的危险工具
-  const hitlTool = useMemo(() => {
-    for (let i = streamingEvents.length - 1; i >= 0; i--) {
-      const ev = streamingEvents[i];
-      if (ev.kind === 'tool' && ev.status === 'loading' && isDangerousTool(ev.tool)) {
-        return ev;
-      }
-    }
-    return undefined;
-  }, [streamingEvents]);
 
   return (
     <div className={styles.wrap}>
@@ -98,31 +82,24 @@ export function MessageList() {
             <MessageBubble key={m.id} message={m} agentName={agentName} />
           ))}
           {streaming && <StreamingMessage />}
-          {hitlTool && (
+          {pendingApprovals.map((pa) => (
             <HITLApproval
-              agentId={currentAgentId ?? 'agent'}
-              tool={hitlTool.tool}
-              args={hitlTool.args}
-              onApprove={() => {
-                if (!hitlTool) return;
-                onStreamToolEnd(hitlTool.tool, { approved: true, by: 'human' });
+              key={pa.approval_id}
+              approvalId={pa.approval_id}
+              agentId={pa.agent_id ?? currentAgentId ?? 'agent'}
+              tool={pa.tool}
+              args={pa.args}
+              scene={pa.scene}
+              onResolved={(id) => {
+                removePendingApproval(id);
                 addToast({
                   variant: 'success',
-                  title: 'Approved',
-                  description: `${hitlTool.tool} was approved.`,
-                });
-              }}
-              onReject={() => {
-                if (!hitlTool) return;
-                onStreamToolEnd(hitlTool.tool, { rejected: true, by: 'human' });
-                addToast({
-                  variant: 'warning',
-                  title: 'Rejected',
-                  description: `${hitlTool.tool} was rejected.`,
+                  title: 'Approval resolved',
+                  description: `${pa.tool} approval has been processed.`,
                 });
               }}
             />
-          )}
+          ))}
         </div>
       </div>
 

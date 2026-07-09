@@ -460,7 +460,8 @@
 
 /* ---- branch case / parallel branch 编辑器 ---- */
 .caseList,
-.branchList {
+.branchList,
+.waitConfig {
   display: flex;
   flex-direction: column;
   gap: 4px;

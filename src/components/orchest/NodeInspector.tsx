@@ -62,6 +62,13 @@ const LOGIC_MODES = [
   { value: 'router', label: 'router · 路由' },
 ];
 
+/** logic.wait 的等待类型 */
+const WAIT_TYPES = [
+  { value: 'timer', label: 'timer · 定时' },
+  { value: 'approval', label: 'approval · 人工审批' },
+  { value: 'event', label: 'event · 外部事件' },
+];
+
 const CONNECTOR_MODES = [
   { value: 'http', label: 'http · HTTP 请求' },
   { value: 'webhook', label: 'webhook · Webhook' },
@@ -547,6 +554,51 @@ export default function NodeInspector({
                     >
                       添加并行分支
                     </Button>
+                  </div>
+                )}
+
+                {/* wait 模式：wait_type 子配置（timer/approval/event） */}
+                {cfgStr(cfg, 'mode') === 'wait' && (
+                  <div className={styles.waitConfig}>
+                    <Field label="wait_type">
+                      <Select
+                        value={cfgStr(cfg, 'wait_type') || 'timer'}
+                        onChange={(e) => updateConfig({ wait_type: e.target.value })}
+                      >
+                        {WAIT_TYPES.map((w) => (
+                          <option key={w.value} value={w.value}>{w.label}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                    {(cfgStr(cfg, 'wait_type') || 'timer') === 'timer' && (
+                      <Field label="duration_seconds">
+                        <TextInput
+                          type="number"
+                          value={cfgNum(cfg, 'duration_seconds')}
+                          onChange={(e) => updateConfig({ duration_seconds: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
+                        />
+                      </Field>
+                    )}
+                    {cfgStr(cfg, 'wait_type') === 'approval' && (
+                      <Field label="approval_prompt" helper="人工审批提示语（可选，便于审批中心展示）">
+                        <TextArea
+                          value={cfgStr(cfg, 'approval_prompt')}
+                          onChange={(e) => updateConfig({ approval_prompt: e.target.value })}
+                          placeholder="请确认是否继续执行…"
+                          rows={2}
+                        />
+                      </Field>
+                    )}
+                    {cfgStr(cfg, 'wait_type') === 'event' && (
+                      <Field label="event_name" helper="等待的外部事件标识（可选，便于事件匹配识别）">
+                        <TextInput
+                          value={cfgStr(cfg, 'event_name')}
+                          onChange={(e) => updateConfig({ event_name: e.target.value })}
+                          placeholder="user_signup"
+                        />
+                      </Field>
+                    )}
                   </div>
                 )}
               </div>

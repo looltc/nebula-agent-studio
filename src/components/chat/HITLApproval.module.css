@@ -27,6 +27,20 @@
   flex-shrink: 0;
 }
 
+.sceneTag {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  line-height: var(--line-xs);
+  color: var(--text-muted);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-2);
+  font-weight: var(--font-medium);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .body {
   display: flex;
   flex-direction: column;
