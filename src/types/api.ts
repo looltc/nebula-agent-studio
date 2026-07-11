@@ -544,7 +544,7 @@ export interface GroupMessageResponse {
 
 /** SSE 流式事件 */
 export interface GroupStreamEvent {
-  type: 'message' | 'chunk' | 'thinking' | 'tool_start' | 'tool_end' | 'tool_approval' | 'skip' | 'error' | 'end';
+  type: 'message' | 'chunk' | 'clear' | 'thinking' | 'tool_start' | 'tool_end' | 'tool_approval' | 'skip' | 'error' | 'end';
   message?: GroupMessage;
   sender_name?: string;
   agent_id?: string;
@@ -582,6 +582,7 @@ export interface StreamEvent {
   type:
     | 'stream_chunk'
     | 'stream_thinking'
+    | 'stream_clear'
     | 'stream_tool_start'
     | 'stream_tool_end'
     | 'stream_tool_approval'
@@ -606,6 +607,9 @@ export interface SSEStartEvent {
 export interface SSEChunkEvent {
   type: 'chunk';
   text: string;
+}
+export interface SSEClearEvent {
+  type: 'clear';
 }
 export interface SSEEndEvent {
   type: 'end';
@@ -635,6 +639,7 @@ export interface SSEToolApprovalEvent {
 export type SSEEvent =
   | SSEStartEvent
   | SSEChunkEvent
+  | SSEClearEvent
   | SSEEndEvent
   | SSEErrorEvent
   | SSEThinkingEvent

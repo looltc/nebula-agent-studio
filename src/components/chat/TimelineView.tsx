@@ -28,6 +28,7 @@ export interface TimelineViewProps {
  */
 const STEP_LABELS: Record<string, string> = {
   reasoning: '思考',
+  react: '推理过程',
   plan: '规划',
   replan: '重新规划',
   evaluator: '评估',

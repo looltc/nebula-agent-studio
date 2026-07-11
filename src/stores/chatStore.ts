@@ -98,6 +98,7 @@ export interface ChatState {
   appendAssistantMessage: (content: string) => void;
   startStreaming: () => void;
   onStreamChunk: (text: string) => void;
+  onStreamClear: () => void;
   onStreamThinking: (step: string, content: string) => void;
   onStreamToolStart: (tool: string, args?: Record<string, unknown>) => void;
   onStreamToolEnd: (tool: string, result?: unknown) => void;
@@ -329,6 +330,15 @@ export const useChatStore = create<ChatState>((set, get) => {
       }
       return { streamingText: s.streamingText + text, streamingEvents: events };
     });
+  },
+
+  onStreamClear: () => {
+    // 撤回已发送的正文 chunk：LLM 调工具前的 narration 不是最终回复
+    // 清空 streamingText 并移除所有 text 事件（保留 thinking/tool 事件）
+    set((s) => ({
+      streamingText: '',
+      streamingEvents: s.streamingEvents.filter((e) => e.kind !== 'text'),
+    }));
   },
 
   onStreamThinking: (step, content) => {

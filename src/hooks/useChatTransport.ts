@@ -47,6 +47,9 @@ export function useChatTransport() {
           case 'stream_chunk':
             st.onStreamChunk(data.payload.text ?? '');
             break;
+          case 'stream_clear':
+            st.onStreamClear();
+            break;
           case 'stream_thinking':
             st.onStreamThinking(data.payload.step ?? '', data.payload.content ?? '');
             break;
@@ -193,6 +196,8 @@ export function useChatTransport() {
                 }
               } else if (evt.type === 'chunk') {
                 s.onStreamChunk(evt.text);
+              } else if (evt.type === 'clear') {
+                s.onStreamClear();
               } else if (evt.type === 'thinking') {
                 s.onStreamThinking(
                   evt.payload.step ?? '',
