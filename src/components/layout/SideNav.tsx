@@ -16,7 +16,6 @@ import {
   Search,
   Puzzle,
   Users,
-  ShieldCheck,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useChatStore } from '@/stores/chatStore';
@@ -41,7 +40,6 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'agents', label: 'Agents', icon: Bot, path: '/agents' },
   { key: 'skills', label: 'Skills', icon: Puzzle, path: '/skills' },
   { key: 'orchestration', label: '编排', icon: GitBranch, path: '/orchestration' },
-  { key: 'approvals', label: '审批中心', icon: ShieldCheck, path: '/approvals' },
   { key: 'observe', label: '观测', icon: Activity, path: '/observe' },
 ];
 
