@@ -59,6 +59,15 @@ export function useChatTransport() {
           case 'stream_tool_end':
             st.onStreamToolEnd(data.payload.tool ?? '', data.payload.result);
             break;
+          case 'stream_tool_approval':
+            st.onStreamToolApproval({
+              approval_id: data.payload.approval_id ?? '',
+              tool: data.payload.tool ?? '',
+              args: data.payload.args,
+              scene: data.payload.scene ?? 'chat',
+              agent_id: data.agent_id,
+            });
+            break;
           case 'stream_done':
             st.onStreamDone(data.payload.message_id ?? data.message_id);
             break;
@@ -204,6 +213,13 @@ export function useChatTransport() {
                   evt.payload.tool ?? '',
                   evt.payload.result,
                 );
+              } else if (evt.type === 'tool_approval') {
+                s.onStreamToolApproval({
+                  approval_id: evt.payload.approval_id ?? '',
+                  tool: evt.payload.tool ?? '',
+                  args: evt.payload.args,
+                  scene: evt.payload.scene ?? 'chat',
+                });
               } else if (evt.type === 'end') {
                 if (evt.conversation_id) {
                   s.setCurrentConversationId(evt.conversation_id);

@@ -1,0 +1,88 @@
+.filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--line-sm);
+  color: var(--text-secondary);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.filterChip:hover {
+  background: var(--bg-hover);
+  color: var(--text-foreground);
+}
+
+.filterChipActive {
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  border-color: var(--accent-primary);
+}
+
+.filterChipActive:hover {
+  background: var(--accent-primary-hover, var(--accent-primary));
+  color: var(--text-on-accent);
+}
+
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  font-size: var(--text-xs);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+}
+
+.filterChipActive .filterCount {
+  color: var(--text-on-accent);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.errorBanner {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--status-destructive);
+  background: var(--status-destructive-bg, rgba(239, 68, 68, 0.08));
+  border: 1px solid var(--status-destructive);
+  border-radius: var(--radius-md);
+}
+
+.empty {
+  flex: 1;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
