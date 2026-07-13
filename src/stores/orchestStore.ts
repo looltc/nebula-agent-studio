@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '@/services/api';
 import { useUIStore } from './uiStore';
-import type { PendingApproval } from './chatStore';
 import type {
   CompiledGraphView,
   EventInfo,
@@ -50,8 +49,6 @@ export interface OrchestState {
   groupMessages: GroupMessage[];
   /** 流式事件接收中的 agent 回复临时聚合（agent_id → {text, events}） */
   streamingReplies: Record<string, StreamingReply>;
-  /** 群聊 HITL 待审批列表（由 tool_approval SSE 事件填充） */
-  groupPendingApprovals: PendingApproval[];
   /** 是否正在流式接收 */
   groupStreaming: boolean;
   worldRunning: boolean;
@@ -79,8 +76,6 @@ export interface OrchestState {
   ) => Promise<void>;
   /** 中止当前流式接收 */
   stopGroupStream: () => void;
-  /** 从群聊 pending 审批列表移除（审批通过/拒绝后调用） */
-  removeGroupPendingApproval: (approvalId: string) => void;
   setWorldRunning: (running: boolean) => void;
   setWorldSpeed: (speed: number) => void;
   stepWorld: () => Promise<void>;
@@ -274,7 +269,6 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
   currentGroupChat: null,
   groupMessages: [],
   streamingReplies: {},
-  groupPendingApprovals: [],
   groupStreaming: false,
   worldRunning: false,
   worldSpeed: 1,
@@ -410,7 +404,7 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
   streamGroupMessage: async (id, body, onEvent) => {
     // 先关闭已有连接
     get().stopGroupStream();
-    set({ groupStreaming: true, streamingReplies: {}, groupPendingApprovals: [] });
+    set({ groupStreaming: true, streamingReplies: {} });
 
     const source = apiClient.streamGroupChat(id, {
       source: body.source,
@@ -531,18 +525,6 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
               streamingReplies: { ...s.streamingReplies, [aid]: { ...prev, events } },
             };
           });
-        } else if (event.type === 'tool_approval') {
-          // HITL：危险工具触发审批，加入 pending 列表供 UI 展示审批卡片
-          const approval: PendingApproval = {
-            approval_id: (event.payload?.approval_id as string) ?? '',
-            tool: (event.payload?.tool as string) ?? '',
-            args: event.payload?.args as Record<string, unknown> | undefined,
-            scene: (event.payload?.scene as string) ?? 'group',
-            agent_id: aid,
-          };
-          set((s) => ({
-            groupPendingApprovals: [...s.groupPendingApprovals, approval],
-          }));
         }
         onEvent?.(event);
       } catch (err) {
@@ -581,14 +563,6 @@ export const useOrchestStore = create<OrchestState>((set, get) => ({
     // 持久化在途的部分回复（用户主动停止时也保留已有内容）
     _persistPartialReplies(get, set);
     set({ groupStreaming: false, streamingReplies: {} });
-  },
-
-  removeGroupPendingApproval: (approvalId) => {
-    set((s) => ({
-      groupPendingApprovals: s.groupPendingApprovals.filter(
-        (a) => a.approval_id !== approvalId,
-      ),
-    }));
   },
 
   setWorldRunning: (running) => set({ worldRunning: running }),

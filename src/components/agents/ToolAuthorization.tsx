@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronDown, Wrench } from 'lucide-react';
+import { ChevronDown, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui';
 import type { ToolInfo } from '@/types/api';
 import { cx } from '@/lib/cx';
@@ -24,7 +24,7 @@ function formatSchema(schema: unknown): string {
 /**
  * Tool authorization grid. Each card is a clickable label that toggles the
  * embedded checkbox. Compact grid layout (2-3 columns) instead of a vertical
- * list. Selecting a dangerous tool surfaces an inline HITL approval warning.
+ * list.
  */
 export function ToolAuthorization({
   tools,
@@ -46,7 +46,6 @@ export function ToolAuthorization({
       {tools.map((tool) => {
         const checked = selectedIds.includes(tool.name);
         const dangerous = Boolean(tool.dangerous);
-        const showDanger = dangerous && checked;
         return (
           <label
             key={tool.name}
@@ -67,12 +66,6 @@ export function ToolAuthorization({
               </div>
               {tool.description && (
                 <p className={styles.toolDesc}>{tool.description}</p>
-              )}
-              {showDanger && (
-                <div className={styles.warn} role="note">
-                  <AlertTriangle size={12} className={styles.warnIcon} />
-                  <span>需要 HITL 审批</span>
-                </div>
               )}
               {tool.schema && (
                 <details className={styles.schema} onClick={(e) => e.stopPropagation()}>

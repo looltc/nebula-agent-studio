@@ -544,7 +544,7 @@ export interface GroupMessageResponse {
 
 /** SSE 流式事件 */
 export interface GroupStreamEvent {
-  type: 'message' | 'chunk' | 'clear' | 'thinking' | 'tool_start' | 'tool_end' | 'tool_approval' | 'skip' | 'error' | 'end';
+  type: 'message' | 'chunk' | 'clear' | 'thinking' | 'tool_start' | 'tool_end' | 'skip' | 'error' | 'end';
   message?: GroupMessage;
   sender_name?: string;
   agent_id?: string;
@@ -572,10 +572,6 @@ export interface StreamEventPayload {
   error?: string;
   kind?: string;
   message_id?: string;
-  /** HITL 审批 ID（stream_tool_approval 事件） */
-  approval_id?: string;
-  /** HITL 审批场景（chat/group/orch） */
-  scene?: string;
 }
 
 export interface StreamEvent {
@@ -585,7 +581,6 @@ export interface StreamEvent {
     | 'stream_clear'
     | 'stream_tool_start'
     | 'stream_tool_end'
-    | 'stream_tool_approval'
     | 'stream_done'
     | 'stream_error';
   agent_id: string;
@@ -632,10 +627,6 @@ export interface SSEToolEndEvent {
   type: 'tool_end';
   payload: { tool?: string; result?: unknown };
 }
-export interface SSEToolApprovalEvent {
-  type: 'tool_approval';
-  payload: { approval_id?: string; tool?: string; args?: Record<string, unknown>; scene?: string };
-}
 export type SSEEvent =
   | SSEStartEvent
   | SSEChunkEvent
@@ -644,8 +635,7 @@ export type SSEEvent =
   | SSEErrorEvent
   | SSEThinkingEvent
   | SSEToolStartEvent
-  | SSEToolEndEvent
-  | SSEToolApprovalEvent;
+  | SSEToolEndEvent;
 
 /* ---------- Metrics ---------- */
 export type MetricsText = string;
@@ -1204,38 +1194,6 @@ export type OrchestrationStreamEvent =
   | { event: 'handoff'; data: { from: string; to: string } }
   | { event: 'orchestration/end'; data: { output: string; runtime: OrchestrationRuntime; run_id?: string } }
   | { event: 'orchestration/error'; data: { error: string; runtime: OrchestrationRuntime } };
-
-/* ---------- HITL Approvals ---------- */
-
-/** 单个 pending 审批信息（GET /approvals/pending 返回的列表项） */
-export interface ApprovalInfo {
-  approval_id: string;
-  scene: string; // chat | group | orch
-  agent_id: string;
-  tool: string;
-  args?: Record<string, unknown>;
-  ctx: string;
-  created_at: number;
-}
-
-export interface ApprovalListResponse {
-  count: number;
-  approvals: ApprovalInfo[];
-}
-
-export interface ApprovalDetailResponse {
-  approval_id: string;
-  is_pending: boolean;
-  meta: Record<string, unknown>;
-}
-
-export interface ApprovalResumeRequest {
-  value: unknown;
-}
-
-export interface ApprovalRejectRequest {
-  reason: string;
-}
 
 /* ---------- Orchestration logic.wait ---------- */
 

@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useChatStore } from '@/stores/chatStore';
-import { useUIStore } from '@/stores/uiStore';
 import { cx } from '@/lib/cx';
 import { MessageBubble } from './MessageBubble';
 import { StreamingMessage } from './StreamingMessage';
-import { HITLApproval } from './HITLApproval';
 import styles from './MessageList.module.css';
 
 const SCROLL_THRESHOLD = 80;
@@ -13,7 +11,6 @@ const SCROLL_THRESHOLD = 80;
 /**
  * Scrollable message list. Auto-sticks to the bottom while the user is near it,
  * and yields a "jump to latest" button when they scroll up.
- * Renders inline HITL approval cards when dangerous tools await human approval.
  */
 export function MessageList() {
   const messages = useChatStore((s) => s.messages);
@@ -22,9 +19,6 @@ export function MessageList() {
   const streamingEvents = useChatStore((s) => s.streamingEvents);
   const currentAgentId = useChatStore((s) => s.currentAgentId);
   const agents = useChatStore((s) => s.agents);
-  const pendingApprovals = useChatStore((s) => s.pendingApprovals);
-  const removePendingApproval = useChatStore((s) => s.removePendingApproval);
-  const addToast = useUIStore((s) => s.addToast);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -58,7 +52,7 @@ export function MessageList() {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [orderedMessages, streamingText, streaming, streamingEvents, pendingApprovals, autoScroll]);
+  }, [orderedMessages, streamingText, streaming, streamingEvents, autoScroll]);
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
@@ -82,24 +76,6 @@ export function MessageList() {
             <MessageBubble key={m.id} message={m} agentName={agentName} />
           ))}
           {streaming && <StreamingMessage />}
-          {pendingApprovals.map((pa) => (
-            <HITLApproval
-              key={pa.approval_id}
-              approvalId={pa.approval_id}
-              agentId={pa.agent_id ?? currentAgentId ?? 'agent'}
-              tool={pa.tool}
-              args={pa.args}
-              scene={pa.scene}
-              onResolved={(id) => {
-                removePendingApproval(id);
-                addToast({
-                  variant: 'success',
-                  title: 'Approval resolved',
-                  description: `${pa.tool} approval has been processed.`,
-                });
-              }}
-            />
-          ))}
         </div>
       </div>
 

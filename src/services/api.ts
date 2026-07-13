@@ -72,10 +72,6 @@ import type {
   AgentObservationDetail,
   AgentTimelineResponse,
   GlobalTimelineResponse,
-  ApprovalListResponse,
-  ApprovalDetailResponse,
-  ApprovalResumeRequest,
-  ApprovalRejectRequest,
   WaitResumeRequest,
   WaitListResponse,
 } from '@/types/api';
@@ -383,31 +379,6 @@ export const apiClient = {
     search.set('limit', String(params.limit ?? 100));
     return api<GlobalTimelineResponse>(`/observe/timeline?${search.toString()}`);
   },
-
-  /* HITL Approvals — 三场景统一审批 API（单聊/群聊/编排共用） */
-  listPendingApprovals: (scene?: 'chat' | 'group' | 'orch') =>
-    api<ApprovalListResponse>(
-      `/approvals/pending${scene ? `?scene=${scene}` : ''}`,
-    ),
-  getApproval: (approvalId: string) =>
-    api<ApprovalDetailResponse>(
-      `/approvals/${encodeURIComponent(approvalId)}`,
-    ),
-  resumeApproval: (approvalId: string, body: ApprovalResumeRequest = { value: true }) =>
-    api<{ ok: boolean; approval_id: string; value: unknown }>(
-      `/approvals/${encodeURIComponent(approvalId)}/resume`,
-      { method: 'POST', body: JSON.stringify(body) },
-    ),
-  rejectApproval: (approvalId: string, body: ApprovalRejectRequest = { reason: '' }) =>
-    api<{ ok: boolean; approval_id: string; reason: string }>(
-      `/approvals/${encodeURIComponent(approvalId)}/reject`,
-      { method: 'POST', body: JSON.stringify(body) },
-    ),
-  cancelApproval: (approvalId: string) =>
-    api<{ ok: boolean; approval_id: string }>(
-      `/approvals/${encodeURIComponent(approvalId)}/cancel`,
-      { method: 'POST' },
-    ),
 
   /* Orchestration — logic.wait 审批/事件 API（向后兼容，独立于 ApprovalRegistry） */
   listPendingWaits: (specId: string) =>

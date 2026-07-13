@@ -56,15 +56,6 @@ export interface StreamingTool {
   error?: string;
 }
 
-/** HITL 待审批请求（由 stream_tool_approval 事件触发） */
-export interface PendingApproval {
-  approval_id: string;
-  tool: string;
-  args?: Record<string, unknown>;
-  scene: string;
-  agent_id?: string;
-}
-
 export interface ChatState {
   agents: AgentSummary[];
   currentAgentId: string | null;
@@ -79,8 +70,6 @@ export interface ChatState {
   streamingText: string;
   /** 流式期间的统一时间线事件（思考 + 工具），按 seq 升序。 */
   streamingEvents: TimelineEvent[];
-  /** HITL 待审批列表（流式期间由 stream_tool_approval 事件填充） */
-  pendingApprovals: PendingApproval[];
 
   loading: boolean;
   error: string | null;
@@ -102,8 +91,6 @@ export interface ChatState {
   onStreamThinking: (step: string, content: string) => void;
   onStreamToolStart: (tool: string, args?: Record<string, unknown>) => void;
   onStreamToolEnd: (tool: string, result?: unknown) => void;
-  onStreamToolApproval: (approval: PendingApproval) => void;
-  removePendingApproval: (approvalId: string) => void;
   onStreamDone: (messageId?: string) => void;
   onStreamError: (error: string) => void;
   clearChat: () => void;
@@ -162,7 +149,6 @@ export const useChatStore = create<ChatState>((set, get) => {
   streaming: false,
   streamingText: '',
   streamingEvents: [],
-  pendingApprovals: [],
 
   loading: false,
   error: null,
@@ -192,8 +178,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       currentConversationId: null,
       streaming: false,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
       error: null,
     });
     void get().loadConversations();
@@ -313,8 +298,7 @@ export const useChatStore = create<ChatState>((set, get) => {
     set({
       streaming: true,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
     });
   },
 
@@ -381,18 +365,6 @@ export const useChatStore = create<ChatState>((set, get) => {
     });
   },
 
-  onStreamToolApproval: (approval) => {
-    set((s) => ({
-      pendingApprovals: [...s.pendingApprovals, approval],
-    }));
-  },
-
-  removePendingApproval: (approvalId) => {
-    set((s) => ({
-      pendingApprovals: s.pendingApprovals.filter((a) => a.approval_id !== approvalId),
-    }));
-  },
-
   onStreamDone: (messageId) => {
     const { streamingText, streamingEvents, currentAgentId } = get();
     const msg: MessageInfo = {
@@ -408,8 +380,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       messages: [...s.messages, msg],
       streaming: false,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
       loading: false,
     }));
     // Refresh conversation list so title updates
@@ -445,8 +416,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       error,
       streaming: false,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
       loading: false,
     }));
   },
@@ -457,8 +427,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       messages: [],
       streaming: false,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
       currentConversationId: null,
     });
   },
@@ -470,8 +439,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       currentConversationId: null,
       streaming: false,
       streamingText: '',
-      streamingEvents: [],
-      pendingApprovals: [],
+      streamingEvents: [],
       error: null,
     });
   },
@@ -505,7 +473,7 @@ export const useChatStore = create<ChatState>((set, get) => {
       // 没有保存的会话 ID，但如果有残留的 streaming 状态（如新会话第一消息
       // 发送后立即切换页面，stream_done 前连接断开），重置它避免 UI 卡在流式态
       if (get().streaming) {
-        set({ streaming: false, streamingText: '', streamingEvents: [], pendingApprovals: [] });
+        set({ streaming: false, streamingText: '', streamingEvents: [] });
       }
       return;
     }
@@ -531,7 +499,6 @@ export const useChatStore = create<ChatState>((set, get) => {
         streaming: false,
         streamingText: '',
         streamingEvents: [],
-        pendingApprovals: [],
       });
     } catch {
       // conversation 已被删除或不存在，清除 localStorage

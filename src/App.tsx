@@ -12,7 +12,6 @@ const GroupChatPage = lazy(() => import('@/pages/GroupChatPage'));
 const ObservePage = lazy(() => import('@/pages/ObservePage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const SkillHubPage = lazy(() => import('@/pages/SkillHubPage'));
-const ApprovalsPage = lazy(() => import('@/pages/ApprovalsPage'));
 
 function PageFallback() {
   return (
@@ -103,14 +102,6 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <ObservePage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/approvals"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <ApprovalsPage />
             </Suspense>
           }
         />

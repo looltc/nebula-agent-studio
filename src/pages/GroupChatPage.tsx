@@ -4,7 +4,6 @@ import { Send, Trash2, Users, Plus, Square, MoreVertical, Info, Eraser, ChevronD
 import { ErrorBoundary } from '@/components/layout';
 import { Avatar, Button, EmptyState, Badge, useToast } from '@/components/ui';
 import { GroupMessageBubble, StreamingBubble } from '@/components/chat/GroupMessageBubble';
-import { HITLApproval } from '@/components/chat/HITLApproval';
 import { useOrchestStore } from '@/stores/orchestStore';
 import { useUserStore } from '@/stores/userStore';
 import { useChatStore } from '@/stores/chatStore';
@@ -37,8 +36,6 @@ export default function GroupChatPage() {
   const groupMessages = useOrchestStore((s) => s.groupMessages);
   const streamingReplies = useOrchestStore((s) => s.streamingReplies);
   const groupStreaming = useOrchestStore((s) => s.groupStreaming);
-  const groupPendingApprovals = useOrchestStore((s) => s.groupPendingApprovals);
-  const removeGroupPendingApproval = useOrchestStore((s) => s.removeGroupPendingApproval);
   const loadGroupChats = useOrchestStore((s) => s.loadGroupChats);
   const loadGroupChatDetail = useOrchestStore((s) => s.loadGroupChatDetail);
   const streamGroupMessage = useOrchestStore((s) => s.streamGroupMessage);
@@ -719,24 +716,6 @@ export default function GroupChatPage() {
                             />
                           );
                         })}
-                        {groupPendingApprovals.length > 0 && (
-                          <div className={styles.pendingApprovals}>
-                            {groupPendingApprovals.map((pa) => (
-                              <HITLApproval
-                                key={pa.approval_id}
-                                approvalId={pa.approval_id}
-                                agentId={pa.agent_id ?? pa.tool}
-                                tool={pa.tool}
-                                args={pa.args}
-                                scene={pa.scene || 'group'}
-                                onResolved={(aid) => {
-                                  removeGroupPendingApproval(aid);
-                                  toast.success('Approval resolved', `${pa.tool} approval has been processed.`);
-                                }}
-                              />
-                            ))}
-                          </div>
-                        )}
                         <div ref={messagesEndRef} />
                       </>
                     )}
